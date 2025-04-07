@@ -1,0 +1,42 @@
+import { ExternalLink } from "lucide-react";
+
+export default function UsersTableDashboard() {
+
+    return (
+        <div className="bg-white rounded-lg shadow-sm p-4">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold">Users</h2>
+            <a href="#" className="text-blue-500 text-sm flex items-center">
+              View All
+              <ExternalLink className="h-3 w-3 ml-1" />
+            </a>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-blue-50">
+                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Name</th>
+                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">E-mail</th>
+                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Transactions</th>
+                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[1, 2, 3].map((i) => (
+                  <tr key={i} className="border-b border-gray-100">
+                    <td className="px-4 py-3 text-sm font-medium">John Doe</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">johndoe@gmail.com</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">567</td>
+                    <td className="px-4 py-3 text-sm">
+                    <span className="bg-[#71FB5533] text-[#20C000] px-4 py-2 rounded-xl text-xs">
+                        Verified
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+    )
+}
