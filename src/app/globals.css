@@ -1,0 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Poppins:wght@400;500;600;700&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap');
+
+@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@theme {
+  --font-poppins: Poppins, sans-serif;
+  --font-satoshi: "Satoshi", "sans-serif";
+  --color-primary: #143881; 
+  --color-primary2: #061F51;
+  --color-darkBg: #1E1E1E;
+  --color-secondary: #27AAE1;
+  --color-secondary2: #27AAE11A;
+  --color-textLight: #1D1D1D; 
+  --color-gray: #4D4C4C;
+  --color-gray2: #333333;
+  --color-green: #71FB5514;
+  --color-skyblue: #27AAE1;
+  --color-green2: #20C000;
+  --color-darkText: #B3B3B3
+  --color-borderDark: #848484;
+}
+
+/* 
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/path-to-your-font/Satoshi-Regular.woff2') format('woff2'),
+    url('/path-to-your-font/Satoshi-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/path-to-your-font/Satoshi-Bold.woff2') format('woff2'),
+    url('/path-to-your-font/Satoshi-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+} */
+
+/* Custom Font Classes */
+.font-satoshi {
+  font-family: 'Satoshi', sans-serif;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  /* height: 100%; */
+  overflow-x: hidden;
+  /* overflow-y: hidden; */
+}
+
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Poppins', 'Montserrat', Arial, Helvetica, sans-serif;
+  background-color: white;
+  color: black;
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+
+/* Dark Mode */
+.dark body {
+  background-color: #121212;
+  color: #F8FAFC;
+}
+
+/* Custom Tailwind Classes */
+.font-poppins {
+  font-family: 'Poppins', sans-serif;
+}
+
+.font-montserrat {
+  font-family: 'Montserrat', sans-serif;
+}
