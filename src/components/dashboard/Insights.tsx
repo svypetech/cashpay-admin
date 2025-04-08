@@ -1,9 +1,31 @@
-export default function Insights() {
+import MostTradedCryptocurrencies from "../cards/MostTradedCryptoCurrencies"
+import TransactionFrequency from "../cards/TransactionFrequency"
+import NewUsers from "../cards/NewUsersTable"
+import UserInsights from "../cards/UserInsights"
 
-    return (
-        <div className="bg-white p-6 rounded-lg shadow-sm mt-6">
-            <h2 className="text-xl font-semibold mb-4">User Insights</h2>
-            <p className="text-gray-600">User insights content will appear here.</p>
+export default function UserInsightsPage() {
+  return (
+      <main className="container mx-auto px-4 py-6">
+
+        {/* Top Row - Cryptocurrencies and Transaction Frequency */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
+          <div className="lg:col-span-3">
+            <MostTradedCryptocurrencies />
+          </div>
+          <div className="lg:col-span-2">
+            <TransactionFrequency />
+          </div>
         </div>
-    );
+
+        {/* Bottom Row - New Users and User Insights */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div>
+            <NewUsers />
+          </div>
+          <div>
+            <UserInsights />
+          </div>
+        </div>
+      </main>
+  )
 }

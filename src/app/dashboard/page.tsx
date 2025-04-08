@@ -19,7 +19,7 @@ export default function DashboardPage() {
               onClick={() => setActiveTab("overview")}
               className={`px-4 py-2 text-sm font-medium text-black ${activeTab === "overview"
                   ? "border-b-2 border-blue-600 text-xl font-bold"
-                  : "hover:text-gray-700"
+                  : "hover:text-gray-700 cursor-pointer"
                 }`}
             >
               Overview
@@ -28,7 +28,7 @@ export default function DashboardPage() {
               onClick={() => setActiveTab("insights")}
               className={`px-4 py-2 text-sm font-medium ${activeTab === "insights"
                   ? "border-b-2 border-blue-600 font-bold text-xl"
-                  : "hover:text-gray-700"
+                  : "hover:text-gray-700 cursor-pointer"
                 }`}
             >
               User Insights

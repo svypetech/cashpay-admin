@@ -3,7 +3,7 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import { useDarkMode } from "../../app/context/DarkModeContext"
 
-const TokenTableSkeleton: React.FC = () => {
+const TableSkeleton: React.FC = () => {
   const { darkMode } = useDarkMode() // Get dark mode state
   const [showDark, setShowDark] = useState(darkMode)
 
@@ -57,5 +57,5 @@ const TokenTableSkeleton: React.FC = () => {
   )
 }
 
-export default TokenTableSkeleton
+export default TableSkeleton
 

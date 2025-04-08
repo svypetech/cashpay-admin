@@ -76,7 +76,7 @@ const SystemHealthGauge = ({ value = 75 }) => {
       <div className="w-full flex justify-center mt-4">
       <button
         onClick={handleDetailsClick}
-        className="mt-4 w-48 px-6 py-2 bg-[#D5E5FF] text-[#3A5AFE] rounded-md text-sm font-medium hover:bg-blue-100 transition"
+        className="mt-4 w-48 px-6 py-2 bg-[#D5E5FF] text-[#3A5AFE] rounded-md text-sm font-medium hover:bg-blue-100 transition cursor-pointer"
         aria-label="View system health details"
       >
         Details
