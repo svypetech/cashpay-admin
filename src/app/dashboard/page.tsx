@@ -14,26 +14,26 @@ export default function DashboardPage() {
       <div className="flex justify-center mb-2">
         <div className="w-full mx-auto max-w-6xl bg-white rounded-lg p-6">
           <div className="flex justify-center items-center mb-2">
-          <div className="flex w-fit">
-            <button
-              onClick={() => setActiveTab("overview")}
-              className={`px-4 py-2 text-sm font-medium text-black ${activeTab === "overview"
-                  ? "border-b-2 border-blue-600 text-xl font-bold"
+            <div className="flex w-fit">
+              <button
+                onClick={() => setActiveTab("overview")}
+                className={`px-4 py-2 text-black ${activeTab === "overview"
+                  ? "border-b-2 border-primary font-bold"
                   : "hover:text-gray-700 cursor-pointer"
-                }`}
-            >
-              Overview
-            </button>
-            <button
-              onClick={() => setActiveTab("insights")}
-              className={`px-4 py-2 text-sm font-medium ${activeTab === "insights"
-                  ? "border-b-2 border-blue-600 font-bold text-xl"
+                  }`}
+              >
+                Overview
+              </button>
+              <button
+                onClick={() => setActiveTab("insights")}
+                className={`px-4 py-2 ${activeTab === "insights"
+                  ? "border-b-2 border-primary font-bold"
                   : "hover:text-gray-700 cursor-pointer"
-                }`}
-            >
-              User Insights
-            </button>
-          </div>
+                  }`}
+              >
+                User Insights
+              </button>
+            </div>
           </div>
 
           {activeTab === "overview" && (
