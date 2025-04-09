@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useDarkMode } from "../../app/context/DarkModeContext";
+import UserProfileSidebar from "../users/UserInfoSidebar";
 
 interface User {
     id: string;
@@ -12,7 +13,7 @@ interface User {
     loginFrequency?: string;
     timeSpent?: string;
     lastActivity?: string;
-  }
+}
 
 interface Props {
     headings: string[];
@@ -22,6 +23,7 @@ interface Props {
 const UserTable: React.FC<Props> = ({ data, headings }) => {
     const { darkMode } = useDarkMode(); // Get dark mode state
     const [showDark, setShowDark] = useState(darkMode);
+    const [showSidebar, setShowSidebar] = useState(false);
 
     useEffect(() => {
         // Delay state update slightly to enable smooth transition
@@ -52,7 +54,9 @@ const UserTable: React.FC<Props> = ({ data, headings }) => {
                     <tbody>
                         {Array.isArray(data) &&
                             data.map((user, index) => (
-                                <tr key={index} className="border-b text-[12px] sm:text-[16px]">
+                                <tr
+                                    onClick={() => setShowSidebar(true)}
+                                    key={index} className="border-b text-[12px] sm:text-[16px] cursor-pointer">
                                     <td className={`p-2 sm:p-4 font-satoshi w-2/6 min-w-0 break-words`}>
                                         {user.id}
                                     </td>
@@ -74,7 +78,7 @@ const UserTable: React.FC<Props> = ({ data, headings }) => {
                     </tbody>
                 </table>
             </div>
-
+            <UserProfileSidebar showSidebar={showSidebar} onClose={() => setShowSidebar(false)} />
 
         </div>
     );
