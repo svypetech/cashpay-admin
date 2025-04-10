@@ -2,14 +2,16 @@
 import React, { useEffect, useState } from "react";
 import { useDarkMode } from "../../app/context/DarkModeContext";
 import UserProfileSidebar from "../users/UserInfoSidebar";
-import Image from "next/image";
 
 interface User {
     id: string;
     name: string;
-    email: string;
-    joinedDate: string;
-    status: string;
+    lastLogin?: string;
+    totalLogins?: number;
+    sessionDuration?: string;
+    loginFrequency?: string;
+    timeSpent?: string;
+    lastActivity?: string;
 }
 
 interface Props {
@@ -17,7 +19,7 @@ interface Props {
     data: User[];
 }
 
-const UserTable: React.FC<Props> = ({ data, headings }) => {
+const ActiveUsersTable: React.FC<Props> = ({ data, headings }) => {
     const { darkMode } = useDarkMode(); // Get dark mode state
     const [showDark, setShowDark] = useState(darkMode);
     const [showSidebar, setShowSidebar] = useState(false);
@@ -52,7 +54,8 @@ const UserTable: React.FC<Props> = ({ data, headings }) => {
                         {Array.isArray(data) &&
                             data.map((user, index) => (
                                 <tr
-                                    key={index} className="border-b text-[12px] sm:text-[16px]">
+                                    onClick={() => setShowSidebar(true)}
+                                    key={index} className="border-b text-[12px] sm:text-[16px] cursor-pointer">
                                     <td className={`p-2 sm:p-4 font-satoshi w-2/6 min-w-0 break-words`}>
                                         {user.id}
                                     </td>
@@ -60,26 +63,13 @@ const UserTable: React.FC<Props> = ({ data, headings }) => {
                                         {user.name}
                                     </td>
                                     <td className="p-2 sm:p-4 font-satoshi w-2/6 min-w-0 break-words">
-                                        {user.email}
+                                        {user.lastLogin ? user.lastLogin : user.loginFrequency}
                                     </td>
                                     <td className="p-2 sm:p-4 font-satoshi w-1/6 min-w-0">
-                                        {user.joinedDate}
+                                        {user.totalLogins ? user.totalLogins : user.timeSpent}
                                     </td>
-                                    <td className="p-2 sm:p-4 font-satoshi w-1/6 min-w-0 ">
-                                        {user.status === "Verified" ? (
-                                            <span className="text-left bg-[#71FB5533] text-[#20C000] px-4 py-2 rounded-xl text-xs md:text-md font-semibold">
-                                                Verified
-                                            </span>
-                                        ) : (
-                                            <span className="text-[#727272] bg-[#72727233] px-4 py-2 rounded-xl font-semibold">
-                                                Pending
-                                            </span>
-                                        )}
-                                    </td>
-                                    <td className="relative p-2 sm:p-4 font-satoshi w-1/6 min-w-0">
-                                        <button className="absolute md:relative md:right-auto right-0 cursor-pointer">
-                                            <Image src="/icons/options.svg" alt="Arrow right" width={24} height={24} className="w-4 h-4" />
-                                        </button>
+                                    <td className="p-2 sm:p-4 font-satoshi w-1/6 min-w-0">
+                                        {user.sessionDuration ? user.sessionDuration : user.lastActivity}
                                     </td>
                                 </tr>
                             ))
@@ -93,4 +83,4 @@ const UserTable: React.FC<Props> = ({ data, headings }) => {
     );
 };
 
-export default UserTable;
+export default ActiveUsersTable;

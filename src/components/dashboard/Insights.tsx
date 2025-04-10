@@ -5,7 +5,7 @@ import UserInsights from "../cards/UserInsights"
 
 export default function UserInsightsPage() {
   return (
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto md:px-4 py-6">
 
         {/* Top Row - Cryptocurrencies and Transaction Frequency */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">

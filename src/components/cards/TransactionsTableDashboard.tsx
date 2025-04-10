@@ -6,7 +6,7 @@ export default function TransactionsTableDashboarD() {
         <div className="lg:col-span-3 bg-white rounded-lg shadow-sm p-4">
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-lg font-semibold">Transactions</h2>
-                    <a href="#" className="text-blue-500 text-sm flex items-center">
+                    <a href="#" className="text-secondary text-sm flex items-center">
                       View All
                       <ExternalLink className="h-3 w-3 ml-1" />
                     </a>
@@ -27,7 +27,9 @@ export default function TransactionsTableDashboarD() {
                           <tr key={i} className="border-b border-gray-100">
                             <td className="px-4 py-3 text-sm">
                               <div className="flex items-center">
-                                <ArrowLeftRight className="h-4 w-4 text-blue-500 mr-2" />
+                                <div className="rounded-full p-2 bg-secondary2 mr-2">
+                                  <ArrowLeftRight className="h-4 w-4 text-primary " />
+                                </div>
                                 <span className="text-gray-600">0x90aCe6b6...f688</span>
                               </div>
                             </td>

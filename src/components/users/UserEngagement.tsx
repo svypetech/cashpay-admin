@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Pagination from "../pagination/pagination";
-import UserTable from "../tables/UserTable";
+import ActiveUsersTable from "../tables/ActiveUsersTable";
 
 const headings = ["User ID", "Name", "Login Frequency", "Time Spent (avg/ day)", "Last Activity"];
 
@@ -28,7 +28,7 @@ export default function UserEngagement() {
 
     return (
         <div>
-            <UserTable headings={headings} data={users} />
+            <ActiveUsersTable headings={headings} data={users} />
             <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
         </div>
     )

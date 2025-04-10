@@ -1,26 +1,27 @@
 'use client'
 import React, { useEffect, useState } from "react";
 import { useDarkMode } from "../../app/context/DarkModeContext";
-import UserProfileSidebar from "../users/UserInfoSidebar";
-import Image from "next/image";
+import TransactionDetailsPopup from "../transaction/TransactionDetailsPopup";
+// import TransactionFrequency from "../cards/TransactionFrequency";
 
-interface User {
+interface Transaction {
     id: string;
-    name: string;
-    email: string;
-    joinedDate: string;
+    userId: string;
+    currency: string;
+    amount: number;
     status: string;
+    timestamp: string;
 }
 
 interface Props {
     headings: string[];
-    data: User[];
+    data: Transaction[];
 }
 
-const UserTable: React.FC<Props> = ({ data, headings }) => {
+const TransactionFrequencyTable: React.FC<Props> = ({ data, headings }) => {
     const { darkMode } = useDarkMode(); // Get dark mode state
     const [showDark, setShowDark] = useState(darkMode);
-    const [showSidebar, setShowSidebar] = useState(false);
+    const [showPopup, setShowPopup] = useState(false);
 
     useEffect(() => {
         // Delay state update slightly to enable smooth transition
@@ -50,36 +51,27 @@ const UserTable: React.FC<Props> = ({ data, headings }) => {
                     </thead>
                     <tbody>
                         {Array.isArray(data) &&
-                            data.map((user, index) => (
+                            data.map((transaction, index) => (
                                 <tr
-                                    key={index} className="border-b text-[12px] sm:text-[16px]">
+                                    onClick={() => setShowPopup(true)}
+                                    key={index} className="border-b text-[12px] sm:text-[16px] cursor-pointer">
                                     <td className={`p-2 sm:p-4 font-satoshi w-2/6 min-w-0 break-words`}>
-                                        {user.id}
+                                        {transaction.id}
                                     </td>
                                     <td className={`p-2 sm:p-4 font-satoshi font-bold text-primary w-3/6 min-w-0 break-words`}>
-                                        {user.name}
+                                        {transaction.userId}
                                     </td>
                                     <td className="p-2 sm:p-4 font-satoshi w-2/6 min-w-0 break-words">
-                                        {user.email}
+                                        {transaction.currency}
                                     </td>
                                     <td className="p-2 sm:p-4 font-satoshi w-1/6 min-w-0">
-                                        {user.joinedDate}
+                                        {transaction.amount}
                                     </td>
-                                    <td className="p-2 sm:p-4 font-satoshi w-1/6 min-w-0 ">
-                                        {user.status === "Verified" ? (
-                                            <span className="text-left bg-[#71FB5533] text-[#20C000] px-4 py-2 rounded-xl text-xs md:text-md font-semibold">
-                                                Verified
-                                            </span>
-                                        ) : (
-                                            <span className="text-[#727272] bg-[#72727233] px-4 py-2 rounded-xl font-semibold">
-                                                Pending
-                                            </span>
-                                        )}
+                                    <td className={`p-2 sm:p-4 font-satoshi w-1/6 min-w-0`}>
+                                        <p className={`px-4 py-2 w-fit rounded-xl font-semibold ${transaction.status === "Pending" ? "text-[#727272] bg-[#72727233]" : "bg-[#71FB5533] text-[#20C000]" }`} >{transaction.status}</p>
                                     </td>
-                                    <td className="relative p-2 sm:p-4 font-satoshi w-1/6 min-w-0">
-                                        <button className="absolute md:relative md:right-auto right-0 cursor-pointer">
-                                            <Image src="/icons/options.svg" alt="Arrow right" width={24} height={24} className="w-4 h-4" />
-                                        </button>
+                                    <td className="p-2 sm:p-4 font-satoshi w-1/6 min-w-0">
+                                        {transaction.timestamp}
                                     </td>
                                 </tr>
                             ))
@@ -87,10 +79,10 @@ const UserTable: React.FC<Props> = ({ data, headings }) => {
                     </tbody>
                 </table>
             </div>
-            <UserProfileSidebar showSidebar={showSidebar} onClose={() => setShowSidebar(false)} />
+            <TransactionDetailsPopup showPopup={showPopup} onClose={() => setShowPopup(false)} />
 
         </div>
     );
 };
 
-export default UserTable;
+export default TransactionFrequencyTable;

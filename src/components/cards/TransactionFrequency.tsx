@@ -1,17 +1,20 @@
 import Image from "next/image"
+import Link from "next/link"
 
 export default function TransactionFrequency() {
   return (
     <section>
       <div className="flex justify-between items-center mb-3">
         <h2 className="text-2xl font-bold font-[satoshi]">Transaction Frequency</h2>
-        <Image
-          src="/icons/export-arrow.svg"
-          alt="Arrow right"
-          width={24}
-          height={24}
-          className="cursor-pointer"
-        />
+        <Link href="/transaction-frequency">
+          <Image
+            src="/icons/export-arrow.svg"
+            alt="Arrow right"
+            width={24}
+            height={24}
+            className="cursor-pointer"
+          />
+        </Link>
       </div>
       <div className="flex justify-between bg-white rounded-lg border border-gray-200 p-4 h-full">
 

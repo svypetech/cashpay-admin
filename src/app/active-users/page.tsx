@@ -1,60 +1,36 @@
 "use client"
 
 import ActiveUsers from "@/src/components/users/ActiveUsers";
-import AllUsers from "@/src/components/users/AllUsers";
 import UserEngagement from "@/src/components/users/UserEngagement";
+import { Search, Calendar, Download } from "lucide-react"
 import Image from "next/image";
 import { useState } from "react";
 
-export default function UsersPage() {
-  const [activePage, setActivePage] = useState("users")
-  const [activeTab, setActiveTab] = useState("all")
+export default function ActiveUsersPage() {
+  const [activeTab, setActiveTab] = useState("active users")
 
   return (
       <main className="container mx-auto px-4 py-6">
-
-        <div className="w-full flex justify-center items-center mb-4">
-            <div className="flex gap-2 bg-secondary2 px-4 py-2 rounded-xl" >
-                <button className={`cursor-pointer px-6 py-2 rounded-xl ${activePage === "users" ? "bg-primary text-white" : ""}`} 
-                    onClick={() => setActivePage("users")}>
-                        Users
-                </button>
-                <button className={`cursor-pointer px-6 py-2 rounded-xl ${activePage === "admins" ? "bg-primary text-white" : ""}`} 
-                    onClick={() => setActivePage("admins")}>
-                    Admins
-                </button>
-            </div>
-        </div>
-
         {/* Navigation Tabs */}
-        <div className="px-10 w-full flex items-center mb-4">
+        <div className="w-dull flex justify-center items-center mb-4">
             <div className="flex w-fit">
               <button
-                onClick={() => setActiveTab("all")}
-                className={`px-4 py-2 text-black ${activeTab === "all"
+                onClick={() => setActiveTab("active users")}
+                className={`px-4 py-2 text-black ${activeTab === "active users"
                   ? "border-b-2 border-primary font-bold"
                   : "hover:text-gray-700 cursor-pointer"
                   }`}
               >
-                All
+                Active Users
               </button>
               <button
-                onClick={() => setActiveTab("verified")}
-                className={`px-4 py-2 ${activeTab === "verified"
+                onClick={() => setActiveTab("user engagement")}
+                className={`px-4 py-2 ${activeTab === "user engagement"
                   ? "border-b-2 border-primary font-bold"
                   : "hover:text-gray-700 cursor-pointer"
                   }`}
               >
-                Verified
-              </button>
-              <button
-                onClick={() => setActiveTab("pending verifications")}
-                className={`px-4 py-2 ${activeTab === "pending verifications"
-                  ? "border-b-2 border-primary font-bold"
-                  : "hover:text-gray-700 cursor-pointer"
-                  }`}
-              >
-                Pending Verifications
+                User Engagement
               </button>
             </div>
           </div>
@@ -88,16 +64,10 @@ export default function UsersPage() {
         </div>
 
         {/* Users Table */}
-        {activeTab === "all" && (
-          <AllUsers />
-        )}
-
-        {activeTab === "verified" && (
+        {activeTab === "active users" ? (
           <ActiveUsers />
-        )}
-
-        {activeTab === "pending verifications" && (
-          <ActiveUsers />
+        ) : (
+          <UserEngagement />
         )}
 
       </main>
