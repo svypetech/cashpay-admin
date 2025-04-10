@@ -19,35 +19,40 @@ const headings = [
       name: "John Doe",
       email: "johndoe@gmail.com",
       joinedDate: "18-03-25",
-      status: "Verified"
+      status: "Verified",
+      profile: "/images/user-avatar.png"
     },
     {
       id: "ID#CP-9203",
       name: "John Doe",
       email: "johndoe@gmail.com",
       joinedDate: "18-03-25",
-      status: "Verified"
+      status: "Verified",
+      profile: "/images/user-avatar.png"
     },
     {
       id: "ID#CP-9203",
       name: "John Doe",
       email: "johndoe@gmail.com",
       joinedDate: "18-03-25",
-      status: "Verified"
+      status: "Verified",
+      profile: "/images/user-avatar.png"
     },
     {
       id: "ID#CP-9203",
       name: "John Doe",
       email: "johndoe@gmail.com",
       joinedDate: "18-03-25",
-      status: "Verified"
+      status: "Verified",
+      profile: "/images/user-avatar.png"
     },
     {
       id: "ID#CP-9203",
       name: "John Doe",
       email: "johndoe@gmail.com",
       joinedDate: "18-03-25",
-      status: "Verified"
+      status: "Verified",
+      profile: "/images/user-avatar.png"
     }
   ];
 

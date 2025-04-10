@@ -1,51 +1,141 @@
-import { ArrowLeftRight, ExternalLink } from "lucide-react";
+import { ArrowLeftRight, ExternalLink, ChevronRight } from "lucide-react"
 
-export default function TransactionsTableDashboarD() {
+const headings = ["ID", "From → To", "Status", "Block#", "Date"]
+const data = [
+  {
+    id: "0x90afca66...f688",
+    from: "0xe0fb...2834f",
+    to: "0x8a5b...7B00C",
+    status: "Success",
+    block: "Block #9432831",
+    date: "2h ago",
+  },
+  {
+    id: "0x90afca66...f688",
+    from: "0xe0fb...2834f",
+    to: "0x8a5...7B00C",
+    status: "Success",
+    block: "Block #9432831",
+    date: "2h ago",
+  },
+  {
+    id: "0x90afca66...f688",
+    from: "0xe0fb...2834f",
+    to: "0x8a5...7B00C",
+    status: "Success",
+    block: "Block #9432831",
+    date: "2h ago",
+  },
+]
 
-    return (
-        <div className="lg:col-span-3 bg-white rounded-lg shadow-sm p-4">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-lg font-semibold">Transactions</h2>
-                    <a href="#" className="text-secondary text-sm flex items-center">
-                      View All
-                      <ExternalLink className="h-3 w-3 ml-1" />
-                    </a>
+export default function TransactionsTableDashboard() {
+  return (
+    <div className="lg:col-span-3 bg-white rounded-lg shadow-sm md:p-4 p-2">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold">Transactions</h2>
+        <a href="#" className="text-secondary text-sm flex items-center">
+          View All
+          <ExternalLink className="h-3 w-3 ml-1" />
+        </a>
+      </div>
+
+      {/* Desktop Table - Hidden on mobile */}
+      <div className="hidden md:block rounded-lg overflow-hidden w-full">
+        <table className="w-full text-left">
+          <thead className="bg-secondary/10">
+            <tr className="text-sm">
+              {headings.map((heading, index) => (
+                <th key={index} className="p-3 text-left font-medium">
+                  {heading}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {Array.isArray(data) &&
+              data.map((transaction, index) => (
+                <tr key={index} className="border-b hover:bg-gray-50">
+                  <td className="p-3">
+                    <div className="flex items-center">
+                      <div className="rounded-full p-1.5 bg-secondary2 mr-2">
+                        <ArrowLeftRight className="h-3.5 w-3.5 text-primary" />
+                      </div>
+                      <span className="text-sm font-semibold text-primary">{transaction.id}</span>
+                    </div>
+                  </td>
+                  <td className="p-3 text-sm">
+                    <span className="text-gray-600">
+                      {transaction.from} → {transaction.to}
+                    </span>
+                  </td>
+                  <td className="p-3">
+                    {transaction.status === "Success" ? (
+                      <span className="inline-flex text-xs bg-[#71FB5533] text-[#20C000] px-3 py-1 rounded-full font-medium">
+                        {transaction.status}
+                      </span>
+                    ) : (
+                      <span className="inline-flex text-xs text-[#727272] bg-[#72727233] px-3 py-1 rounded-full font-medium">
+                        {transaction.status}
+                      </span>
+                    )}
+                  </td>
+                  <td className="p-3 text-sm text-gray-600">{transaction.block}</td>
+                  <td className="p-3 text-sm text-gray-600">{transaction.date}</td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile Card View - Shown only on mobile */}
+      <div className="md:hidden space-y-3">
+        {Array.isArray(data) &&
+          data.map((transaction, index) => (
+            <div key={index} className="border rounded-lg p-3 hover:bg-gray-50">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center">
+                  <div className="rounded-full p-1.5 bg-secondary2 mr-2">
+                    <ArrowLeftRight className="h-3.5 w-3.5 text-primary" />
                   </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="bg-blue-50">
-                          <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">ID</th>
-                          <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">From → To</th>
-                          <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Status</th>
-                          <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Block#</th>
-                          <th className="px-4 py-2 text-left text-sm font-medium text-gray-600">Date</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {[1, 2, 3].map((i) => (
-                          <tr key={i} className="border-b border-gray-100">
-                            <td className="px-4 py-3 text-sm">
-                              <div className="flex items-center">
-                                <div className="rounded-full p-2 bg-secondary2 mr-2">
-                                  <ArrowLeftRight className="h-4 w-4 text-primary " />
-                                </div>
-                                <span className="text-gray-600">0x90aCe6b6...f688</span>
-                              </div>
-                            </td>
-                            <td className="px-4 py-3 text-sm text-gray-600">0xe0fb...2834f → 0x8a5b51...7B00C</td>
-                            <td className="px-4 py-3 text-sm">
-                              <span className="bg-[#71FB5533] text-[#20C000] px-4 py-2 rounded-xl text-xs">
-                                Success
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 text-sm text-gray-600">Block #9432831</td>
-                            <td className="px-4 py-3 text-sm text-gray-600">2h ago</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  <span className="text-sm font-semibold text-primary">{transaction.id}</span>
                 </div>
-    )
+                <ChevronRight className="h-4 w-4 text-gray-400" />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <p className="text-gray-500 mb-0.5">From → To</p>
+                  <p className="text-gray-700">
+                    {transaction.from} → {transaction.to}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-gray-500 mb-0.5">Status</p>
+                  {transaction.status === "Success" ? (
+                    <span className="inline-flex text-xs bg-[#71FB5533] text-[#20C000] px-2 py-0.5 rounded-full">
+                      {transaction.status}
+                    </span>
+                  ) : (
+                    <span className="inline-flex text-xs text-[#727272] bg-[#72727233] px-2 py-0.5 rounded-full">
+                      {transaction.status}
+                    </span>
+                  )}
+                </div>
+
+                <div>
+                  <p className="text-gray-500 mb-0.5">Block#</p>
+                  <p className="text-gray-700">{transaction.block}</p>
+                </div>
+
+                <div>
+                  <p className="text-gray-500 mb-0.5">Date</p>
+                  <p className="text-gray-700">{transaction.date}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+      </div>
+    </div>
+  )
 }

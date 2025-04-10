@@ -61,7 +61,7 @@ export default function UsersPage() {
 
         {/* Search and Actions */}
         <div className="flex flex-col md:grid md:grid-cols-4 justify-between items-center mb-2 gap-4 md:px-10">
-          <div className="relative w-full md:w-auto md:col-span-2">
+          <div className="relative w-full md:w-auto md:col-span-3">
             <div className="relative">
               <input
                 type="text"
@@ -74,15 +74,10 @@ export default function UsersPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4 w-full md:col-span-2 font-[satoshi]">
-            <button className="w-[50%] flex justify-between items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50">
-              <span>Filter</span>
-              <Image src="/icons/calendar.svg" alt="Arrow right" width={24} height={24} />
-            </button>
-
-            <button className="w-[50%] flex justify-center items-center gap-2 px-4 py-2 font-bold border border-primary rounded-lg text-primary bg-white hover:bg-blue-50 ml-auto md:ml-0">
-              <span>Download</span>
-              <Image src="/icons/download.svg" alt="Arrow right" width={24} height={24} />
+          <div className="flex items-center gap-4 w-full col-span-1 font-[satoshi]">
+            <button className="w-full flex justify-between items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50">
+              <span>Sort by</span>
+              <Image src="/icons/dropdownIcon.svg" alt="Arrow right" width={24} height={24} />
             </button>
           </div>
         </div>
@@ -93,11 +88,11 @@ export default function UsersPage() {
         )}
 
         {activeTab === "verified" && (
-          <ActiveUsers />
+          <AllUsers />
         )}
 
         {activeTab === "pending verifications" && (
-          <ActiveUsers />
+          <AllUsers />
         )}
 
       </main>
