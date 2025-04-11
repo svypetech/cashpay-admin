@@ -2,7 +2,7 @@
 
 import Header from "../header";
 import Footer from "../Footer";
-import { DarkModeProvider, useDarkMode } from "../../app/context/DarkModeContext";
+import { DarkModeProvider, useDarkMode } from "../../app/(auth)/signin/context/DarkModeContext";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   return (

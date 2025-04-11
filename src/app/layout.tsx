@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`${montserrat.variable} antialiased`}>
-        <ClientLayout>{children}</ClientLayout>
+        {children}
       </body>
     </html>
   );

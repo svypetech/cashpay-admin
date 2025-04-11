@@ -1,7 +1,7 @@
 "use client"
 import type React from "react"
 import { useEffect, useState } from "react"
-import { useDarkMode } from "../../app/context/DarkModeContext"
+import { useDarkMode } from "../../app/(auth)/signin/context/DarkModeContext"
 
 const TableSkeleton: React.FC = () => {
   const { darkMode } = useDarkMode() // Get dark mode state

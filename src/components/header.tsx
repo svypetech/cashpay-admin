@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useDarkMode } from "../app/context/DarkModeContext"; // Import context hook
+import { useDarkMode } from "../app/(auth)/signin/context/DarkModeContext"; // Import context hook
 import { Bell, Menu } from "lucide-react"
 
 export default function Navbar() {

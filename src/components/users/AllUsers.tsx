@@ -5,70 +5,95 @@ import Pagination from "../pagination/pagination";
 import UserTable from "../tables/UserTable";
 
 const headings = [
-    "User ID",
-    "Name",
-    "E-mail",
-    "Joined date",
-    "Status",
-    "Actions"
-  ];
-  
-  const data = [
-    {
-      id: "ID#CP-9203",
-      name: "John Doe",
-      email: "johndoe@gmail.com",
-      joinedDate: "18-03-25",
-      status: "Verified",
-      profile: "/images/user-avatar.png"
-    },
-    {
-      id: "ID#CP-9203",
-      name: "John Doe",
-      email: "johndoe@gmail.com",
-      joinedDate: "18-03-25",
-      status: "Verified",
-      profile: "/images/user-avatar.png"
-    },
-    {
-      id: "ID#CP-9203",
-      name: "John Doe",
-      email: "johndoe@gmail.com",
-      joinedDate: "18-03-25",
-      status: "Verified",
-      profile: "/images/user-avatar.png"
-    },
-    {
-      id: "ID#CP-9203",
-      name: "John Doe",
-      email: "johndoe@gmail.com",
-      joinedDate: "18-03-25",
-      status: "Verified",
-      profile: "/images/user-avatar.png"
-    },
-    {
-      id: "ID#CP-9203",
-      name: "John Doe",
-      email: "johndoe@gmail.com",
-      joinedDate: "18-03-25",
-      status: "Verified",
-      profile: "/images/user-avatar.png"
-    }
-  ];
+  "User ID",
+  "Name",
+  "E-mail",
+  "Joined date",
+  "Status",
+  "Actions",
+];
 
-export default function AllUsers() {
-    const [currentPage, setCurrentPage] = useState(1);
+const data = [
+  {
+    id: "ID#CP-9203",
+    name: "John Doe",
+    email: "johndoe@gmail.com",
+    joinedDate: "18-03-25",
+    status: "Verified",
+    profile: "/images/user-avatar.png",
+  },
+  {
+    id: "ID#CP-9203",
+    name: "John Doe",
+    email: "johndoe@gmail.com",
+    joinedDate: "18-03-25",
+    status: "Pending",
+    profile: "/images/user-avatar.png",
+  },
+  {
+    id: "ID#CP-9203",
+    name: "John Doe",
+    email: "johndoe@gmail.com",
+    joinedDate: "18-03-25",
+    status: "Verified",
+    profile: "/images/user-avatar.png",
+  },
+  {
+    id: "ID#CP-9203",
+    name: "John Doe",
+    email: "johndoe@gmail.com",
+    joinedDate: "18-03-25",
+    status: "Pending",
+    profile: "/images/user-avatar.png",
+  },
+  {
+    id: "ID#CP-9203",
+    name: "John Doe",
+    email: "johndoe@gmail.com",
+    joinedDate: "18-03-25",
+    status: "Verified",
+    profile: "/images/user-avatar.png",
+  },
+  {
+    id: "ID#CP-9203",
+    name: "John Doe",
+    email: "johndoe@gmail.com",
+    joinedDate: "18-03-25",
+    status: "Pending",
+    profile: "/images/user-avatar.png",
+  },
+  {
+    id: "ID#CP-9203",
+    name: "John Doe",
+    email: "johndoe@gmail.com",
+    joinedDate: "18-03-25",
+    status: "Verified",
+    profile: "/images/user-avatar.png",
+  },
+];
+
+export default function AllUsers({ activeTab }: { activeTab: string }) {
+  const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(15); // Example total pages
 
   const handlePageChange = (page: number) => {
-    // Handle page change logic here
     setCurrentPage(page);
-  }
+  };
 
-    return (
-        <div>
-            <UserTable headings={headings} data={data} />
-            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
-        </div>
-    )
+  // Filter data based on activeTab
+  const filteredData = data.filter((user) => {
+    if (activeTab === "all") return true;
+    return user.status.toLowerCase() === activeTab.toLowerCase();
+  });
+
+  return (
+    <div>
+      <UserTable headings={headings} data={filteredData} />
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
+    </div>
+  );
 }

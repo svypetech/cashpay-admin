@@ -1,6 +1,6 @@
 'use client'
 import React, { useEffect, useState } from "react";
-import { useDarkMode } from "../../app/context/DarkModeContext";
+import { useDarkMode } from "../../app/(auth)/signin/context/DarkModeContext";
 import TransactionDetailsPopup from "../transaction/TransactionDetailsPopup";
 // import TransactionFrequency from "../cards/TransactionFrequency";
 
