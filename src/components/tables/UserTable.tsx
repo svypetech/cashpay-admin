@@ -102,14 +102,14 @@ const UserTable: React.FC<Props> = ({ data, headings }) => {
   }
 
   return (
-    <div className="flex-1 rounded-lg w-full sm:px-10 py-5">
+    <div className="flex-1 rounded-lg w-full py-5">
       {/* Table */}
       <div className="rounded-lg overflow-x-auto w-full" ref={tableRef}>
         <table className="w-full text-left table-auto min-w-[600px]">
           <thead className="bg-secondary/10">
-            <tr className="font-satoshi text-[12px] sm:text-[16px] p-2 sm:p-4">
+            <tr className="font-satoshi text-[12px] md:text-[16px] p-2 md:p-4">
               {headings.map((heading, index) => (
-                <th key={index} className="p-2 sm:p-4 text-left">
+                <th key={index} className="p-2 md:p-4 text-left">
                   {heading}
                 </th>
               ))}
@@ -118,14 +118,14 @@ const UserTable: React.FC<Props> = ({ data, headings }) => {
           <tbody>
             {Array.isArray(data) &&
               data.map((user, index) => (
-                <tr key={index} className="border-b text-[12px] sm:text-[16px]">
-                  <td className="p-2 sm:p-4 font-satoshi min-w-[100px] break-words">{user.id}</td>
-                  <td className="p-2 sm:p-4 font-satoshi font-bold text-primary min-w-[120px] break-words">
+                <tr key={index} className="border-b text-[12px] md:text-[16px]">
+                  <td className="p-2 md:p-4 font-satoshi min-w-[100px] break-words">{user.id}</td>
+                  <td className="p-2 md:p-4 font-satoshi font-bold text-primary min-w-[120px] break-words">
                     {user.name}
                   </td>
-                  <td className="p-2 sm:p-4 font-satoshi min-w-[150px] break-words">{user.email}</td>
-                  <td className="p-2 sm:p-4 font-satoshi min-w-[100px]">{user.joinedDate}</td>
-                  <td className="p-2 sm:p-4 font-satoshi min-w-[120px]">
+                  <td className="p-2 md:p-4 font-satoshi min-w-[150px] break-words">{user.email}</td>
+                  <td className="p-2 md:p-4 font-satoshi min-w-[100px]">{user.joinedDate}</td>
+                  <td className="p-2 md:p-4 font-satoshi min-w-[120px]">
                     {user.status === "Verified" ? (
                       <span className="text-left bg-[#71FB5533] text-[#20C000] px-4 py-2 rounded-xl text-xs md:text-md font-semibold whitespace-nowrap">
                         Verified
@@ -136,7 +136,7 @@ const UserTable: React.FC<Props> = ({ data, headings }) => {
                       </span>
                     )}
                   </td>
-                  <td className="relative p-2 sm:p-4 font-satoshi min-w-[60px] text-center">
+                  <td className="relative p-2 md:p-4 font-satoshi min-w-[60px] text-center">
                     <div className="dropdown-container relative">
                       <button
                         className="absolute right-0 md:relative md:right-auto cursor-pointer"
@@ -188,22 +188,7 @@ const UserTable: React.FC<Props> = ({ data, headings }) => {
       </div>
 
       {/* User Profile Sidebar */}
-      {selectedUser && selectedUser.status === "Verified" && (
-        <UserProfileSidebar
-          showSidebar={showUserSidebar}
-          onClose={() => setShowUserSidebar(false)}
-          user={{
-            id: selectedUser.id,
-            profileImage: selectedUser.profile || "/images/user-avatar.png",
-            name: selectedUser.name,
-            email: selectedUser.email,
-            joiningDate: selectedUser.joinedDate,
-            status: selectedUser.status,
-          }}
-        />
-      )}
-
-      {selectedUser && selectedUser.status === "Pending" && (
+      {selectedUser && (
         <UserProfileSidebar
           showSidebar={showUserSidebar}
           onClose={() => setShowUserSidebar(false)}

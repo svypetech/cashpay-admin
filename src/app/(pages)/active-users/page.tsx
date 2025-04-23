@@ -51,12 +51,12 @@ export default function ActiveUsersPage() {
           </div>
 
           <div className="flex items-center gap-4 w-full md:col-span-2 font-[satoshi]">
-            <button className="w-[50%] flex justify-between items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50">
+            <button className="w-[50%] cursor-pointer flex justify-between items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50">
               <span>Filter</span>
               <Image src="/icons/calendar.svg" alt="Arrow right" width={24} height={24} />
             </button>
 
-            <button className="w-[50%] flex justify-center items-center gap-2 px-4 py-2 font-bold border border-primary rounded-lg text-primary bg-white hover:bg-blue-50 ml-auto md:ml-0">
+            <button className="w-[50%] cursor-pointer flex justify-center items-center gap-2 px-4 py-2 font-bold border border-primary rounded-lg text-primary bg-white hover:bg-blue-50 ml-auto md:ml-0">
               <span>Download</span>
               <Image src="/icons/download.svg" alt="Arrow right" width={24} height={24} />
             </button>
