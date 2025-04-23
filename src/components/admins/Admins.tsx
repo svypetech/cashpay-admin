@@ -1,68 +1,120 @@
 "use client";
 
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import Pagination from "../pagination/pagination";
 import AdminTable from "../tables/AdminTable";
 import CreateRoleSidebar from "./CreateRoleSidebar";
 import { Plus } from "lucide-react";
 import Image from "next/image";
+import AddAdminPopup from "./CreateAdmin";
 
 const headings = ["ID", "Name", "E-mail", "Joined date", "Status", "Role", "Actions"];
-const admins = [
-  {
-    id: "ID#CP-9203",
-    name: "John Doe",
-    email: "johndoe@gmail.com",
-    joinedDate: "18-03-25",
-    status: "+93 2328238902",
-    role: "Super Admin"
-  },
-  {
-    id: "ID#CP-9204",
-    name: "Jane Smith",
-    email: "janesmith@gmail.com",
-    joinedDate: "18-03-25",
-    status: "+93 2328238902",
-    role: "Support Agent"
-  },
-  {
-    id: "ID#CP-9205",
-    name: "Alice Johnson",
-    email: "alicejohnson@gmail.com",
-    joinedDate: "18-03-25",
-    status: "+93 2328238902",
-    role: "Financial Manager"
-  },
-  {
-    id: "ID#CP-9206",
-    name: "Bob Wilson",
-    email: "bobwilson@gmail.com",
-    joinedDate: "18-03-25",
-    status: "+93 2328238902",
-    role: "Support Agent"
-  },
-  {
-    id: "ID#CP-9207",
-    name: "Carol Brown",
-    email: "carolbrown@gmail.com",
-    joinedDate: "18-03-25",
-    status: "+93 2328238902",
-    role: "Financial Manager"
-  }
-];
 
 export default function Admins() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(15); // Example total pages
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isPopupOpen, setIsPopupOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("all")
+  const [searchQuery, setSearchQuery] = useState("")
   const [roles, setRoles] = useState([
     { id: "0", title: "All", description: "All admins" },
     { id: "1", title: "Super Admin", description: "Full access to all features" },
     { id: "2", title: "Support Agent", description: "Can only view data" },
     { id: "3", title: "Financial Manager", description: "Can manage users and transactions" },
   ])
+  const [admins, setAdmins] = useState([
+    {
+      id: "ID#CP-9203",
+      name: "John Doe",
+      email: "johndoe@gmail.com",
+      joinedDate: "18-03-25",
+      status: "+93 2328238902",
+      role: "Super Admin"
+    },
+    {
+      id: "ID#CP-9204",
+      name: "Jane Smith",
+      email: "janesmith@gmail.com",
+      joinedDate: "18-03-25",
+      status: "+93 2328238902",
+      role: "Support Agent"
+    },
+    {
+      id: "ID#CP-9205",
+      name: "Alice Johnson",
+      email: "alicejohnson@gmail.com",
+      joinedDate: "18-03-25",
+      status: "+93 2328238902",
+      role: "Financial Manager"
+    },
+    {
+      id: "ID#CP-9206",
+      name: "Bob Wilson",
+      email: "bobwilson@gmail.com",
+      joinedDate: "18-03-25",
+      status: "+93 2328238902",
+      role: "Support Agent"
+    },
+    {
+      id: "ID#CP-9207",
+      name: "Carol Brown",
+      email: "carolbrown@gmail.com",
+      joinedDate: "18-03-25",
+      status: "+93 2328238902",
+      role: "Financial Manager"
+    }
+  ])
+  const [filteredData, setFilteredData] = useState(admins)
+
+  useEffect(() => {
+    setFilteredData(admins.filter((user) => {
+      if (activeTab === "all") return true;
+      return user.role.toLowerCase() === activeTab.toLowerCase();
+    }))
+  }, [activeTab, admins])
+
+  useEffect(() => {
+    setFilteredData(admins.filter((user) => {
+      return user.name.toLowerCase().includes(searchQuery.toLowerCase()) || user.email.toLowerCase().includes(searchQuery.toLowerCase())
+    }))
+  }, [searchQuery, admins])
+
+  const handleAddAdmin = async (data: { email: string; password: string; roleId: string }) => {
+    setIsLoading(true)
+    try {
+      // Simulate API call
+      console.log("Adding admin:", data)
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      // Map role ID to role name
+      const roleMap = {
+        super_admin: "Super Admin",
+        support_agent: "Support Agent",
+        financial_manager: "Financial Manager",
+      }
+
+      // Add new admin to the list
+      const newAdmin = {
+        id: (admins.length + 1).toString(),
+        email: data.email,
+        role: roleMap[data.roleId as keyof typeof roleMap],
+        name: data.email.split("@")[0], // Example name from email
+        joinedDate: new Date().toLocaleDateString("en-GB"),
+        status: "+93 2328238902", // Example phone number
+        profile: "/images/user-avatar.png", // Example profile image
+      }
+      setAdmins([...admins, newAdmin])
+
+      // Close popup
+      setIsPopupOpen(false)
+    } catch (error) {
+      console.error("Error adding admin:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handleCreateRole = async (data: { title: string; description: string; permissions: string[] }) => {
     setIsLoading(true)
@@ -91,12 +143,6 @@ export default function Admins() {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
-
-  // Filter data based on activeTab
-  const filteredData = admins.filter((user) => {
-    if (activeTab === "all") return true;
-    return user.role.toLowerCase() === activeTab.toLowerCase();
-  });
 
   return (
     <div>
@@ -127,9 +173,10 @@ export default function Admins() {
         <div className={`relative w-full md:w-auto md:col-span-3`}>
           <div className="relative">
             <input
+              onChange={(e) => setSearchQuery(e.target.value)}
               type="text"
               placeholder="Search..."
-              className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-primary focus:border-transparent"
+              className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-gray-700 focus:border-transparent"
             />
             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
               <Image src="/icons/search.svg" alt="Arrow right" width={24} height={24} />
@@ -145,7 +192,7 @@ export default function Admins() {
         </div>
 
         <div className="flex items-center gap-4 w-full md:col-span-3 font-[satoshi]">
-          <button className={`w-[50%] cursor-pointer flex justify-center items-center gap-2 px-4 py-2 font-bold border border-primary rounded-lg text-primary bg-white hover:bg-blue-50 ml-auto md:ml-0`}>
+          <button onClick={() => setIsPopupOpen(true)} className={`w-[50%] cursor-pointer flex justify-center items-center gap-2 px-4 py-2 font-bold border border-primary rounded-lg text-primary bg-white hover:bg-blue-50 ml-auto md:ml-0`}>
             <span>Add Admin</span>
             <Plus className="h-6 w-6 text-primary" />
           </button>
@@ -166,6 +213,13 @@ export default function Admins() {
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
         onSubmit={handleCreateRole}
+        isLoading={isLoading}
+      />
+
+      <AddAdminPopup
+        isOpen={isPopupOpen}
+        onClose={() => setIsPopupOpen(false)}
+        onSubmit={handleAddAdmin}
         isLoading={isLoading}
       />
     </div>

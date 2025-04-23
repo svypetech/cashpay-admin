@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import Pagination from "../pagination/pagination";
 import UserTable from "../tables/UserTable";
 import Image from "next/image";
@@ -25,24 +25,24 @@ const data = [
   },
   {
     id: "ID#CP-9203",
-    name: "John Doe",
-    email: "johndoe@gmail.com",
+    name: "Jane Smith",
+    email: "jane@gmail.com",
     joinedDate: "18-03-25",
     status: "Pending",
     profile: "/images/user-avatar.png",
   },
   {
     id: "ID#CP-9203",
-    name: "John Doe",
-    email: "johndoe@gmail.com",
+    name: "Justin Timberlake",
+    email: "justin@gmail.com",
     joinedDate: "18-03-25",
     status: "Verified",
     profile: "/images/user-avatar.png",
   },
   {
     id: "ID#CP-9203",
-    name: "John Doe",
-    email: "johndoe@gmail.com",
+    name: "Pedri Gonzalez",
+    email: "pedri@gmail.com",
     joinedDate: "18-03-25",
     status: "Pending",
     profile: "/images/user-avatar.png",
@@ -77,16 +77,36 @@ export default function AllUsers() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(15); // Example total pages
   const [activeTab, setActiveTab] = useState("all");
-
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredData, setFilteredData] = useState(data);
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
 
-  // Filter data based on activeTab
-  const filteredData = data.filter((user) => {
-    if (activeTab === "all") return true;
-    return user.status.toLowerCase() === activeTab.toLowerCase();
-  });
+  // filter based on active tab
+  useEffect(() => {
+    if (activeTab === "all") {
+      setFilteredData(data);
+    } else if (activeTab === "verified") {
+      setFilteredData(data.filter((user) => user.status === "Verified"));
+    } else if (activeTab === "pending") {
+      setFilteredData(data.filter((user) => user.status === "Pending"));
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    const filtered = data.filter((user) => {
+      const userName = user.name.toLowerCase();
+      const userEmail = user.email.toLowerCase();
+      const query = searchQuery.toLowerCase();
+      return (
+        userName.includes(query) ||
+        userEmail.includes(query) ||
+        user.id.includes(query)
+      );
+    });
+    setFilteredData(filtered);
+  }, [searchQuery]);
 
   return (
     <div>
@@ -129,9 +149,10 @@ export default function AllUsers() {
         <div className={`relative w-full md:w-auto md:col-span-3`}>
           <div className="relative">
             <input
+              onChange={(e) => setSearchQuery(e.target.value)}
               type="text"
               placeholder="Search..."
-              className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-primary focus:border-transparent"
+              className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:gray-700 focus:border-transparent"
             />
             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
               <Image src="/icons/search.svg" alt="Arrow right" width={24} height={24} />

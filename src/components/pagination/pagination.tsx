@@ -74,7 +74,7 @@ export default function Pagination({
               <button
                 key={page}
                 onClick={() => handlePageChange(Number(page))}
-                className={`w-8 h-8 flex items-center justify-center rounded-md font-semibold font-[satoshi] ${
+                className={`w-8 h-8 flex items-center justify-center rounded-full font-semibold font-[satoshi] ${
                   currentPage === page
                     ? "bg-secondary/10 font-medium"
                     : "hover:bg-gray-100"

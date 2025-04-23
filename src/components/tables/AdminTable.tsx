@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useEffect, useRef, useState } from "react"
-import { useDarkMode } from "../../app/(auth)/signin/context/DarkModeContext"
+import { useDarkMode } from "../../app/context/DarkModeContext"
 import Image from "next/image"
 import UserProfileSidebar from "../users/UserInfoSidebar"
 import AdminSidebar from "../admins/AdminSidebar"
