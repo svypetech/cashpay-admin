@@ -22,7 +22,7 @@
   --color-borderDark: #848484;
 }
 
-/* 
+
 @font-face {
   font-family: 'Satoshi';
   src: url('/path-to-your-font/Satoshi-Regular.woff2') format('woff2'),
@@ -37,7 +37,7 @@
     url('/path-to-your-font/Satoshi-Bold.woff') format('woff');
   font-weight: 700;
   font-style: normal;
-} */
+}
 
 /* Custom Font Classes */
 .font-satoshi {
