@@ -5,6 +5,7 @@ import { useState } from "react"
 import Overview from "@/src/components/dashboard/Overview"
 import Insights from "@/src/components/dashboard/Insights"
 import Transactions from "@/src/components/transaction/Transactions"
+import Wallet from "@/src/components/transaction/Wallet"
 
 // tabs are transactions, wallet, p2p trading store in object array
 const tabs = [
@@ -43,8 +44,8 @@ export default function DashboardPage() {
             <Transactions />
           )}
 
-          {activeTab === "insights" && (
-            <Insights />
+          {activeTab === "wallet" && (
+            <Wallet />
           )}
         </div>
       </div>

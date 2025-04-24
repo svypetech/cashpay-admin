@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Pagination from "../pagination/pagination";
 import Image from "next/image";
 import TransactionTable from "../tables/TransactionsTable";
@@ -8,6 +8,7 @@ import TransactionTable from "../tables/TransactionsTable";
 const headings = ["ID", "From", "To", "Status", "Block#", "Date"];
 const data = [
     {
+      hash: "0x3a33151e6d5de02...c666",
       id: "0x9afca6...f684",
       from: "0xae0fb...2834f",
       to: "0xEb851...7B02C",
@@ -16,6 +17,7 @@ const data = [
       date: "2h ago"
     },
     {
+      hash: "0x3a33151e6d5de02...c666",
       id: "0x9afca6...f685",
       from: "0xae0fb...2834f",
       to: "0xEb851...7B02C",
@@ -24,6 +26,7 @@ const data = [
       date: "2h ago"
     },
     {
+      hash: "0x3a33151e6d5de02...c666",
       id: "0x9afca6...f686",
       from: "0xae0fb...2834f",
       to: "0xEb851...7B02C",
@@ -32,6 +35,7 @@ const data = [
       date: "2h ago"
     },
     {
+      hash: "0x3a33151e6d5de02...c666",
       id: "0x9afca6...f687",
       from: "0xae0fb...2834f",
       to: "0xEb851...7B02C",
@@ -40,6 +44,7 @@ const data = [
       date: "2h ago"
     },
     {
+      hash: "0x3a33151e6d5de02...c666",
       id: "0x9afca6...f688",
       from: "0xae0fb...2834f",
       to: "0xEb851...7B02C",
