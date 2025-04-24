@@ -3,25 +3,26 @@
 import Image from "next/image";
 import type React from "react"
 import { useEffect, useState, useRef } from "react"
-import WalletSidebar from "../transaction/WalletSidebar";
+import TradeDetailsPopup from "./TradeDetailsPopup";
 
-interface Wallet {
-    userId: string;
-    name: string;
-    cardUser: boolean;
-    cryptoHoldings: number;
-    totalBalance: number;
+interface Trade {
+    disputeId: string;
+    tradeId: string;
+    reason: string;
+    status: string;
+    chatHistory: string; // URL or identifier for chat history
 }
+
 
 interface Props {
     headings: string[]
-    data: Wallet[]
+    data: Trade[]
 }
 
-const WalletTable: React.FC<Props> = ({ data, headings }) => {
+const P2PTableDisputed: React.FC<Props> = ({ data, headings }) => {
     const [activeDropdown, setActiveDropdown] = useState<number | null>(null)
-    const [showSidebar, setShowSidebar] = useState(false)
-    const [selectedWallet, setSelectedWallet] = useState<Wallet | null>(null)
+    const [showPopup, setShowPopup] = useState(false)
+    const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null)
     const tableRef = useRef<HTMLDivElement>(null)
     const dropdownRefs = useRef<(HTMLDivElement | null)[]>([])
 
@@ -43,7 +44,7 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
     }, [activeDropdown])
 
     useEffect(() => {
-        // Adjust dropdown position for the last few rows
+        // Adjust dropdown position
         if (activeDropdown !== null && tableRef.current && dropdownRefs.current[activeDropdown]) {
             const tableRect = tableRef.current.getBoundingClientRect()
             const dropdownRect = dropdownRefs.current[activeDropdown]!.getBoundingClientRect()
@@ -54,22 +55,30 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
                 const spaceBelow = tableRect.bottom - rowRect.bottom
                 const dropdownHeight = dropdownRect.height
 
-                // If there's not enough space below, open the dropdown upwards
-                if (spaceBelow < dropdownHeight) {
-                    dropdownRefs.current[activeDropdown]!.style.bottom = "100%"
-                    dropdownRefs.current[activeDropdown]!.style.top = "auto"
-                    dropdownRefs.current[activeDropdown]!.style.marginBottom = "8px"
-                    dropdownRefs.current[activeDropdown]!.style.marginTop = "0"
-                } else {
-                    // Otherwise, open downwards (default)
+                // Always open dropdown downwards for the first row or single row
+                if (activeDropdown === 0 || data.length === 1) {
                     dropdownRefs.current[activeDropdown]!.style.top = "100%"
                     dropdownRefs.current[activeDropdown]!.style.bottom = "auto"
                     dropdownRefs.current[activeDropdown]!.style.marginTop = "8px"
                     dropdownRefs.current[activeDropdown]!.style.marginBottom = "0"
+                } else {
+                    // For other rows with multiple rows, open upwards if not enough space below
+                    if (spaceBelow < dropdownHeight) {
+                        dropdownRefs.current[activeDropdown]!.style.bottom = "100%"
+                        dropdownRefs.current[activeDropdown]!.style.top = "auto"
+                        dropdownRefs.current[activeDropdown]!.style.marginBottom = "8px"
+                        dropdownRefs.current[activeDropdown]!.style.marginTop = "0"
+                    } else {
+                        // Open downwards
+                        dropdownRefs.current[activeDropdown]!.style.top = "100%"
+                        dropdownRefs.current[activeDropdown]!.style.bottom = "auto"
+                        dropdownRefs.current[activeDropdown]!.style.marginTop = "8px"
+                        dropdownRefs.current[activeDropdown]!.style.marginBottom = "0"
+                    }
                 }
             }
         }
-    }, [activeDropdown])
+    }, [activeDropdown, data.length])
 
     const toggleDropdown = (index: number) => {
         setActiveDropdown(activeDropdown === index ? null : index)
@@ -78,7 +87,7 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
     return (
         <div className="flex-1 rounded-lg w-full py-5">
             {/* Table */}
-            <div className="rounded-lg overflow-x-auto w-full" ref={tableRef}>
+            <div className="rounded-lg overflow-x-auto w-full min-h-[200px]" ref={tableRef}>
                 <table className="w-full text-left table-auto min-w-[600px]">
                     <thead className="bg-secondary/10">
                         <tr className="font-satoshi text-[12px] md:text-[16px] p-2 md:p-4">
@@ -91,17 +100,28 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
                     </thead>
                     <tbody>
                         {Array.isArray(data) &&
-                            data.map((wallet, index) => (
+                            data.map((trade, index) => (
                                 <tr key={index} className="border-b text-[12px] md:text-[16px]">
-                                    <td className="p-2 md:p-4 font-satoshi min-w-[100px] break-words">{wallet.userId}</td>
+                                    <td className="p-2 md:p-4 font-satoshi min-w-[100px] break-words">{trade.disputeId}</td>
                                     <td className="p-2 md:p-4 font-satoshi font-bold text-primary min-w-[120px] break-words">
-                                        {wallet.name}
+                                        {trade.tradeId}
                                     </td>
-                                    <td className="p-2 md:p-4 font-satoshi min-w-[150px] break-words">{wallet.cardUser ? "True" : "False"}</td>
-                                    <td className="p-2 md:p-4 font-satoshi min-w-[120px]">
-                                        {wallet.cryptoHoldings}
+                                    <td className="p-2 md:p-4 font-satoshi min-w-[100px]">
+                                        <span className={`text-[12px] md:text-[16px] px-4 py-2 rounded-xl text-xs md:text-md font-semibold bg-[#DF1D1D33] text-[#DF1D1D]`}>
+                                            {trade.reason}
+                                        </span>
                                     </td>
-                                    <td className="p-2 md:p-4 font-satoshi min-w-[100px]">{wallet.totalBalance}</td>
+                                    <td className="p-2 md:p-4 font-satoshi min-w-[100px]">
+                                        <span className={`text-[12px] md:text-[16px] px-4 py-2 rounded-xl text-xs md:text-md font-semibold bg-[#71FB5533] text-[#20C000]`}>
+                                            {trade.status}
+                                        </span>
+                                    </td>
+                                    <td className="p-2 md:p-4 font-satoshi min-w-[100px]">
+                                        <span className={`text-[12px] md:text-[16px] px-4 py-2 text-primary underline decoration-primary cursor-pointer`}>
+                                            {trade.chatHistory}
+                                        </span>
+                                    </td>
+
                                     <td className="relative p-2 md:p-4 font-satoshi min-w-[60px] text-center">
                                         <div className="dropdown-container relative">
                                             <button
@@ -119,7 +139,7 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
 
                                             {activeDropdown === index && (
                                                 <div
-                                                    className="absolute z-10 right-0 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-100"
+                                                    className="absolute z-10 right-0 w-80 bg-white rounded-md shadow-lg py-1 border border-gray-100"
                                                     ref={(el) => {
                                                         dropdownRefs.current[index] = el;
                                                     }}
@@ -127,24 +147,24 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
                                                     <button
                                                         className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
                                                         onClick={() => {
-                                                            setSelectedWallet(wallet)
-                                                            setShowSidebar(true)
+                                                            setSelectedTrade(trade)
+                                                            setShowPopup(true)
                                                         }}
                                                     >
-                                                        View Wallet
+                                                        View Details
                                                     </button>
                                                     <div className="border-t border-gray-100"></div>
                                                     <button
-                                                        className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
+                                                        className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
                                                         onClick={() => { }}
                                                     >
-                                                        Ban User
+                                                        Resolve in Favour of Buyer
                                                     </button>
                                                     <button
-                                                        className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
+                                                        className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
                                                         onClick={() => { }}
                                                     >
-                                                        Suspend User
+                                                        Resolve in Favour of Seller
                                                     </button>
                                                 </div>
                                             )}
@@ -157,16 +177,15 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
             </div>
 
             {/* Wallet Details Sidebar */}
-            {selectedWallet && (
-                <WalletSidebar
-                    showSidebar={showSidebar}
-                    onClose={() => setShowSidebar(false)}
-                    wallet={selectedWallet}
+            {/* {selectedTrade && (
+                <TradeDetailsPopup
+                    showPopup={showPopup}
+                    onClose={() => setShowPopup(false)}
+                    trade={selectedTrade}
                 />
-            )}
-
+            )} */}
         </div>
     )
 }
 
-export default WalletTable;
+export default P2PTableDisputed;

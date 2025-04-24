@@ -6,6 +6,7 @@ import Overview from "@/src/components/dashboard/Overview"
 import Insights from "@/src/components/dashboard/Insights"
 import Transactions from "@/src/components/transaction/Transactions"
 import Wallet from "@/src/components/transaction/Wallet"
+import P2PTrading from "@/src/components/p2pTrading/P2PTrading"
 
 // tabs are transactions, wallet, p2p trading store in object array
 const tabs = [
@@ -46,6 +47,10 @@ export default function DashboardPage() {
 
           {activeTab === "wallet" && (
             <Wallet />
+          )}
+
+          {activeTab === "p2p trading" && (
+            <P2PTrading />
           )}
         </div>
       </div>

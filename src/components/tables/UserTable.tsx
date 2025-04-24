@@ -53,34 +53,42 @@ const UserTable: React.FC<Props> = ({ data, headings }) => {
   }, [activeDropdown])
 
   useEffect(() => {
-    // Adjust dropdown position for the last few rows
-    if (activeDropdown !== null && tableRef.current && dropdownRefs.current[activeDropdown]) {
-      const tableRect = tableRef.current.getBoundingClientRect()
-      const dropdownRect = dropdownRefs.current[activeDropdown]!.getBoundingClientRect()
-      const rowElement = dropdownRefs.current[activeDropdown]!.closest("tr")
-      const rowRect = rowElement?.getBoundingClientRect()
-
-      if (rowRect && dropdownRect) {
-        const spaceBelow = tableRect.bottom - rowRect.bottom
-        const dropdownHeight = dropdownRect.height
-
-        // If there's not enough space below, open the dropdown upwards
-        if (spaceBelow < dropdownHeight) {
-          dropdownRefs.current[activeDropdown]!.style.bottom = "100%"
-          dropdownRefs.current[activeDropdown]!.style.top = "auto"
-          dropdownRefs.current[activeDropdown]!.style.marginBottom = "8px"
-          dropdownRefs.current[activeDropdown]!.style.marginTop = "0"
-        } else {
-          // Otherwise, open downwards (default)
-          dropdownRefs.current[activeDropdown]!.style.top = "100%"
-          dropdownRefs.current[activeDropdown]!.style.bottom = "auto"
-          dropdownRefs.current[activeDropdown]!.style.marginTop = "8px"
-          dropdownRefs.current[activeDropdown]!.style.marginBottom = "0"
-        }
-      }
-    }
-  }, [activeDropdown])
-
+          // Adjust dropdown position
+          if (activeDropdown !== null && tableRef.current && dropdownRefs.current[activeDropdown]) {
+              const tableRect = tableRef.current.getBoundingClientRect()
+              const dropdownRect = dropdownRefs.current[activeDropdown]!.getBoundingClientRect()
+              const rowElement = dropdownRefs.current[activeDropdown]!.closest("tr")
+              const rowRect = rowElement?.getBoundingClientRect()
+  
+              if (rowRect && dropdownRect) {
+                  const spaceBelow = tableRect.bottom - rowRect.bottom
+                  const dropdownHeight = dropdownRect.height
+  
+                  // Always open dropdown downwards for the first row or single row
+                  if (activeDropdown === 0 || activeDropdown === 1 || data.length === 2) {
+                      dropdownRefs.current[activeDropdown]!.style.top = "100%"
+                      dropdownRefs.current[activeDropdown]!.style.bottom = "auto"
+                      dropdownRefs.current[activeDropdown]!.style.marginTop = "8px"
+                      dropdownRefs.current[activeDropdown]!.style.marginBottom = "0"
+                  } else {
+                      // For other rows with multiple rows, open upwards if not enough space below
+                      if (spaceBelow < dropdownHeight) {
+                          dropdownRefs.current[activeDropdown]!.style.bottom = "100%"
+                          dropdownRefs.current[activeDropdown]!.style.top = "auto"
+                          dropdownRefs.current[activeDropdown]!.style.marginBottom = "8px"
+                          dropdownRefs.current[activeDropdown]!.style.marginTop = "0"
+                      } else {
+                          // Open downwards
+                          dropdownRefs.current[activeDropdown]!.style.top = "100%"
+                          dropdownRefs.current[activeDropdown]!.style.bottom = "auto"
+                          dropdownRefs.current[activeDropdown]!.style.marginTop = "8px"
+                          dropdownRefs.current[activeDropdown]!.style.marginBottom = "0"
+                      }
+                  }
+              }
+          }
+      }, [activeDropdown, data.length])
+      
   const toggleDropdown = (index: number) => {
     setActiveDropdown(activeDropdown === index ? null : index)
   }

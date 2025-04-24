@@ -2,10 +2,8 @@
 
 import type React from "react"
 import { useEffect, useRef, useState } from "react"
-import { useDarkMode } from "../../app/context/DarkModeContext"
 import Image from "next/image"
-import UserProfileSidebar from "../users/UserInfoSidebar"
-import AdminSidebar from "../admins/AdminSidebar"
+import AdminSidebar from "@/src/components/admins/AdminSidebar"
 
 interface Admin {
     id: string;
@@ -23,19 +21,11 @@ interface Props {
 }
 
 const AdminTable: React.FC<Props> = ({ data, headings }) => {
-    const { darkMode } = useDarkMode() // Get dark mode state
-    const [showDark, setShowDark] = useState(darkMode)
     const [activeDropdown, setActiveDropdown] = useState<number | null>(null)
     const [showAdminSidebar, setShowAdminSidebar] = useState(false)
     const [selectedAdmin, setSelectedAdmin] = useState<Admin | null>(null)
     const tableRef = useRef<HTMLDivElement>(null)
     const dropdownRefs = useRef<(HTMLDivElement | null)[]>([])
-
-    useEffect(() => {
-        // Delay state update slightly to enable smooth transition
-        const timeout = setTimeout(() => setShowDark(darkMode), 100)
-        return () => clearTimeout(timeout)
-    }, [darkMode])
 
     useEffect(() => {
         // Close dropdown when clicking outside
@@ -55,7 +45,7 @@ const AdminTable: React.FC<Props> = ({ data, headings }) => {
     }, [activeDropdown])
 
     useEffect(() => {
-        // Adjust dropdown position for the last few rows
+        // Adjust dropdown position
         if (activeDropdown !== null && tableRef.current && dropdownRefs.current[activeDropdown]) {
             const tableRect = tableRef.current.getBoundingClientRect()
             const dropdownRect = dropdownRefs.current[activeDropdown]!.getBoundingClientRect()
@@ -66,22 +56,30 @@ const AdminTable: React.FC<Props> = ({ data, headings }) => {
                 const spaceBelow = tableRect.bottom - rowRect.bottom
                 const dropdownHeight = dropdownRect.height
 
-                // If there's not enough space below, open the dropdown upwards
-                if (spaceBelow < dropdownHeight) {
-                    dropdownRefs.current[activeDropdown]!.style.bottom = "100%"
-                    dropdownRefs.current[activeDropdown]!.style.top = "auto"
-                    dropdownRefs.current[activeDropdown]!.style.marginBottom = "8px"
-                    dropdownRefs.current[activeDropdown]!.style.marginTop = "0"
-                } else {
-                    // Otherwise, open downwards (default)
+                // Always open dropdown downwards for the first row or single row
+                if (activeDropdown === 0 || activeDropdown === 1 || data.length === 2) {
                     dropdownRefs.current[activeDropdown]!.style.top = "100%"
                     dropdownRefs.current[activeDropdown]!.style.bottom = "auto"
                     dropdownRefs.current[activeDropdown]!.style.marginTop = "8px"
                     dropdownRefs.current[activeDropdown]!.style.marginBottom = "0"
+                } else {
+                    // For other rows with multiple rows, open upwards if not enough space below
+                    if (spaceBelow < dropdownHeight) {
+                        dropdownRefs.current[activeDropdown]!.style.bottom = "100%"
+                        dropdownRefs.current[activeDropdown]!.style.top = "auto"
+                        dropdownRefs.current[activeDropdown]!.style.marginBottom = "8px"
+                        dropdownRefs.current[activeDropdown]!.style.marginTop = "0"
+                    } else {
+                        // Open downwards
+                        dropdownRefs.current[activeDropdown]!.style.top = "100%"
+                        dropdownRefs.current[activeDropdown]!.style.bottom = "auto"
+                        dropdownRefs.current[activeDropdown]!.style.marginTop = "8px"
+                        dropdownRefs.current[activeDropdown]!.style.marginBottom = "0"
+                    }
                 }
             }
         }
-    }, [activeDropdown])
+    }, [activeDropdown, data.length])
 
     const toggleDropdown = (index: number) => {
         setActiveDropdown(activeDropdown === index ? null : index)
@@ -103,10 +101,15 @@ const AdminTable: React.FC<Props> = ({ data, headings }) => {
         setActiveDropdown(null)
     }
 
+    const handleDeleteAdmin = (admin: Admin) => {
+        console.log("Delete admin:", admin)
+        setActiveDropdown(null)
+    }
+
     return (
         <div className="flex-1 rounded-lg w-full py-5">
             {/* Table */}
-            <div className="rounded-lg overflow-x-auto w-full" ref={tableRef}>
+            <div className="rounded-lg overflow-x-auto w-full min-h-[200px]" ref={tableRef}>
                 <table className="w-full text-left table-auto min-w-[600px]">
                     <thead className="bg-secondary/10">
                         <tr className="font-satoshi text-[12px] md:text-[16px] p-2 md:p-4">
@@ -172,7 +175,7 @@ const AdminTable: React.FC<Props> = ({ data, headings }) => {
                                                     </button>
                                                     <button
                                                         className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
-                                                        onClick={() => handleBanAdmin(admin)}
+                                                        onClick={() => handleDeleteAdmin(admin)}
                                                     >
                                                         Delete Admin
                                                     </button>

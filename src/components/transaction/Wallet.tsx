@@ -17,7 +17,7 @@ const data = [
     },
     {
       userId: "ID#CP-9203",
-      name: "John Doe",
+      name: "Jane Smith",
       cardUser: true,
       cryptoHoldings: 5,
       totalBalance: 1700.00,
@@ -25,7 +25,7 @@ const data = [
     },
     {
       userId: "ID#CP-9203",
-      name: "John Doe",
+      name: "Jack Sparrow",
       cardUser: true,
       cryptoHoldings: 5,
       totalBalance: 1700.00,
@@ -33,7 +33,7 @@ const data = [
     },
     {
       userId: "ID#CP-9203",
-      name: "John Doe",
+      name: "Daniel Bryan",
       cardUser: true,
       cryptoHoldings: 5,
       totalBalance: 1700.00,
@@ -41,7 +41,7 @@ const data = [
     },
     {
       userId: "ID#CP-9203",
-      name: "John Doe",
+      name: "John Wick",
       cardUser: true,
       cryptoHoldings: 5,
       totalBalance: 1700.00,
@@ -49,7 +49,7 @@ const data = [
     },
     {
       userId: "ID#CP-9203",
-      name: "John Doe",
+      name: "Arslan Khan",
       cardUser: true,
       cryptoHoldings: 5,
       totalBalance: 1700.00,
@@ -57,7 +57,7 @@ const data = [
     },
     {
       userId: "ID#CP-9203",
-      name: "John Doe",
+      name: "Lionel Messi",
       cardUser: true,
       cryptoHoldings: 5,
       totalBalance: 1700.00,

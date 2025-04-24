@@ -110,10 +110,10 @@ export default function Navbar() {
         {isMenuOpen && (
           <div className="absolute top-14 right-4 w-40 bg-white rounded-md shadow-lg py-3 px-4 z-10 border border-gray-100 md:hidden">
             <div className="space-y-3 font-[satoshi]">
-              <Link href="/settings" className="block text-sm text-secondary font-bold curspor-pointer">
+              <Link href="/settings" className="block text-sm text-secondary font-bold cursor-pointer">
                 Forgot Password
               </Link>
-              <Link href="/logout" className="block text-sm text-[#DF1D1D] font-bold curpsor-pointer">
+              <Link href="/logout" className="block text-sm text-[#DF1D1D] font-bold cursor-pointer">
                 Logout
               </Link>
             </div>
