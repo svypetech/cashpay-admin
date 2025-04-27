@@ -4,26 +4,26 @@ import { useEffect } from "react"
 import Image from "next/image"
 import { X } from "lucide-react"
 
-interface TradeDetailsPopupProps {
+interface PopupProps {
     showPopup: boolean
     onClose: () => void
     trade: {
-        hash: string
-        tradeId: string
-        sellerId: string
-        buyerId: string
-        amount: number
-        currency: string
-        payment: string
-        status: string
+        hash: string;
+        tradeId: string;
+        sellerId: string;
+        buyerId: string;
+        amount: number;
+        currency: string;
+        reason: string;
+        status: string;
     }
 }
 
-export default function TradeDetailsPopup({
+export default function StuckTradePopup({
     showPopup,
     onClose,
     trade,
-}: TradeDetailsPopupProps) {
+}: PopupProps) {
     // Prevent body scrolling when popup is open
     useEffect(() => {
         if (showPopup) {
@@ -58,7 +58,7 @@ export default function TradeDetailsPopup({
 
                     {/* Body */}
                     <div className="flex flex-col items-center p-6 font-[satoshi]">
-                        <h3 className="text-xl font-semibold text-gray-900 mb-5 mt-10">Transaction Details</h3>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-5 mt-10">Trade Details</h3>
                         {/* Currency Icon */}
                         <div className={`mb-4 flex h-20 w-20 items-center justify-center rounded-full`}>
                             <Image
@@ -91,17 +91,27 @@ export default function TradeDetailsPopup({
                                 <span className="text-sm text-gray-800">{trade.amount}</span>
                             </div>
                             <div className="flex gap-8">
-                                <span className="w-28 text-sm font-bold bg-[#27AAE11A] px-4 py-1">Status</span>
-                                <span className="text-sm text-[#727272]">{trade.status}</span>
+                                <span className="w-28 text-sm font-bold bg-[#27AAE11A] px-4 py-1">Reason</span>
+                                <span className={`text-sm text-red-500 font-bold`}>
+                                    {trade.reason}
+                                </span>
                             </div>
                             <div className="flex gap-8">
-                                <span className="w-28 text-sm font-bold bg-[#27AAE11A] px-4 py-1">Payment</span>
-                                <span className={`text-sm text-red-500 font-bold`}>
-                                    {trade.payment}
-                                </span>
+                                <span className="w-28 text-sm font-bold bg-[#27AAE11A] px-4 py-1">Status</span>
+                                <span className="text-sm text-gray-800">{trade.status}</span>
                             </div>
                         </div>
                     </div>
+
+                    {/* action buttons */}
+                    <div className="flex gap-4 w-full justify-between px-10 md:px-16 pb-8">
+                            <button className=" flex justify-center items-center gap-2 px-5 py-2 text-xs border border-primary rounded-xl text-primary bg-white hover:bg-primary-50">
+                                Release Escrow
+                            </button>
+                            <button className="flex justify-center items-center gap-2 px-5 py-2 rounded-xl font-semibold text-white bg-primary hover:bg-blue-900">
+                                Cancel Transaction
+                            </button>
+                        </div>
                 </div>
             </div>
         </div>

@@ -21,6 +21,7 @@ export default function Footer() {
     { name: "Transactions", href: "/transactions", icon: "/icons/footer-transactions.svg", activeIcon: "/icons/footer-transactions-active.svg" },
     { name: "Support", href: "/support", icon: "/icons/footer-support.svg" , activeIcon: "/icons/footer-support-active.svg" },
     { name: "Monitoring", href: "/monitoring", icon: "/icons/footer-monitoring.svg" , activeIcon: "/icons/footer-monitoring-active.svg" },
+    { name: "Cards", href: "/card-orders", icon: "/icons/footer-cards.svg" , activeIcon: "/icons/footer-cards-active.svg" }
   ]
 
   return (

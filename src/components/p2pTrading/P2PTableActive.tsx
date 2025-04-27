@@ -16,7 +16,6 @@ interface Trade {
     status: string;
 }
 
-
 interface Props {
     headings: string[]
     data: Trade[]
@@ -93,9 +92,9 @@ const P2PTableActive: React.FC<Props> = ({ data, headings }) => {
             <div className="rounded-lg overflow-x-auto w-full min-h-[200px]" ref={tableRef}>
                 <table className="w-full text-left table-auto min-w-[600px]">
                     <thead className="bg-secondary/10">
-                        <tr className="font-satoshi text-[12px] md:text-[16px] p-2 md:p-4">
+                        <tr className="font-satoshi text-[12px] md:text-[16px] py-3 md:py-4 px-2 md:px-4">
                             {headings.map((heading, index) => (
-                                <th key={index} className="p-2 md:p-4 text-left">
+                                <th key={index} className="px-2 md:px-4 py-3 md:py-4 text-left">
                                     {heading}
                                 </th>
                             ))}
@@ -105,27 +104,22 @@ const P2PTableActive: React.FC<Props> = ({ data, headings }) => {
                         {Array.isArray(data) &&
                             data.map((trade, index) => (
                                 <tr key={index} className="border-b text-[12px] md:text-[16px]">
-                                    <td className="p-2 md:p-4 font-satoshi min-w-[100px] break-words">{trade.tradeId}</td>
-                                    <td className="p-2 md:p-4 font-satoshi font-bold text-primary min-w-[120px] break-words">
-                                        {trade.sellerId}
-                                    </td>
-                                    <td className="p-2 md:p-4 font-satoshi min-w-[120px]">
-                                        {trade.buyerId}
-                                    </td>
-                                    <td className="p-2 md:p-4 font-satoshi min-w-[100px]">{trade.amount}</td>
-                                    <td className="p-2 md:p-4 font-satoshi min-w-[100px]">{trade.currency}</td>
-                                    <td className="p-2 md:p-4 font-satoshi min-w-[100px]">
-                                        <span className={`text-[12px] md:text-[16px] px-4 py-2 rounded-xl text-xs md:text-md font-semibold bg-[#71FB5533] text-[#20C000]`}>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[100px] break-words">{trade.tradeId}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{trade.sellerId}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{trade.buyerId}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[100px]">{trade.amount}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[100px]">{trade.currency}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[150px]">
+                                        <span className="text-[12px] md:text-[16px] px-4 py-2 rounded-xl text-xs md:text-base font-semibold bg-[#71FB5533] text-[#20C000]">
                                             {trade.payment}
                                         </span>
                                     </td>
-                                    <td className="p-2 md:p-4 font-satoshi min-w-[100px]">
-                                        <span className={`text-[12px] md:text-[16px] px-4 py-2 rounded-xl text-xs md:text-md font-semibold ${trade.status === "Success" ? "bg-[#71FB5533] text-[#20C000]" : "text-[#727272] bg-[#72727233]"}`}>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[100px]">
+                                        <span className={`text-[12px] md:text-[16px] px-4 py-2 rounded-xl text-xs md:text-base font-semibold ${trade.status === "Success" ? "bg-[#71FB5533] text-[#20C000]" : "text-[#727272] bg-[#72727233]"}`}>
                                             {trade.status}
                                         </span>
                                     </td>
-
-                                    <td className="relative p-2 md:p-4 font-satoshi min-w-[60px] text-center">
+                                    <td className="relative px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[60px] text-center">
                                         <div className="dropdown-container relative">
                                             <button
                                                 className="absolute right-0 md:relative md:right-auto cursor-pointer"
@@ -173,7 +167,7 @@ const P2PTableActive: React.FC<Props> = ({ data, headings }) => {
                 </table>
             </div>
 
-            {/* Wallet Details Sidebar */}
+            {/* Trade Details Popup */}
             {selectedTrade && (
                 <TradeDetailsPopup
                     showPopup={showPopup}

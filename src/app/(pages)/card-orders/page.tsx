@@ -3,54 +3,120 @@
 import { useEffect, useState } from "react";
 import Pagination from "@/src/components/pagination/pagination";
 import Image from "next/image";
-import P2PTableActive from "./P2PTableActive";
-import P2PTableDisputed from "./P2PTableDisputed";
-import { activeData, activeHeadings, disputedData, disputedHeadings, stuckData, stuckHeadings } from "./data";
-import P2PTableStuck from "./P2PTableStuck";
+import CardOrdersTable from "@/src/components/tables/CardOrdersTable";
+
+const headings = ["Order ID", "User ID", "Card Type", "Date", "Delivery Address", "Order Status", "Card Status", "Actions"];
+
+const cardOrdersData = [
+    {
+        orderID: "CD-001",
+        userID: "CP-001",
+        cardType: "Physical",
+        date: "18-03-25",
+        deliveryAddress: "House#100, Anywhere S...",
+        orderStatus: "Dispatched",
+        cardStatus: "Inactive"
+    },
+    {
+        orderID: "CD-001",
+        userID: "CP-001",
+        cardType: "Physical",
+        date: "18-03-25",
+        deliveryAddress: "House#100, Anywhere S...",
+        orderStatus: "Dispatched",
+        cardStatus: "Inactive"
+    },
+    {
+        orderID: "CD-001",
+        userID: "CP-001",
+        cardType: "Physical",
+        date: "18-03-25",
+        deliveryAddress: "House#100, Anywhere S...",
+        orderStatus: "Dispatched",
+        cardStatus: "Inactive"
+    },
+    {
+        orderID: "CD-001",
+        userID: "CP-001",
+        cardType: "Physical",
+        date: "18-03-25",
+        deliveryAddress: "House#100, Anywhere S...",
+        orderStatus: "Dispatched",
+        cardStatus: "Inactive"
+    },
+    {
+        orderID: "CD-001",
+        userID: "CP-001",
+        cardType: "Physical",
+        date: "18-03-25",
+        deliveryAddress: "House#100, Anywhere S...",
+        orderStatus: "Dispatched",
+        cardStatus: "Inactive"
+    },
+    {
+        orderID: "CD-001",
+        userID: "CP-001",
+        cardType: "Virtual",
+        date: "18-03-25",
+        deliveryAddress: "-",
+        orderStatus: "Completed",
+        cardStatus: "Active"
+    },
+    {
+        orderID: "CD-001",
+        userID: "CP-001",
+        cardType: "Virtual",
+        date: "18-03-25",
+        deliveryAddress: "-",
+        orderStatus: "Completed",
+        cardStatus: "Active"
+    }
+]
+
 
 const navigationTabs = [
-    { id: "active", title: "Active" },
-    { id: "disputed", title: "Disputed" },
-    { id: "stuck", title: "Stuck" },
+    { id: "all", title: "All" },
+    { id: "completed", title: "Completed" },
+    { id: "pending", title: "Pending" },
 ];
 
 export default function P2PTrading() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(15); // Example total pages
-    const [activeTab, setActiveTab] = useState("active");
+    const [activeTab, setActiveTab] = useState("all");
     const [searchQuery, setSearchQuery] = useState("");
-    const [data, setData] = useState<(typeof activeData[number] | typeof disputedData[number] | typeof stuckData[number])[]>(activeData);
-    const [filteredData, setFilteredData] = useState<(typeof activeData[number] | typeof disputedData[number] | typeof stuckData[number])[]>(activeData);
-    const [headings, setHeadings] = useState(activeHeadings);
+    const [data, setData] = useState(cardOrdersData);
+    const [filteredData, setFilteredData] = useState(data);
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
     };
 
     // filter based on active tab
     useEffect(() => {
-        if (activeTab === "active") {
-            setFilteredData(activeData);
-            setHeadings(activeHeadings);
-        } else if (activeTab === "disputed") {
-            setFilteredData(disputedData);
-            setHeadings(disputedHeadings);
-        } else if (activeTab === "stuck") {
-            setFilteredData(stuckData);
-            setHeadings(stuckHeadings);
-        }
+        const filtered = data.filter((order) => {
+
+            if (activeTab === "all") {
+                return true; 
+            } else if (activeTab === "completed") {
+                return order.orderStatus === "Completed";
+            } else if (activeTab === "pending") {
+                return order.orderStatus === "Dispatched";
+            }
+        });
+        setFilteredData(filtered);
     }, [activeTab]);
 
     useEffect(() => {
-        const filtered = data.filter((trade) => {
+        const filtered = data.filter((order) => {
             return (
-                trade.tradeId.toLowerCase().includes(searchQuery.toLowerCase())
+                order.orderID.toLowerCase().includes(searchQuery.toLowerCase())
             );
         });
         setFilteredData(filtered);
     }, [searchQuery]);
 
     return (
-        <div>
+        <div className="px-2 md:px-10">
 
             {/* Navigation Tabs */}
             <div className="w-full flex items-center mb-4">
@@ -94,13 +160,8 @@ export default function P2PTrading() {
                 </div>
 
             </div>
-            {/* @ts-ignore */}
-            {activeTab === "active" &&  <P2PTableActive headings={headings} data={filteredData} />}
-            {/* @ts-ignore */}
-            {activeTab === "disputed" &&  <P2PTableDisputed headings={headings} data={filteredData} />}
-            {/* @ts-ignore */}
-            {activeTab === "stuck" &&  <P2PTableStuck headings={headings} data={filteredData} />}
 
+            <CardOrdersTable headings={headings} data={filteredData} />
             <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Image from "next/image"
-import { ChevronDown, ChevronUp, X } from "lucide-react"
+import { X } from "lucide-react"
 
 interface WalletSidebarProps {
     showSidebar: boolean

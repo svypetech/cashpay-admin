@@ -11,7 +11,7 @@ export default function Page() {
   return (
       <main className="container mx-auto px-4 py-6">
         {/* Navigation Tabs */}
-        <h1 className="text-3xl font-[satoshi] font-bold px-10 my-10" >Transaction Frequency</h1>
+        <h1 className="text-3xl font-[satoshi] font-bold md:px-10 my-10" >Transaction Frequency</h1>
 
         {/* Search and Actions */}
         <div className="flex flex-col md:grid md:grid-cols-4 justify-between items-center mb-2 gap-4 md:px-10">

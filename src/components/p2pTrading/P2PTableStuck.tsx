@@ -1,31 +1,38 @@
 "use client"
 
+import Image from "next/image";
 import type React from "react"
-import { useEffect, useRef, useState } from "react"
-import Image from "next/image"
-import AdminSidebar from "@/src/components/admins/AdminSidebar"
+import { useEffect, useState, useRef } from "react"
+import StuckTradePopup from "./StuckTradePopup";
 
-interface Admin {
-    id: string;
-    name: string;
-    email: string;
-    joinedDate: string;
+
+interface Trade {
+    hash: string;
+    tradeId: string;
+    sellerId: string;
+    buyerId: string;
+    amount: number;
+    currency: string;
+    reason: string;
     status: string;
-    role: string;
-    profile?: string;
 }
 
 interface Props {
     headings: string[]
-    data: Admin[]
+    data: Trade[]
 }
 
-const AdminTable: React.FC<Props> = ({ data, headings }) => {
+const P2PTableStuck: React.FC<Props> = ({ data, headings }) => {
     const [activeDropdown, setActiveDropdown] = useState<number | null>(null)
-    const [showAdminSidebar, setShowAdminSidebar] = useState(false)
-    const [selectedAdmin, setSelectedAdmin] = useState<Admin | null>(null)
+    const [showPopup, setShowPopup] = useState(false)
+    const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null)
     const tableRef = useRef<HTMLDivElement>(null)
     const dropdownRefs = useRef<(HTMLDivElement | null)[]>([])
+    const [filteredTrades, setFilteredTrades] = useState<Trade[]>(data)
+
+    useEffect(() => {
+        setFilteredTrades(data)
+    }, [data])
 
     useEffect(() => {
         // Close dropdown when clicking outside
@@ -57,7 +64,7 @@ const AdminTable: React.FC<Props> = ({ data, headings }) => {
                 const dropdownHeight = dropdownRect.height
 
                 // Always open dropdown downwards for the first row or single row
-                if (activeDropdown === 0 || activeDropdown === 1 || activeDropdown === 2 || data.length === 1 || data.length === 2) {
+                if (activeDropdown === 0 || data.length === 1) {
                     dropdownRefs.current[activeDropdown]!.style.top = "100%"
                     dropdownRefs.current[activeDropdown]!.style.bottom = "auto"
                     dropdownRefs.current[activeDropdown]!.style.marginTop = "8px"
@@ -85,31 +92,10 @@ const AdminTable: React.FC<Props> = ({ data, headings }) => {
         setActiveDropdown(activeDropdown === index ? null : index)
     }
 
-    const handleViewAdmin = (admin: Admin) => {
-        setSelectedAdmin(admin)
-        setShowAdminSidebar(true)
-        setActiveDropdown(null)
-    }
-
-    const handleSuspendAdmin = (admin: Admin) => {
-        console.log("Suspend admin:", admin)
-        setActiveDropdown(null)
-    }
-
-    const handleBanAdmin = (admin: Admin) => {
-        console.log("Ban admin:", admin)
-        setActiveDropdown(null)
-    }
-
-    const handleDeleteAdmin = (admin: Admin) => {
-        console.log("Delete admin:", admin)
-        setActiveDropdown(null)
-    }
-
     return (
         <div className="flex-1 rounded-lg w-full py-5">
             {/* Table */}
-            <div className="rounded-lg overflow-x-auto w-full min-h-[200px]" ref={tableRef}>
+            <div className="rounded-lg overflow-x-auto w-full min-h-[150px]" ref={tableRef}>
                 <table className="w-full text-left table-auto min-w-[600px]">
                     <thead className="bg-secondary/10">
                         <tr className="font-satoshi text-[12px] md:text-[16px] py-3 md:py-4 px-2 md:px-4">
@@ -121,17 +107,24 @@ const AdminTable: React.FC<Props> = ({ data, headings }) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {Array.isArray(data) &&
-                            data.map((admin, index) => (
+                        {Array.isArray(filteredTrades) &&
+                            filteredTrades.map((trade, index) => (
                                 <tr key={index} className="border-b text-[12px] md:text-[16px]">
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[100px] break-words">{admin.id}</td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi font-bold text-primary min-w-[120px] break-words">
-                                        {admin.name}
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{trade.tradeId}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{trade.sellerId}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{trade.buyerId}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{trade.amount}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[100px]">{trade.currency}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[200px]">
+                                        <span className="text-[12px] md:text-[16px] px-4 py-2 rounded-xl text-xs md:text-base font-semibold bg-[#EFE40833] text-[#B0A700]">
+                                            {trade.reason}
+                                        </span>
                                     </td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[150px] break-words">{admin.email}</td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px]">{admin.joinedDate}</td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px]">{admin.status}</td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px]">{admin.role}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[100px]">
+                                        <span className="text-[12px] md:text-[16px] px-4 py-2 rounded-xl text-xs md:text-base font-semibold bg-[#72727233] text-[#727272]">
+                                            {trade.status}
+                                        </span>
+                                    </td>
                                     <td className="relative px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[60px] text-center">
                                         <div className="dropdown-container relative">
                                             <button
@@ -149,35 +142,32 @@ const AdminTable: React.FC<Props> = ({ data, headings }) => {
 
                                             {activeDropdown === index && (
                                                 <div
-                                                    className="absolute z-10 right-0 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-100"
+                                                    className="absolute z-10 right-0 w-56 bg-white rounded-md shadow-lg py-1 border border-gray-100"
                                                     ref={(el) => {
                                                         dropdownRefs.current[index] = el;
                                                     }}
                                                 >
                                                     <button
                                                         className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
-                                                        onClick={() => handleViewAdmin(admin)}
+                                                        onClick={() => {
+                                                            setSelectedTrade(trade)
+                                                            setShowPopup(true)
+                                                        }}
                                                     >
-                                                        View
+                                                        {"View Details"}
                                                     </button>
                                                     <div className="border-t border-gray-100"></div>
                                                     <button
-                                                        className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
-                                                        onClick={() => handleSuspendAdmin(admin)}
+                                                        className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
+                                                        onClick={() => {}}
                                                     >
-                                                        Suspend Admin
+                                                        Release Escrow
                                                     </button>
                                                     <button
-                                                        className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
-                                                        onClick={() => handleBanAdmin(admin)}
+                                                        className="block w-full text-left px-4 py-2 text-sm text-[#DF1D1D] font-bold cursor-pointer hover:bg-gray-50"
+                                                        onClick={() => {}}
                                                     >
-                                                        Ban Admin
-                                                    </button>
-                                                    <button
-                                                        className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
-                                                        onClick={() => handleDeleteAdmin(admin)}
-                                                    >
-                                                        Delete Admin
+                                                        Cancel Transaction
                                                     </button>
                                                 </div>
                                             )}
@@ -189,24 +179,16 @@ const AdminTable: React.FC<Props> = ({ data, headings }) => {
                 </table>
             </div>
 
-            {/* Admin Profile Sidebar */}
-            {selectedAdmin && (
-                <AdminSidebar
-                    showSidebar={showAdminSidebar}
-                    onClose={() => setShowAdminSidebar(false)}
-                    admin={{
-                        id: selectedAdmin.id,
-                        profileImage: selectedAdmin.profile || "/images/user-avatar.png",
-                        name: selectedAdmin.name,
-                        email: selectedAdmin.email,
-                        joiningDate: selectedAdmin.joinedDate,
-                        status: selectedAdmin.status,
-                        role: selectedAdmin.role,
-                    }}
+            {/* Trade Details Popup */}
+            {selectedTrade && (
+                <StuckTradePopup
+                    showPopup={showPopup}
+                    onClose={() => setShowPopup(false)}
+                    trade={selectedTrade}
                 />
             )}
         </div>
     )
 }
 
-export default AdminTable
+export default P2PTableStuck;

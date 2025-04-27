@@ -79,20 +79,20 @@ body {
   font-family: 'Montserrat', sans-serif;
 }
 
-.user-profile-sidebar-enter {
+.sidebar-enter {
   transform: translateX(100%);
 }
 
-.user-profile-sidebar-enter-active {
+.sidebar-enter-active {
   transform: translateX(0);
   transition: transform 300ms ease-in-out;
 }
 
-.user-profile-sidebar-exit {
+.sidebar-exit {
   transform: translateX(0);
 }
 
-.user-profile-sidebar-exit-active {
+.sidebar-exit-active {
   transform: translateX(100%);
   transition: transform 300ms ease-in-out;
 }
