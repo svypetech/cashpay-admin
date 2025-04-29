@@ -3,89 +3,67 @@
 import { useEffect, useState } from "react";
 import Pagination from "@/src/components/pagination/pagination";
 import Image from "next/image";
-import CardOrdersTable from "@/src/components/tables/CardOrdersTable";
+import CustomerSupportTable from "@/src/components/tables/CustomerSupportTable";
 
-const headings = ["Order ID", "User ID", "Card Type", "Date", "Delivery Address", "Order Status", "Card Status", "Actions"];
+const headings = ["TicketID", "UserID", "AgentID", "RequestDate", "Subject", "Status", "Actions"];
 
-const cardOrdersData = [
+const customerSupportTable = [
     {
-        orderID: "CD-001",
-        userID: "CP-001",
-        cardType: "Physical",
-        date: "18-03-25",
-        deliveryAddress: "House#100, Anywhere S...",
-        orderStatus: "Dispatched",
-        cardStatus: "Inactive"
+      TicketID: "ID#TC-1001",
+      UserID: "ID#CP-9000",
+      AgentID: "-",
+      RequestDate: "2025-03-10 14:30",
+      Subject: "Unable to access my account",
+      Status: "Unassigned"
     },
     {
-        orderID: "CD-001",
-        userID: "CP-001",
-        cardType: "Physical",
-        date: "18-03-25",
-        deliveryAddress: "House#100, Anywhere S...",
-        orderStatus: "Dispatched",
-        cardStatus: "Inactive"
+      TicketID: "ID#TC-1001",
+      UserID: "ID#CP-9000",
+      AgentID: "-",
+      RequestDate: "2025-03-10 14:30",
+      Subject: "Unable to access my account",
+      Status: "Unassigned"
     },
     {
-        orderID: "CD-001",
-        userID: "CP-001",
-        cardType: "Physical",
-        date: "18-03-25",
-        deliveryAddress: "House#100, Anywhere S...",
-        orderStatus: "Dispatched",
-        cardStatus: "Inactive"
+      TicketID: "ID#TC-1001",
+      UserID: "ID#CP-9000",
+      AgentID: "-",
+      RequestDate: "2025-03-10 14:30",
+      Subject: "Unable to access my account",
+      Status: "Assigned"
     },
     {
-        orderID: "CD-001",
-        userID: "CP-001",
-        cardType: "Physical",
-        date: "18-03-25",
-        deliveryAddress: "House#100, Anywhere S...",
-        orderStatus: "Dispatched",
-        cardStatus: "Inactive"
+      TicketID: "ID#TC-1001",
+      UserID: "ID#CP-9000",
+      AgentID: "-",
+      RequestDate: "2025-03-10 14:30",
+      Subject: "Unable to access my account",
+      Status: "Unassigned"
     },
     {
-        orderID: "CD-001",
-        userID: "CP-001",
-        cardType: "Physical",
-        date: "18-03-25",
-        deliveryAddress: "House#100, Anywhere S...",
-        orderStatus: "Dispatched",
-        cardStatus: "Inactive"
-    },
-    {
-        orderID: "CD-001",
-        userID: "CP-001",
-        cardType: "Virtual",
-        date: "18-03-25",
-        deliveryAddress: "Apartment#1200, Electra, UAE",
-        orderStatus: "Completed",
-        cardStatus: "Active"
-    },
-    {
-        orderID: "CD-001",
-        userID: "CP-001",
-        cardType: "Virtual",
-        date: "18-03-25",
-        deliveryAddress: "Apartment#1200, Electra, UAE",
-        orderStatus: "Completed",
-        cardStatus: "Active"
+      TicketID: "ID#TC-1001",
+      UserID: "ID#CP-9000",
+      AgentID: "-",
+      RequestDate: "2025-03-10 14:30",
+      Subject: "Unable to access my account",
+      Status: "Unassigned"
     }
-]
+  ]
+  
 
 
 const navigationTabs = [
     { id: "all", title: "All" },
-    { id: "completed", title: "Completed" },
-    { id: "pending", title: "Pending" },
+    { id: "unassigned", title: "Unassigned" },
+    { id: "assigned", title: "Assigned" }
 ];
 
-export default function P2PTrading() {
+export default function SupportRequests() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(15); // Example total pages
     const [activeTab, setActiveTab] = useState("all");
     const [searchQuery, setSearchQuery] = useState("");
-    const [data, setData] = useState(cardOrdersData);
+    const [data, setData] = useState(customerSupportTable);
     const [filteredData, setFilteredData] = useState(data);
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
@@ -93,30 +71,30 @@ export default function P2PTrading() {
 
     // filter based on active tab
     useEffect(() => {
-        const filtered = data.filter((order) => {
+        const filtered = data.filter((request) => {
 
             if (activeTab === "all") {
                 return true; 
-            } else if (activeTab === "completed") {
-                return order.orderStatus === "Completed";
-            } else if (activeTab === "pending") {
-                return order.orderStatus === "Dispatched";
+            } else if (activeTab === "unassigned") {
+                return request.Status === "Unassigned";
+            } else if (activeTab === "assigned") {
+                return request.Status === "Assigned";
             }
         });
         setFilteredData(filtered);
     }, [activeTab]);
 
     useEffect(() => {
-        const filtered = data.filter((order) => {
+        const filtered = data.filter((request) => {
             return (
-                order.orderID.toLowerCase().includes(searchQuery.toLowerCase())
+                request.TicketID.toLowerCase().includes(searchQuery.toLowerCase())
             );
         });
         setFilteredData(filtered);
     }, [searchQuery]);
 
     return (
-        <div className="px-2 md:px-10">
+        <div className="px-2">
 
             {/* Navigation Tabs */}
             <div className="w-full flex items-center mb-4">
@@ -161,7 +139,7 @@ export default function P2PTrading() {
 
             </div>
 
-            <CardOrdersTable headings={headings} data={filteredData} />
+            <CustomerSupportTable headings={headings} data={filteredData} />
             <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}

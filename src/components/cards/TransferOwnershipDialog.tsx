@@ -19,7 +19,6 @@ const users = [
         email: 'janesmith@gmail.com',
         type: 'Financial Manager',
     },
-    // ... other users (updated IDs to be unique for clarity)
     {
         id: 'ID#CP-9205',
         name: 'John Doe',

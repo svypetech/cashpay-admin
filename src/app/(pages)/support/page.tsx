@@ -2,15 +2,14 @@
 
 import type React from "react"
 import { useState } from "react"
-import Transactions from "@/src/components/transaction/Transactions"
 import Wallet from "@/src/components/transaction/Wallet"
-import P2PTrading from "@/src/components/p2pTrading/P2PTrading"
+import SupportRequests from "@/src/components/CustomerSupport/SupportRequest"
+import Chats from "@/src/components/CustomerSupport/Chats"
 
 // tabs are transactions, wallet, p2p trading store in object array
 const tabs = [
-  { id: "transactions", title: "Transactions" },
-  { id: "wallet", title: "Wallet" },
-  { id: "p2p trading", title: "P2P Trading" },
+  { id: "supportRequests", title: "Support Requests" },
+  { id: "chats", title: "Chats" }
 ]
 
 
@@ -39,17 +38,14 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {activeTab === "transactions" && (
-            <Transactions />
+          {activeTab === "supportRequests" && (
+            <SupportRequests />
           )}
 
-          {activeTab === "wallet" && (
-            <Wallet />
-          )}
+            {activeTab === "chats" && (
+                <Chats />
+            )}
 
-          {activeTab === "p2p trading" && (
-            <P2PTrading />
-          )}
         </div>
       </div>
     </main>

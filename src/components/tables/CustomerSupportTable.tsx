@@ -3,37 +3,34 @@
 import Image from "next/image";
 import type React from "react"
 import { useEffect, useState, useRef } from "react"
-import OrderDetailsSidebar from "../cards/OrderDetailsSidebar";
+import AssignRequestTable from "../CustomerSupport/AssignRequestTable";
+import AssignRequestDialog from "../CustomerSupport/AssignRequestDialog";
 
 
-interface CardOrder {
-    orderID: string;
-    userID: string;
-    cardType: string;
-    date: string;
-    deliveryAddress: string;
-    orderStatus: string;
-    cardStatus: string;
-    userEmail?: string; // Added userEmail as an optional property
-    userName?: string; // Added userName as an optional property
-    userJoiningDate?: string; // Added userJoinedDate as an optional property
+interface Request {
+    TicketID: string;
+    UserID: string;
+    AgentID: string;
+    RequestDate: string;
+    Subject: string;
+    Status: string;
 }
 
 interface Props {
     headings: string[]
-    data: CardOrder[]
+    data: Request[]
 }
 
-const CardOrdersTable: React.FC<Props> = ({ data, headings }) => {
+const CustomerSupportTable: React.FC<Props> = ({ data, headings }) => {
     const [activeDropdown, setActiveDropdown] = useState<number | null>(null)
-    const [showSidebar, setShowSidebar] = useState(false)
-    const [selectedOrder, setSelectedOrder] = useState<CardOrder | null>(null)
+    const [showPopup, setShowPopup] = useState(false)
+    const [selectedRequest, setSelectedRequest] = useState<Request | null>(null)
     const tableRef = useRef<HTMLDivElement>(null)
     const dropdownRefs = useRef<(HTMLDivElement | null)[]>([])
-    const [filteredOrders, setFilteredOrders] = useState<CardOrder[]>(data)
+    const [customerRequests, setCustomerRequests] = useState<Request[]>(data)
 
     useEffect(() => {
-        setFilteredOrders(data)
+        setCustomerRequests(data)
     }, [data])
 
     useEffect(() => {
@@ -109,25 +106,19 @@ const CardOrdersTable: React.FC<Props> = ({ data, headings }) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {Array.isArray(filteredOrders) &&
-                            filteredOrders.map((order, index) => (
+                        {Array.isArray(customerRequests) &&
+                            customerRequests.map((request, index) => (
                                 <tr key={index} className="border-b text-[12px] md:text-[16px]">
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{order.orderID}</td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{order.userID}</td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{order.cardType}</td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{order.date}</td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[200px] break-words text-center">{order.deliveryAddress}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{request.TicketID}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{request.UserID}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{request.AgentID}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{request.RequestDate}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[200px] break-words text-center">{request.Subject}</td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[100px]">
-                                        <span className={`text-[12px] md:text-[16px] px-4 py-2 rounded-xl text-xs md:text-base font-semibold ${order.orderStatus === "Dispatched" ? "bg-[#EFE40833] text-[#B0A700]" : order.orderStatus === "Completed" ? "bg-[#71FB5533] text-[#20C000]" : "bg-[#72727233] text-[#727272]"}`}>
-                                            {order.orderStatus}
+                                        <span className={`text-[12px] md:text-[16px] px-4 py-2 rounded-xl text-xs md:text-base font-semibold ${request.Status === "Unassigned" ? "bg-[#EFE40833] text-[#B0A700]" : "bg-[#71FB5533] text-[#20C000]"}`}>
+                                            {request.Status}
                                         </span>
                                     </td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[100px]">
-                                        <span className={`text-[12px] md:text-[16px] px-4 py-2 rounded-xl text-xs md:text-base font-semibold ${order.cardStatus === "Inactive" ? "bg-[#72727233] text-[#727272]" : "bg-[#71FB5533] text-[#20C000]"}`}>
-                                            {order.cardStatus}
-                                        </span>
-                                    </td>
-
                                     <td className="relative px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[60px] text-center">
                                         <div className="dropdown-container relative">
                                             <button
@@ -153,26 +144,13 @@ const CardOrdersTable: React.FC<Props> = ({ data, headings }) => {
                                                     <button
                                                         className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
                                                         onClick={() => {
-                                                            order = { ...order, userID: "User123", userEmail: "johndoe@gmail.com", userName: "John Doe", userJoiningDate: "2023-01-01" } // Example data
-                                                            setSelectedOrder(order)
-                                                            setShowSidebar(true)
+                                                            setSelectedRequest(request)
+                                                            setShowPopup(true)
                                                         }}
                                                     >
                                                         {"View Details"}
                                                     </button>
                                                     <div className="border-t border-gray-100"></div>
-                                                    {/* <button
-                                                        className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
-                                                        onClick={() => {}}
-                                                    >
-                                                        Release Escrow
-                                                    </button>
-                                                    <button
-                                                        className="block w-full text-left px-4 py-2 text-sm text-[#DF1D1D] font-bold cursor-pointer hover:bg-gray-50"
-                                                        onClick={() => {}}
-                                                    >
-                                                        Cancel Transaction
-                                                    </button> */}
                                                 </div>
                                             )}
                                         </div>
@@ -183,16 +161,21 @@ const CardOrdersTable: React.FC<Props> = ({ data, headings }) => {
                 </table>
             </div>
 
-            {/* order Details Popup */}
-            {showSidebar && (
-                <OrderDetailsSidebar // @ts-ignore
-                    order={selectedOrder}
-                    showSidebar={showSidebar}
-                    onClose={() => setShowSidebar(false)}
+            {/* Assign Request Popup */}
+            {showPopup && (
+                <AssignRequestDialog
+                    isOpen={showPopup}
+                    onCancel={() => setShowPopup(false)}
+                    handleAssign={(agentID) => {
+                        setCustomerRequests((prevRequests) =>
+                            prevRequests.map((req) => (req.UserID === agentID ? { ...req, Status: "Assigned" } : req))
+                        )
+                        
+                    }}
                 />
             )}
         </div>
     )
 }
 
-export default CardOrdersTable;
+export default CustomerSupportTable;

@@ -3,89 +3,72 @@
 import { useEffect, useState } from "react";
 import Pagination from "@/src/components/pagination/pagination";
 import Image from "next/image";
-import CardOrdersTable from "@/src/components/tables/CardOrdersTable";
+import ChatsTable from "./ChatsTable";
 
-const headings = ["Order ID", "User ID", "Card Type", "Date", "Delivery Address", "Order Status", "Card Status", "Actions"];
+const headings = ["ChatID", "UserID", "AgentID", "IssueType", "Status", "LastUpdated", "Chat"]
 
-const cardOrdersData = [
+const chatsData = [
     {
-        orderID: "CD-001",
-        userID: "CP-001",
-        cardType: "Physical",
-        date: "18-03-25",
-        deliveryAddress: "House#100, Anywhere S...",
-        orderStatus: "Dispatched",
-        cardStatus: "Inactive"
+      ChatID: "CH-1001",
+      UserID: "CP-9000",
+      AgentID: "CP-9004",
+      IssueType: "Crypto Release Issue",
+      Status: "Resolved",
+      LastUpdated: "2025-03-10 14:30",
+      Chat: "chat.cashpay/89342998d..."
     },
     {
-        orderID: "CD-001",
-        userID: "CP-001",
-        cardType: "Physical",
-        date: "18-03-25",
-        deliveryAddress: "House#100, Anywhere S...",
-        orderStatus: "Dispatched",
-        cardStatus: "Inactive"
+      ChatID: "CH-1001",
+      UserID: "CP-9000",
+      AgentID: "CP-9004",
+      IssueType: "Crypto Release Issue",
+      Status: "Resolved",
+      LastUpdated: "2025-03-10 14:30",
+      Chat: "chat.cashpay/89342998d..."
     },
     {
-        orderID: "CD-001",
-        userID: "CP-001",
-        cardType: "Physical",
-        date: "18-03-25",
-        deliveryAddress: "House#100, Anywhere S...",
-        orderStatus: "Dispatched",
-        cardStatus: "Inactive"
+      ChatID: "CH-1001",
+      UserID: "CP-9000",
+      AgentID: "CP-9004",
+      IssueType: "Crypto Release Issue",
+      Status: "Resolved",
+      LastUpdated: "2025-03-10 14:30",
+      Chat: "chat.cashpay/89342998d..."
     },
     {
-        orderID: "CD-001",
-        userID: "CP-001",
-        cardType: "Physical",
-        date: "18-03-25",
-        deliveryAddress: "House#100, Anywhere S...",
-        orderStatus: "Dispatched",
-        cardStatus: "Inactive"
+      ChatID: "CH-1001",
+      UserID: "CP-9000",
+      AgentID: "CP-9004",
+      IssueType: "Crypto Release Issue",
+      Status: "Resolved",
+      LastUpdated: "2025-03-10 14:30",
+      Chat: "chat.cashpay/89342998d..."
     },
     {
-        orderID: "CD-001",
-        userID: "CP-001",
-        cardType: "Physical",
-        date: "18-03-25",
-        deliveryAddress: "House#100, Anywhere S...",
-        orderStatus: "Dispatched",
-        cardStatus: "Inactive"
-    },
-    {
-        orderID: "CD-001",
-        userID: "CP-001",
-        cardType: "Virtual",
-        date: "18-03-25",
-        deliveryAddress: "Apartment#1200, Electra, UAE",
-        orderStatus: "Completed",
-        cardStatus: "Active"
-    },
-    {
-        orderID: "CD-001",
-        userID: "CP-001",
-        cardType: "Virtual",
-        date: "18-03-25",
-        deliveryAddress: "Apartment#1200, Electra, UAE",
-        orderStatus: "Completed",
-        cardStatus: "Active"
+      ChatID: "CH-1001",
+      UserID: "CP-9000",
+      AgentID: "CP-9004",
+      IssueType: "Crypto Release Issue",
+      Status: "Resolved",
+      LastUpdated: "2025-03-10 14:30",
+      Chat: "chat.cashpay/89342998d..."
     }
-]
-
+  ]
+  
 
 const navigationTabs = [
     { id: "all", title: "All" },
-    { id: "completed", title: "Completed" },
+    { id: "ongoing", title: "Ongoing" },
     { id: "pending", title: "Pending" },
+    { id: "resolved", title: "Resolved" },
 ];
 
-export default function P2PTrading() {
+export default function Chats() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(15); // Example total pages
     const [activeTab, setActiveTab] = useState("all");
     const [searchQuery, setSearchQuery] = useState("");
-    const [data, setData] = useState(cardOrdersData);
+    const [data, setData] = useState(chatsData);
     const [filteredData, setFilteredData] = useState(data);
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
@@ -93,30 +76,32 @@ export default function P2PTrading() {
 
     // filter based on active tab
     useEffect(() => {
-        const filtered = data.filter((order) => {
+        const filtered = data.filter((request) => {
 
             if (activeTab === "all") {
                 return true; 
-            } else if (activeTab === "completed") {
-                return order.orderStatus === "Completed";
             } else if (activeTab === "pending") {
-                return order.orderStatus === "Dispatched";
+                return request.Status === "Pending";
+            } else if (activeTab === "ongoing") {
+                return request.Status === "Ongoing";
+            } else if (activeTab === "resolved") {
+                return request.Status === "Resolved";
             }
         });
         setFilteredData(filtered);
     }, [activeTab]);
 
     useEffect(() => {
-        const filtered = data.filter((order) => {
+        const filtered = data.filter((chat) => {
             return (
-                order.orderID.toLowerCase().includes(searchQuery.toLowerCase())
+                chat.ChatID.toLowerCase().includes(searchQuery.toLowerCase())
             );
         });
         setFilteredData(filtered);
     }, [searchQuery]);
 
     return (
-        <div className="px-2 md:px-10">
+        <div className="px-2">
 
             {/* Navigation Tabs */}
             <div className="w-full flex items-center mb-4">
@@ -154,14 +139,14 @@ export default function P2PTrading() {
 
                 <div className={`flex items-center gap-4 w-full font-[satoshi] md:col-span-1`}>
                     <button className="w-full flex justify-between items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50">
-                        <span>Sort by</span>
-                        <Image src="/icons/dropdownIcon.svg" alt="Arrow right" width={24} height={24} />
+                        <span>Filter</span>
+                        <Image src="/icons/calendar.svg" alt="Arrow right" width={24} height={24} />
                     </button>
                 </div>
 
             </div>
 
-            <CardOrdersTable headings={headings} data={filteredData} />
+            <ChatsTable headings={headings} data={filteredData} />
             <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}

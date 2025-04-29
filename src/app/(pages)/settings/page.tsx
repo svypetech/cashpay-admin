@@ -7,7 +7,6 @@ import Image from "next/image"
 import { ChevronRight } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import ConfirmDialog from "@/src/components/cards/ConfirmDialog"
 import TransferOwnershipDialog from "@/src/components/cards/TransferOwnershipDialog"
 
 export default function SettingsPage() {

@@ -154,7 +154,6 @@ export default function OrderDetailsSidebar({
                         </div>
 
                         <div className="flex flex-col justify-center" >
-                            
                             <div className="mb-4 flex w-full items-center justify-between gap-10">
                                 <h4 className="text-2xl font-semibold">{order.cardType === "Virtual" ? "Virtual Card" : "Physical Card"}</h4>
                                 {order.cardStatus === "Active" && (
@@ -163,13 +162,24 @@ export default function OrderDetailsSidebar({
                                 {order.cardStatus === "Inactive" && (
                                     <span className="rounded-xl font-bold px-4 py-2 text-[#727272] bg-[#72727233]">Pending</span>
                                 )}
-                                
                             </div>
+                            <div className="mb-4 flex w-full items-center justify-between gap-10">
+                                <p className="font-semibold text-sm">Payment Method</p>
+                                <p className="text-sm text-gray-800">{"Cashpay Wallet"}</p>
+                            </div>
+                            <div className="mb-4 flex w-full items-center justify-between gap-10">
+                                <p className="font-semibold text-sm">Request Date</p>
+                                <p className="text-sm text-gray-800">{order.date}</p>
+                            </div>
+                            {order.orderStatus != "Dispatched" && <div className="mb-4 flex w-full items-center justify-between gap-10">
+                                <p className="font-semibold text-sm">Delivery Address</p>
+                                <p className="text-sm text-gray-800">{order.deliveryAddress}</p>
+                            </div>}
                         </div>
 
                         {/* Action Buttons */}
                         <div className="flex justify-between mt-10 w-full gap-4 px-5">
-                            <button className="w-full rounded-lg px-6 py-2 bg-primary text-white hover:bg-blue-700 cursor-pointer font-semibold">Activate Card</button>
+                            <button className="w-full rounded-lg px-6 py-2 bg-primary text-white hover:bg-blue-900 cursor-pointer font-semibold">{order.cardType === "Inactive" ? "Activate Card" : "Dispatch Card"}</button>
                         </div>
                     </div>
                 </div>
