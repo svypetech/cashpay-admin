@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { X } from "lucide-react";
 import CustomDropdown from "./Dropdown";
 import NotificationOption from "./NotificationOption";
-
-
 
 // Types
 interface AddRuleModalProps {
@@ -42,30 +41,6 @@ const RECIPIENTS = [
 ];
 const DURATIONS = ["Immediate", "1 min", "5 mins", "10 mins", "30 mins"];
 const NOTIFICATION_OPTIONS = ["SMS", "E-mail", "In-App"];
-
-// Subcomponents
-const CloseButton = ({ onClick }: { onClick: () => void }) => (
-  <button onClick={onClick} className="text-gray-500 hover:text-gray-700">
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <line x1="18" y1="6" x2="6" y2="18"></line>
-      <line x1="6" y1="6" x2="18" y2="18"></line>
-    </svg>
-  </button>
-);
-
-
-
-// ... (Types, Constants, and Subcomponents remain unchanged)
 
 export default function AddRuleModal({
   isOpen,
@@ -108,7 +83,7 @@ export default function AddRuleModal({
   const [showDurationDropdown, setShowDurationDropdown] = useState(false);
   const [showRecipientDropdown, setShowRecipientDropdown] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const [shouldSlideIn, setShouldSlideIn] = useState(false); // New state for animation
+  const [shouldSlideIn, setShouldSlideIn] = useState(false);
 
   const toggleNotification = (notification: string) => {
     setNotifications((prev) => ({
@@ -150,21 +125,32 @@ export default function AddRuleModal({
     setValue("recipient", recipient);
   }, [recipient, setValue]);
 
-  // Handle visibility and animation
+  // Handle visibility and animation states
   useEffect(() => {
     if (isOpen) {
-      setIsVisible(true); // Render the modal
+      setIsVisible(true) // Render the sidebar
+      // Use a small timeout to ensure DOM is ready before starting animation
       setTimeout(() => {
-        setShouldSlideIn(true); // Trigger slide-in animation after mount
-      }, 0);
+        setShouldSlideIn(true) // Trigger slide-in animation
+      }, 0)
+      document.body.style.overflow = "hidden" // Prevent scrolling
     } else {
-      setShouldSlideIn(false); // Start slide-out animation
+      setShouldSlideIn(false) // Start slide-out animation
+      // Wait for animation to complete before removing from DOM
       const timer = setTimeout(() => {
-        setIsVisible(false); // Remove from DOM after animation
-      }, 300); // Match duration-300
-      return () => clearTimeout(timer);
+        setIsVisible(false)
+        document.body.style.overflow = "auto" // Re-enable scrolling
+      }, 300) // Match transition duration
+      return () => clearTimeout(timer)
     }
-  }, [isOpen]);
+  }, [isOpen])
+
+  // Clean up overflow style when component unmounts
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = "auto"
+    }
+  }, [])
 
   useEffect(() => {
     if (isOpen) {
@@ -209,34 +195,33 @@ export default function AddRuleModal({
   if (!isVisible && !isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex">
-      {/* Backdrop */}
-      <div
-        className={`fixed inset-0 bg-black transition-opacity duration-300 ease-in-out ${
-          isOpen ? "opacity-30" : "opacity-0"
-        }`}
-        onClick={onClose}
+    <div className="fixed inset-0 z-50 overflow-hidden">
+      {/* Overlay with fade animation */}
+      <div 
+        className={`absolute inset-0 bg-black/50 transition-opacity duration-300 ${shouldSlideIn ? 'opacity-100' : 'opacity-0'}`} 
+        onClick={onClose} 
+        aria-hidden="true" 
       />
-
-      {/* Modal Container */}
-      <div
-        className={`fixed inset-y-0 right-0 w-full sm:w-[520px] bg-white shadow-xl transform transition-transform duration-300 ease-in-out flex flex-col ${
-          shouldSlideIn ? "translate-x-0" : "translate-x-full"
-        }`}
+      
+      {/* Modal/Sidebar with slide animation */}
+      <div 
+        className={`absolute inset-y-0 right-0 w-full max-w-md bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${shouldSlideIn ? 'translate-x-0' : 'translate-x-full'}`}
       >
-        <div className="flex flex-col h-full p-6">
-          {/* Header with title */}
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">
+        <div className="flex h-full flex-col overflow-y-auto">
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-4 mt-5">
+            <h2 className="text-2xl font-semibold">
               {isEditMode ? "Edit Alert Rule" : "Create a new Alert Rule"}
             </h2>
-            <CloseButton onClick={onClose} />
+            <button onClick={onClose} className="rounded-full cursor-pointer p-1 hover:bg-gray-100" aria-label="Close sidebar">
+              <X className="h-6 w-6" />
+            </button>
           </div>
 
           {/* Form */}
           <form
             onSubmit={handleSubmit(onFormSubmit)}
-            className="flex flex-col gap-4 flex-grow overflow-y-auto"
+            className="flex flex-col gap-4 px-6 py-4"
           >
             {/* Rule Name Input */}
             <div>
@@ -334,8 +319,8 @@ export default function AddRuleModal({
               )}
             </div>
 
-            {/* Submit Button */}
-            <div className="mt-auto pt-4">
+            {/* Submit Button - Fixed at bottom */}
+            <div className="mt-auto pt-10 sticky bottom-0 bg-white py-4">
               <button
                 type="submit"
                 disabled={Object.values(notifications).every((v) => !v)}

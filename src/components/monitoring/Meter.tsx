@@ -13,7 +13,6 @@ ChartJS.register({
       // Update only the unfilled arc (assumed to be data index 1)
       meta.data.forEach((arc, index) => {
           if (index === 1) {
-              const globalOuter = arc.outerRadius;
               // Set thickness = 0.05 * globalOuter, centered at 0.875 * globalOuter:
               
               // arc.innerRadius = globalOuter * 0.85;

@@ -8,6 +8,7 @@ import { ChevronRight } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import TransferOwnershipDialog from "@/src/components/cards/TransferOwnershipDialog"
+import DeleteAccountDialog from "@/src/components/cards/DeleteAccount"
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -184,7 +185,7 @@ export default function SettingsPage() {
 
           <div className="border-t border-gray-100"></div>
 
-          <Link href={"#"} className="w-full cursor-pointer border-b border-gray-300 flex items-center justify-between py-3 px-1 text-left hover:bg-gray-50 rounded-md group">
+          <button onClick={() => setShowDeleteDialog(true)} className="w-full cursor-pointer border-b border-gray-300 flex items-center justify-between py-3 px-1 text-left hover:bg-gray-50 rounded-md group">
             <div className="flex items-center">
               <div className="mr-3 text-red-500">
                 <Image src="/icons/trash-can.svg" alt="Delete" width={20} height={20} className="h-5 w-5" />
@@ -192,7 +193,7 @@ export default function SettingsPage() {
               <span className="font-medium text-red-500">Delete Account</span>
             </div>
             <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-gray-600" />
-          </Link>
+          </button>
         </div>
       </div>
 
@@ -204,6 +205,20 @@ export default function SettingsPage() {
         isLoading={isSubmitting}
       />
 
+      {/* Delete Account Dialog */}
+      <DeleteAccountDialog  
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        title="Confirm Account Deletion"
+        message="Are you sure you want to delete your account?"
+        warningText="*This operation cannot be undone."
+        cancelText="Cancel"
+        confirmText="Confirm Deletion"
+        onConfirm={() => {
+          console.log("Account deleted")
+          setShowDeleteDialog(false)
+        }}
+      />
     </div>
   )
 }

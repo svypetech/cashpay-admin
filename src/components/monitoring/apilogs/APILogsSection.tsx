@@ -44,7 +44,7 @@ export default function MainSection() {
   return (
     <div className="flex flex-col gap-4 relative">
       
-      <div className="flex flex-col gap-3 sm:flex-row sm:gap-10 mt-[20px]">
+      <div className="flex flex-col gap-3 sm:flex-row sm:gap-5 mt-[20px]">
         <Search className="sm:w-[50%] w-full" onSearch={handleSearch} />
         <Sort className="sm:w-[25%] w-full" title="Filter" />
         <Sort className="sm:w-[25%] w-full" title="Filter" />

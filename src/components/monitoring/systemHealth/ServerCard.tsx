@@ -70,9 +70,7 @@ const ServerCard: React.FC<ServerCardProps> = ({
   // Info card with location
   const LocationCard = () => (
     <div className="bg-white rounded-lg border-[1px] border-black/10 p-4 sm:p-6 flex items-center h-[104px]">
-      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-50 flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
-        <Image src="/icons/location.svg" alt="Location" width={20} height={20} />
-      </div>
+      <Image src="/icons/location.svg" alt="Trades" width={56} height={56} className="mr-3" />
       <div>
         <p className="text-xs sm:text-sm text-gray-500">Hosted Location</p>
         <p className="text-lg sm:text-xl font-semibold text-blue-900">{hostedLocation}</p>
@@ -83,9 +81,7 @@ const ServerCard: React.FC<ServerCardProps> = ({
   // Info card with active duration
   const DurationCard = () => (
     <div className="bg-white rounded-lg border-[1px] border-black/10 p-4 sm:p-6 flex items-center h-[104px]">
-      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-50 flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
-        <Image src="/icons/clock.svg" alt="Clock" width={20} height={20} />
-      </div>
+      <Image src="/icons/clock.svg" alt="Trades" width={56} height={56} className="mr-3" />
       <div>
         <p className="text-xs sm:text-sm text-gray-500">Active Duration</p>
         <p className="text-lg sm:text-xl font-semibold text-blue-900">{activeDuration} hours</p>
@@ -96,9 +92,7 @@ const ServerCard: React.FC<ServerCardProps> = ({
   // Info card with p2p trades
   const TradesCard = () => (
     <div className="bg-white rounded-lg border-[1px] border-black/10 p-4 sm:p-6 flex items-center h-[104px]">
-      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-50 flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
-        <Image src="/icons/group.svg" alt="Trades" width={20} height={20} />
-      </div>
+        <Image src="/icons/group.svg" alt="Trades" width={56} height={56} className="mr-3" />
       <div>
         <p className="text-xs sm:text-sm text-gray-500">P2P Trades</p>
         <p className="text-lg sm:text-xl font-semibold text-blue-900">{p2pTrades.toLocaleString('en-US')}</p>
