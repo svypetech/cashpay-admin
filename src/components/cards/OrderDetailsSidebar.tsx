@@ -3,10 +3,9 @@
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import { X } from "lucide-react"
-import VerificationSteps from "../cards/VerficationStatus"
 import VerificationAccordion from "../cards/VerificationForm"
 
-interface UserProfileSidebarProps {
+interface SidebarProps {
     showSidebar: boolean
     onClose: () => void
     order: {
@@ -27,13 +26,15 @@ export default function OrderDetailsSidebar({
     showSidebar,
     onClose,
     order,
-}: UserProfileSidebarProps) {
+}: SidebarProps) {
     const [steps, setSteps] = useState([
         { title: "Personal Details", completed: true },
         { title: "Documents", completed: false },
         { title: "Selfie", completed: false },
     ])
     const [verificationStarted, setVerificationStarted] = useState(false)
+    const [isVisible, setIsVisible] = useState(false)
+    const [shouldSlideIn, setShouldSlideIn] = useState(false)
 
     const handleStartVerification = () => {
         console.log("Starting verification process")
@@ -44,26 +45,49 @@ export default function OrderDetailsSidebar({
         console.log("Verifying user")
     }
 
-    // Prevent body scrolling when sidebar is open
+    // Handle animation and visibility states
     useEffect(() => {
         if (showSidebar) {
-            document.body.style.overflow = "hidden"
+            setIsVisible(true) // Render the sidebar
+            // Use a small timeout to ensure DOM is ready before starting animation
+            setTimeout(() => {
+                setShouldSlideIn(true) // Trigger slide-in animation
+            }, 0)
+            document.body.style.overflow = "hidden" // Prevent scrolling
         } else {
-            document.body.style.overflow = "auto"
-        }
-
-        return () => {
-            document.body.style.overflow = "auto"
+            setShouldSlideIn(false) // Start slide-out animation
+            // Wait for animation to complete before removing from DOM
+            const timer = setTimeout(() => {
+                setIsVisible(false)
+                document.body.style.overflow = "auto" // Re-enable scrolling
+            }, 300) // Match transition duration
+            return () => clearTimeout(timer)
         }
     }, [showSidebar])
 
-    if (!showSidebar) return null
+    // Clean up overflow style when component unmounts
+    useEffect(() => {
+        return () => {
+            document.body.style.overflow = "auto"
+        }
+    }, [])
+
+    if (!isVisible && !showSidebar) return null
 
     if (verificationStarted) {
         return (
             <div className="fixed inset-0 z-50 overflow-hidden">
-                <div className="absolute inset-0 bg-black/50 transition-opacity" onClick={onClose} aria-hidden="true" />
-                <div className="absolute inset-y-0 right-0 w-full max-w-md bg-white shadow-xl">
+                {/* Overlay with fade animation */}
+                <div 
+                    className={`absolute inset-0 bg-black/50 transition-opacity duration-300 ${shouldSlideIn ? 'opacity-100' : 'opacity-0'}`} 
+                    onClick={onClose} 
+                    aria-hidden="true" 
+                />
+                
+                {/* Sidebar with slide animation */}
+                <div 
+                    className={`absolute inset-y-0 right-0 w-full max-w-md bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${shouldSlideIn ? 'translate-x-0' : 'translate-x-full'}`}
+                >
                     <div className="flex flex-col h-full justify-between pb-5">
                         <div className="flex h-full flex-col overflow-y-auto">
                             <div className="flex items-center justify-between px-6 py-4 mt-5">
@@ -81,7 +105,6 @@ export default function OrderDetailsSidebar({
                                     <span className="rounded-xl font-bold px-4 py-2 text-[#727272] bg-[#72727233]">Pending</span>
                                 </div>
                                 <VerificationAccordion />
-
                             </div>
                         </div>
                         <div className="px-16">
@@ -100,11 +123,17 @@ export default function OrderDetailsSidebar({
 
     return (
         <div className="fixed inset-0 z-50 overflow-hidden">
-            {/* Overlay */}
-            <div className="absolute inset-0 bg-black/50 transition-opacity" onClick={onClose} aria-hidden="true" />
+            {/* Overlay with fade animation */}
+            <div 
+                className={`absolute inset-0 bg-black/50 transition-opacity duration-300 ${shouldSlideIn ? 'opacity-100' : 'opacity-0'}`} 
+                onClick={onClose} 
+                aria-hidden="true" 
+            />
 
-            {/* Sidebar */}
-            <div className="absolute inset-y-0 right-0 w-full max-w-md bg-white shadow-xl">
+            {/* Sidebar with slide animation */}
+            <div 
+                className={`absolute inset-y-0 right-0 w-full max-w-md bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${shouldSlideIn ? 'translate-x-0' : 'translate-x-full'}`}
+            >
                 <div className="flex h-full flex-col overflow-y-auto">
                     {/* Header */}
                     <div className="flex items-center justify-between px-6 py-4 mt-5">

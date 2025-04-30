@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { X, Check } from "lucide-react"
 
 interface Permission {
@@ -26,6 +26,8 @@ export default function CreateRoleSidebar({ isOpen, onClose, onSubmit, isLoading
         { id: "access_api_logs", label: "Access API Logs", checked: false },
         { id: "access_system_settings", label: "Access System Settings", checked: false },
     ])
+    const [isVisible, setIsVisible] = useState(false)
+    const [shouldSlideIn, setShouldSlideIn] = useState(false)
 
     const handlePermissionChange = (id: string) => {
         setPermissions(
@@ -44,15 +46,48 @@ export default function CreateRoleSidebar({ isOpen, onClose, onSubmit, isLoading
         })
     }
 
-    if (!isOpen) return null
+    // Handle animation and visibility states
+    useEffect(() => {
+        if (isOpen) {
+            setIsVisible(true) // Render the sidebar
+            // Use a small timeout to ensure DOM is ready before starting animation
+            setTimeout(() => {
+                setShouldSlideIn(true) // Trigger slide-in animation
+            }, 0)
+            document.body.style.overflow = "hidden" // Prevent scrolling
+        } else {
+            setShouldSlideIn(false) // Start slide-out animation
+            // Wait for animation to complete before removing from DOM
+            const timer = setTimeout(() => {
+                setIsVisible(false)
+                document.body.style.overflow = "auto" // Re-enable scrolling
+            }, 300) // Match transition duration
+            return () => clearTimeout(timer)
+        }
+    }, [isOpen])
+
+    // Clean up overflow style when component unmounts
+    useEffect(() => {
+        return () => {
+            document.body.style.overflow = "auto"
+        }
+    }, [])
+
+    if (!isVisible && !isOpen) return null
 
     return (
         <div className="fixed inset-0 z-50 overflow-hidden font-[satoshi]">
-            {/* Overlay */}
-            <div className="absolute inset-0 bg-black/50 transition-opacity" onClick={onClose} aria-hidden="true" />
+            {/* Overlay with fade animation */}
+            <div 
+                className={`absolute inset-0 bg-black/50 transition-opacity duration-300 ${shouldSlideIn ? 'opacity-100' : 'opacity-0'}`} 
+                onClick={onClose} 
+                aria-hidden="true" 
+            />
 
-            {/* Sidebar */}
-            <div className="absolute inset-y-0 right-0 w-full max-w-md bg-white">
+            {/* Sidebar with slide animation */}
+            <div 
+                className={`absolute inset-y-0 right-0 w-full max-w-md bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${shouldSlideIn ? 'translate-x-0' : 'translate-x-full'}`}
+            >
                 <div className="flex h-full flex-col overflow-y-auto">
                     {/* Header */}
                     <div className="flex items-center justify-between px-8 py-4 mt-5">

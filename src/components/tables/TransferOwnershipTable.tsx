@@ -27,15 +27,15 @@ const TransferOwnershipTable: React.FC<Props> = ({ headings, users, handleSelect
     }, [darkMode]);
 
     return (
-        <div className={`flex-1 rounded-lg w-full sm:px-10 py-5`}>
-            <div className="rounded-lg overflow-hidden w-full">
-                <table className="w-full text-left table-fixed min-w-30">
+        <div className="flex-1 rounded-lg w-full sm:px-10 py-5">
+            <div className="rounded-lg overflow-auto w-full min-h-[200px]">
+                <table className="w-full text-left table-auto min-w-[700px]">
                     <thead className="bg-secondary/10">
-                        <tr className="font-satoshi text-[12px] sm:text-[16px] p-2 sm:p-4">
+                        <tr className="font-satoshi text-[12px] sm:text-[16px] py-3 sm:py-4 px-2 sm:px-4">
                             {headings.map((heading, index) => (
                                 <th
                                     key={index}
-                                    className="p-2 sm:p-4 text-left w-1/5 sm:w-2/6"
+                                    className={`px-2 sm:px-4 py-3 sm:py-4 text-left ${index === 0 ? 'w-[100px]' : index === 1 ? 'w-[100px]' : index === 2 ? 'w-[150px]' : index === 3 ? 'w-[100px]' : 'w-[80px]'}`}
                                 >
                                     {heading}
                                 </th>
@@ -47,35 +47,35 @@ const TransferOwnershipTable: React.FC<Props> = ({ headings, users, handleSelect
                             users.map((user, index) => (
                                 <tr
                                     onClick={() => console.log('User clicked', user.id)}
-                                    key={user.id} // Use unique user.id instead of index
+                                    key={user.id}
                                     className="border-b text-[12px] sm:text-[16px] cursor-pointer"
                                 >
                                     <td
-                                        className={`p-2 sm:p-4 font-satoshi w-2/6 min-w-0 break-words`}
+                                        className="px-2 sm:px-4 py-3 sm:py-4 font-satoshi min-w-[100px] whitespace-nowrap"
                                     >
                                         {user.id}
                                     </td>
                                     <td
-                                        className={`p-2 sm:p-4 font-satoshi font-bold text-primary w-3/6 min-w-0 break-words`}
+                                        className="px-2 sm:px-4 py-3 sm:py-4 font-satoshi font-bold text-primary min-w-[100px] whitespace-nowrap"
                                     >
                                         {user.name}
                                     </td>
                                     <td
-                                        className="p-2 sm:p-4 font-satoshi w-2/6 min-w-0 break-words"
+                                        className="px-2 sm:px-4 py-3 sm:py-4 font-satoshi min-w-[100px] whitespace-nowrap"
                                     >
                                         {user.email}
                                     </td>
                                     <td
-                                        className="p-2 sm:p-4 font-satoshi w-1/6 min-w-0"
+                                        className="px-2 sm:px-4 py-3 sm:py-4 font-satoshi min-w-[100px] whitespace-nowrap"
                                     >
                                         {user.type}
                                     </td>
                                     <td
-                                        className="p-2 sm:p-4 font-satoshi w-1/6 min-w-0 relative"
+                                        className="px-2 sm:px-4 py-3 sm:py-4 font-satoshi min-w-[80px] whitespace-nowrap text-center"
                                     >
                                         <button
                                             onClick={() => handleSelectUser(user.id)}
-                                            className="absolute right-0 md:relative md:right-auto cursor-pointer"
+                                            className="cursor-pointer"
                                         >
                                             <Image
                                                 src={
@@ -86,7 +86,7 @@ const TransferOwnershipTable: React.FC<Props> = ({ headings, users, handleSelect
                                                 alt={selectedUserId === user.id ? 'Selected' : 'Options'}
                                                 width={24}
                                                 height={24}
-                                                className="w-4 h-4"
+                                                className="w-4 h-4 mx-auto"
                                             />
                                         </button>
                                     </td>

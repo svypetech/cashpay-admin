@@ -118,7 +118,7 @@ const ChatsTable: React.FC<Props> = ({ data, headings }) => {
                                         </span>
                                     </td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] whitespace-nowrap">{chat.LastUpdated}</td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] whitespace-nowrap underline text-primary">{chat.Chat}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] whitespace-nowrap underline text-primary cursor-pointer">{chat.Chat}</td>
                                 </tr>
                             ))}
                     </tbody>

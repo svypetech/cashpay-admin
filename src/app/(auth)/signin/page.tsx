@@ -51,9 +51,9 @@ export default function SignIn() {
   }
 
   return (
-    <div className="flex min-h-screen md:min-h-[1024px] flex-col md:flex-row justify-center">
+    <div className="flex min-h-screen flex-col md:flex-row justify-center">
       {/* Left side - Login form */}
-      <div className="flex w-full md:w-1/2 flex-col justify-center px-6 py-6 md:py-12 lg:px-8 xl:px-24">
+      <div className="flex w-full md:w-1/2 flex-col justify-center items-center px-6 py-6 lg:px-8 xl:px-24">
         <div className="sm:mx-auto sm:w-full sm:max-w-[400px]">
           <h1 className="mt-6 text-3xl font-bold leading-9 tracking-tight text-gray-900">
             Welcome back, <span className="text-secondary">Admin!</span>
@@ -108,7 +108,7 @@ export default function SignIn() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="flex w-full justify-center rounded-md bg-primary px-3 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-900  disabled:opacity-70"
+                className="flex w-full justify-center cursor-pointer rounded-md bg-primary px-3 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-900  disabled:opacity-70"
               >
                 {isLoading ? (
                   <>
@@ -124,12 +124,12 @@ export default function SignIn() {
       </div>
 
       {/* Right side - Branding */}
-      <div className="hidden xl:flex md:w-1/2 flex-col items-center justify-center bg-[#001233] text-white relative overflow-hidden">
+      <div className="hidden xl:flex md:w-1/2 flex-col items-center justify-center bg-[#001233] text-white relative">
         <Image
           src={"/icons/signinIcon.svg"}
           alt="Background"
           fill
-          className="xl:object-cover object-center"
+          className="object-cover object-center h-full w-full"
           priority
         />
       </div>

@@ -157,7 +157,7 @@ export default function TransferOwnershipDialog({
                     <p className="text-red-500 text-sm mt-2">{error}</p>
                 )}
 
-                <div className="flex justify-between mt-auto w-full gap-4 px-5">
+                <div className="flex justify-between mt-2 w-full gap-4 px-5">
                     <button
                         onClick={onCancel}
                         className="rounded-md w-[50%] border px-6 py-2 border-[#DF1D1D] text-[#DF1D1D] hover:bg-red-50 cursor-pointer font-bold"

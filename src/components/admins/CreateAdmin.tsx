@@ -54,7 +54,7 @@ export default function AddAdminPopup({ isOpen, onClose, onSubmit, isLoading = f
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 bg-opacity-50 font-[satoshi]">
-            <div className="w-full max-w-[600px] rounded-xl bg-white pt-10 pb-20 px-20 max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+            <div className="sm:min-w-[600px] rounded-xl bg-white pt-10 pb-20 px-5 sm:px-20 max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
                 {/* Header */}
                 <div className="mb-6 flex items-center justify-between">
                     <div></div>
@@ -70,7 +70,7 @@ export default function AddAdminPopup({ isOpen, onClose, onSubmit, isLoading = f
                 <div className={`space-y-4 ${isRoleDropdownOpen ? 'pb-40' : ''}`}>
                     <h2 className="text-2xl text-center font-semibold text-gray-900 my-5">Add an Admin</h2>
                     {/* Email Input */}
-                    <div className="relative">
+                    <div className="relative min-w-[320px]">
                         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                             <Image src={'/icons/email-icon.svg'} alt="Email Icon" height={20} width={20} />
                         </div>

@@ -17,7 +17,7 @@ export default function UsersTableDashboard() {
           <ExternalLink className="h-3 w-3 ml-1" />
         </a>
       </div>
-      <div className="rounded-lg overflow-hidden w-full">
+      <div className="rounded-lg overflow-auto w-full">
         <table className="w-full text-left table-fixed min-w-30">
           <thead className="bg-secondary/10">
             <tr className="font-satoshi text-[12px] sm:text-[16px] p-2 sm:p-4">
@@ -44,11 +44,11 @@ export default function UsersTableDashboard() {
                   </td>
                   <td className="p-2 sm:p-4 font-satoshi w-1/6 min-w-0 relative">
                     {user.status === "Verified" ? (
-                      <span className="absolute left-0 top-[30%] md:relative md:top-auto  bg-[#71FB5533] text-[#20C000] px-4 py-2 rounded-xl text-xs md:text-md font-semibold">
+                      <span className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] whitespace-nowrap bg-[#71FB5533] text-[#20C000] rounded-xl font-semibold">
                         Verified
                       </span>
                     ) : (
-                      <span className="text-[#727272] bg-[#72727233] px-4 py-2 rounded-xl font-semibold">
+                      <span className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] whitespace-nowrap text-[#727272] bg-[#72727233] rounded-xl font-semibold">
                         Pending
                       </span>
                     )}

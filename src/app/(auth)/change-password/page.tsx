@@ -4,7 +4,6 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { X } from "lucide-react"
 import ConfirmDialog from "@/src/components/cards/ConfirmDialog"
 
 // Define the form schema with Zod
@@ -70,8 +69,8 @@ export default function ChangePasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 font-[satoshi]">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-sm p-8">
+    <div className="min-h-screen flex items-center justify-center bg-white px-4 font-[satoshi]">
+      <div className="w-full max-w-md bg-white rounded-lg p-8">
         <h1 className="text-2xl font-bold text-center mb-2">Change Password</h1>
         <p className="text-gray-600 text-center mb-6">Please enter your new Password to reset your password.</p>
 

@@ -10,7 +10,7 @@ export default function UsersPage() {
   return (
     <main className="container mx-auto px-4 py-6">
 
-      <div className="w-full flex justify-center items-center mb-4">
+      <div className="w-full flex justify-center items-center mb-4 font-satoshi">
         <div className="flex gap-2 bg-secondary2 px-4 py-2 rounded-xl" >
           <button className={`cursor-pointer px-6 py-2 rounded-xl ${activePage === "users" ? "bg-primary text-white" : ""}`}
             onClick={() => setActivePage("users")}>

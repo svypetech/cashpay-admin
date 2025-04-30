@@ -40,7 +40,7 @@ export default function TransactionsTableDashboard() {
       </div>
 
       {/* Desktop Table - Hidden on mobile */}
-      <div className="hidden md:block rounded-lg overflow-hidden w-full">
+      <div className="block rounded-lg overflow-auto w-full">
         <table className="w-full text-left">
           <thead className="bg-secondary/10">
             <tr className="text-sm">
@@ -63,78 +63,26 @@ export default function TransactionsTableDashboard() {
                       <span className="text-sm font-semibold text-primary">{transaction.id}</span>
                     </div>
                   </td>
-                  <td className="p-3 text-sm">
-                    <span className="text-gray-600">
+                  <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] whitespace-nowrap">
                       {transaction.from} → {transaction.to}
-                    </span>
                   </td>
                   <td className="p-3">
                     {transaction.status === "Success" ? (
-                      <span className="inline-flex text-xs bg-[#71FB5533] text-[#20C000] px-3 py-1 rounded-full font-medium">
+                      <span className="text-left bg-[#71FB5533] text-[#20C000] px-4 py-2 rounded-xl text-xs md:text-base font-semibold whitespace-nowrap">
                         {transaction.status}
                       </span>
                     ) : (
-                      <span className="inline-flex text-xs text-[#727272] bg-[#72727233] px-3 py-1 rounded-full font-medium">
+                      <span className="text-left text-[#727272] bg-[#72727233] px-4 py-2 rounded-xl text-xs md:text-base font-semibold whitespace-nowrap">
                         {transaction.status}
                       </span>
                     )}
                   </td>
-                  <td className="p-3 text-sm text-gray-600">{transaction.block}</td>
-                  <td className="p-3 text-sm text-gray-600">{transaction.date}</td>
+                  <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] whitespace-nowrap font-medium">{transaction.block}</td>
+                  <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] whitespace-nowrap">{transaction.date}</td>
                 </tr>
               ))}
           </tbody>
         </table>
-      </div>
-
-      {/* Mobile Card View - Shown only on mobile */}
-      <div className="md:hidden space-y-3">
-        {Array.isArray(data) &&
-          data.map((transaction, index) => (
-            <div key={index} className="border rounded-lg p-3 hover:bg-gray-50">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center">
-                  <div className="rounded-full p-1.5 bg-secondary2 mr-2">
-                    <ArrowLeftRight className="h-3.5 w-3.5 text-primary" />
-                  </div>
-                  <span className="text-sm font-semibold text-primary">{transaction.id}</span>
-                </div>
-                <ChevronRight className="h-4 w-4 text-gray-400" />
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div>
-                  <p className="text-gray-500 mb-0.5">From → To</p>
-                  <p className="text-gray-700">
-                    {transaction.from} → {transaction.to}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-gray-500 mb-0.5">Status</p>
-                  {transaction.status === "Success" ? (
-                    <span className="inline-flex text-xs bg-[#71FB5533] text-[#20C000] px-2 py-0.5 rounded-full">
-                      {transaction.status}
-                    </span>
-                  ) : (
-                    <span className="inline-flex text-xs text-[#727272] bg-[#72727233] px-2 py-0.5 rounded-full">
-                      {transaction.status}
-                    </span>
-                  )}
-                </div>
-
-                <div>
-                  <p className="text-gray-500 mb-0.5">Block#</p>
-                  <p className="text-gray-700">{transaction.block}</p>
-                </div>
-
-                <div>
-                  <p className="text-gray-500 mb-0.5">Date</p>
-                  <p className="text-gray-700">{transaction.date}</p>
-                </div>
-              </div>
-            </div>
-          ))}
       </div>
     </div>
   )
