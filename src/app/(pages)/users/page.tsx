@@ -1,25 +1,44 @@
 "use client"
 
 import Admins from "@/src/components/admins/Admins";
+import MerchantsComponent from "@/src/components/merchants/MerchantsComponent";
 import AllUsers from "@/src/components/users/AllUsers";
 import { useState } from "react";
+
+const tabs = [
+  { id: "users", title: "Users" },
+  { id: "admins", title: "Admins" },
+  { id: "merchants", title: "Merchants" }
+]
 
 export default function UsersPage() {
   const [activePage, setActivePage] = useState("users")
 
   return (
-    <main className="container mx-auto px-4 py-6">
+    <main className="px-6 sm:px-10 py-6">
 
       <div className="w-full flex justify-center items-center mb-4 font-satoshi">
         <div className="flex gap-2 bg-secondary2 px-4 py-2 rounded-xl" >
-          <button className={`cursor-pointer px-6 py-2 rounded-xl ${activePage === "users" ? "bg-primary text-white" : ""}`}
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActivePage(tab.id)}
+              className={`cursor-pointer px-6 py-2 rounded-xl ${activePage === tab.id
+                ? "bg-primary text-white"
+                : ""
+                }`}
+            >
+              {tab.title}
+            </button>
+          ))}
+          {/* <button className={`cursor-pointer px-6 py-2 rounded-xl ${activePage === "users" ? "bg-primary text-white" : ""}`}
             onClick={() => setActivePage("users")}>
             Users
           </button>
           <button className={`cursor-pointer px-6 py-2 rounded-xl ${activePage === "admins" ? "bg-primary text-white" : ""}`}
             onClick={() => setActivePage("admins")}>
             Admins
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -31,6 +50,11 @@ export default function UsersPage() {
       {/* Admins Table */}
       {activePage === "admins" && (
         <Admins />
+      )}
+
+      {/* Merchants Table */}
+      {activePage === "merchants" && (
+        <MerchantsComponent />
       )}
 
     </main>

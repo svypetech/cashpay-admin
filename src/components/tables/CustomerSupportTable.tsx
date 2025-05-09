@@ -122,7 +122,7 @@ const CustomerSupportTable: React.FC<Props> = ({ data, headings }) => {
                                     <td className="relative px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[60px] text-center">
                                         <div className="dropdown-container relative">
                                             <button
-                                                className="absolute right-0 md:relative md:right-auto cursor-pointer"
+                                                className="z-70 absolute right-0 md:relative md:right-auto cursor-pointer"
                                                 onClick={() => toggleDropdown(index)}
                                             >
                                                 <Image
@@ -136,7 +136,7 @@ const CustomerSupportTable: React.FC<Props> = ({ data, headings }) => {
 
                                             {activeDropdown === index && (
                                                 <div
-                                                    className="absolute z-10 right-0 w-56 bg-white rounded-md shadow-lg"
+                                                    className="absolute z-80 right-0 w-56 bg-white rounded-md shadow-lg"
                                                     ref={(el) => {
                                                         dropdownRefs.current[index] = el;
                                                     }}

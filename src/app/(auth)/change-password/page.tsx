@@ -5,6 +5,8 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import ConfirmDialog from "@/src/components/cards/ConfirmDialog"
+import axios from "axios"
+import { useRouter } from "next/navigation"
 
 // Define the form schema with Zod
 const passwordSchema = z
@@ -24,6 +26,7 @@ type PasswordFormValues = z.infer<typeof passwordSchema>
 
 export default function ChangePasswordPage() {
   const [showConfirmation, setShowConfirmation] = useState(false)
+  const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const {
@@ -47,18 +50,26 @@ export default function ChangePasswordPage() {
   const handleConfirmChange = async () => {
     setIsSubmitting(true)
     try {
-      // Get the form values
       const formData = getValues()
 
-      // Simulate API call to change password
-      console.log("Changing password with:", formData)
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const response = await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/changePassword`, {
+        oldpassword: formData.currentPassword,
+        newPassword: formData.newPassword,
+      }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
 
-      // Show success message or redirect
-      alert("Password changed successfully!")
-
-      // Reset form or redirect
-      window.location.href = "/settings"
+      if (response.data.success) {
+        alert("Password changed successfully!")
+        router.push("/settings")
+      }
+      else {
+        alert("Failed to change password. Please try again.")
+      }
+      
+      // window.location.href = "/settings"
     } catch (error) {
       console.error("Error changing password:", error)
       alert("Failed to change password. Please try again.")

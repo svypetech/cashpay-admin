@@ -97,7 +97,10 @@ export default function Navbar() {
                   <Link onClick={() => setIsMenuOpen(!isMenuOpen)} href="/settings" className="block text-sm text-secondary font-bold curpsor-pointer">
                     Forgot Password
                   </Link>
-                  <Link href="/signin" className="block text-sm text-[#DF1D1D] font-bold curpsor-pointer">
+                  <Link onClick={() => {
+                    setIsMenuOpen(!isMenuOpen)
+                    localStorage.removeItem("userInfo")
+                    }} href="/signin" className="block text-sm text-[#DF1D1D] font-bold curpsor-pointer">
                     Logout
                   </Link>
                 </div>
@@ -113,7 +116,10 @@ export default function Navbar() {
               <Link onClick={() => setIsMenuOpen(!isMenuOpen)} href="/settings" className="block text-sm text-secondary font-bold cursor-pointer">
                 Forgot Password
               </Link>
-              <Link href="/logout" className="block text-sm text-[#DF1D1D] font-bold cursor-pointer">
+              <Link onClick={() => {
+                setIsMenuOpen(!isMenuOpen)
+                localStorage.removeItem("userInfo")
+              }} href="/signin" className="block text-sm text-[#DF1D1D] font-bold cursor-pointer">
                 Logout
               </Link>
             </div>

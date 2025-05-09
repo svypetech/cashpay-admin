@@ -9,7 +9,7 @@ import { getStatusColors } from "@/src/components/utils/GetBlockColor"
 interface User {
   ticketId: string
   userId: string
-  
+
   issueType: string
   priority: string
   status: string
@@ -25,13 +25,13 @@ interface Props {
 }
 
 const UserTable: React.FC<Props> = ({ data, headings, onChatClick }) => {
-   
-  
+
+
   const [activeDropdown, setActiveDropdown] = useState<number | null>(null)
-  
+
   const tableRef = useRef<HTMLDivElement>(null)
   const dropdownRefs = useRef<(HTMLDivElement | null)[]>([])
-  
+
   useEffect(() => {
     // Close dropdown when clicking outside
     const handleClickOutside = (event: MouseEvent) => {
@@ -94,7 +94,7 @@ const UserTable: React.FC<Props> = ({ data, headings, onChatClick }) => {
         return ""
     }
   }
- 
+
 
   return (
     <div className="flex-1 rounded-lg w-full py-5">
@@ -102,34 +102,34 @@ const UserTable: React.FC<Props> = ({ data, headings, onChatClick }) => {
       <div className="rounded-lg overflow-x-auto w-full" ref={tableRef}>
         <table className="w-full text-left table-auto min-w-[800px]">
           <thead className="bg-[#27AAE11A]">
-            
-          <tr className="bg-secondary/10 text-[12px] sm:text-[16px]">
-  <th className="py-4 px-6 text-left font-[700] text-[16px] w-[12%] whitespace-nowrap">
-    {headings[0]}
-  </th>
-  <th className="py-4 px-6 text-left font-[700] text-[16px] w-[10%]">
-    {headings[1]}
-  </th>
-  <th className="py-4 px-6 text-left font-[700] text-[16px] w-[17%]">
-    {headings[2]}
-  </th>
-  <th className="py-4 px-6 text-left font-[700] text-[16px] w-[15%]">
-    {headings[3]}
-  </th>
-  <th className="py-4 px-6 text-left font-[700] text-[16px] w-[15%]">
-    {headings[4]}
-  </th>
-  <th className="py-4 px-6 text-left font-[700] text-[16px] w-[18%] whitespace-nowrap">
-    {headings[5]}
-  </th>
-  <th className="py-4 px-6 text-left font-[700] text-[16px] w-[12%]">
-    {headings[6]}
-  </th>
-  <th className="py-4 px-6 text-left font-[700] text-[16px] w-[9%]">
-    {headings[7]}
-  </th>
-</tr>
-            
+
+            <tr className="bg-secondary/10 text-[12px] sm:text-[16px]">
+              <th className="py-4 px-6 text-left font-[700] text-[16px] w-[12%] whitespace-nowrap">
+                {headings[0]}
+              </th>
+              <th className="py-4 px-6 text-left font-[700] text-[16px] w-[10%]">
+                {headings[1]}
+              </th>
+              <th className="py-4 px-6 text-left font-[700] text-[16px] w-[17%]">
+                {headings[2]}
+              </th>
+              <th className="py-4 px-6 text-left font-[700] text-[16px] w-[15%]">
+                {headings[3]}
+              </th>
+              <th className="py-4 px-6 text-left font-[700] text-[16px] w-[15%]">
+                {headings[4]}
+              </th>
+              <th className="py-4 px-6 text-left font-[700] text-[16px] w-[18%] whitespace-nowrap">
+                {headings[5]}
+              </th>
+              <th className="py-4 px-6 text-left font-[700] text-[16px] w-[12%]">
+                {headings[6]}
+              </th>
+              <th className="py-4 px-6 text-left font-[700] text-[16px] w-[9%]">
+                {headings[7]}
+              </th>
+            </tr>
+
           </thead>
           <tbody>
             {Array.isArray(data) &&
@@ -148,7 +148,7 @@ const UserTable: React.FC<Props> = ({ data, headings, onChatClick }) => {
                   </td>
                   <td className="py-6 px-6 min-w-[120px] break-words font-[400] text-[#333333] whitespace-nowrap">{supportRequest.dateCreated}</td>
                   <td className="py-6 px-6 min-w-[100px] break-words">
-                    <button 
+                    <button
                       className="underline text-primary font-[400] cursor-pointer"
                       onClick={() => onChatClick && onChatClick(supportRequest)}
                     >
@@ -158,7 +158,7 @@ const UserTable: React.FC<Props> = ({ data, headings, onChatClick }) => {
                   <td className="py-6 px-6 min-w-[60px] text-center">
                     <div className="dropdown-container relative">
                       <button
-                        className="absolute right-0 md:relative md:right-auto cursor-pointer"
+                        className="z-70 absolute right-0 md:relative md:right-auto cursor-pointer"
                         onClick={() => toggleDropdown(index)}
                       >
                         {/* Replace with three horizontal dots */}
@@ -167,7 +167,7 @@ const UserTable: React.FC<Props> = ({ data, headings, onChatClick }) => {
 
                       {activeDropdown === index && (
                         <div
-                          className="absolute z-10 right-0 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-100"
+                          className="absolute z-80 right-0 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-100"
                           ref={(el) => {
                             dropdownRefs.current[index] = el;
                           }}
@@ -182,9 +182,10 @@ const UserTable: React.FC<Props> = ({ data, headings, onChatClick }) => {
           </tbody>
         </table>
       </div>
-      </div>
-  )}
-  export default UserTable
+    </div>
+  )
+}
+export default UserTable
 
 
 

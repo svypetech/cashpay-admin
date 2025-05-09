@@ -4,69 +4,79 @@ import { useEffect, useState } from "react";
 import Pagination from "../pagination/pagination";
 import Image from "next/image";
 import TransactionTable from "../tables/TransactionsTable";
+import useFetchTransactions from "@/src/hooks/Transactions/transactionsManagement";
+import Transaction from "@/src/Types/TransactionManagement";
+import SkeletonTableLoader from "../skeletons/SkeletonTableLoader";
 
 const headings = ["ID", "From", "To", "Status", "Block#", "Date"];
 const data = [
-    {
-      hash: "0x3a33151e6d5de02...c666",
-      id: "0x9afca6...f684",
-      from: "0xae0fb...2834f",
-      to: "0xEb851...7B02C",
-      status: "Completed",
-      block: "#8422531",
-      date: "2h ago"
-    },
-    {
-      hash: "0x3a33151e6d5de02...c666",
-      id: "0x9afca6...f685",
-      from: "0xae0fb...2834f",
-      to: "0xEb851...7B02C",
-      status: "Pending",
-      block: "#8422531",
-      date: "2h ago"
-    },
-    {
-      hash: "0x3a33151e6d5de02...c666",
-      id: "0x9afca6...f686",
-      from: "0xae0fb...2834f",
-      to: "0xEb851...7B02C",
-      status: "Completed",
-      block: "#8422531",
-      date: "2h ago"
-    },
-    {
-      hash: "0x3a33151e6d5de02...c666",
-      id: "0x9afca6...f687",
-      from: "0xae0fb...2834f",
-      to: "0xEb851...7B02C",
-      status: "Failed",
-      block: "#8422531",
-      date: "2h ago"
-    },
-    {
-      hash: "0x3a33151e6d5de02...c666",
-      id: "0x9afca6...f688",
-      from: "0xae0fb...2834f",
-      to: "0xEb851...7B02C",
-      status: "Completed",
-      block: "#8422531",
-      date: "2h ago"
-    }
-  ];  
+  {
+    hash: "0x3a33151e6d5de02...c666",
+    id: "0x9afca6...f684",
+    from: "0xae0fb...2834f",
+    to: "0xEb851...7B02C",
+    status: "Completed",
+    block: "#8422531",
+    date: "2h ago"
+  },
+  {
+    hash: "0x3a33151e6d5de02...c666",
+    id: "0x9afca6...f685",
+    from: "0xae0fb...2834f",
+    to: "0xEb851...7B02C",
+    status: "Pending",
+    block: "#8422531",
+    date: "2h ago"
+  },
+  {
+    hash: "0x3a33151e6d5de02...c666",
+    id: "0x9afca6...f686",
+    from: "0xae0fb...2834f",
+    to: "0xEb851...7B02C",
+    status: "Completed",
+    block: "#8422531",
+    date: "2h ago"
+  },
+  {
+    hash: "0x3a33151e6d5de02...c666",
+    id: "0x9afca6...f687",
+    from: "0xae0fb...2834f",
+    to: "0xEb851...7B02C",
+    status: "Failed",
+    block: "#8422531",
+    date: "2h ago"
+  },
+  {
+    hash: "0x3a33151e6d5de02...c666",
+    id: "0x9afca6...f688",
+    from: "0xae0fb...2834f",
+    to: "0xEb851...7B02C",
+    status: "Completed",
+    block: "#8422531",
+    date: "2h ago"
+  }
+];
 
-  const navigationTabs = [
-    { id: "all", title: "All" },
-    { id: "completed", title: "Completed" },
-    { id: "pending", title: "Pending" },
-    { id: "failed", title: "Failed" },
-  ];
+const navigationTabs = [
+  { id: "all", title: "All" },
+  { id: "completed", title: "Completed" },
+  { id: "pending", title: "Pending" },
+  { id: "failed", title: "Failed" },
+];
 
 export default function Transactions() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(15); // Example total pages
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredData, setFilteredData] = useState(data);
+  const { transactions, totalPages, loading, error } = useFetchTransactions({ page:currentPage, limit:10, searchQuery: searchQuery });
+  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>(transactions);
+
+  useEffect(() => {
+    if (transactions) {
+      setFilteredTransactions(transactions);
+    }
+  }, [transactions]);
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
@@ -74,19 +84,19 @@ export default function Transactions() {
   // filter based on active tab
   useEffect(() => {
     if (activeTab === "all") {
-      setFilteredData(data);
+      setFilteredTransactions(transactions);
     } else if (activeTab === "completed") {
-      setFilteredData(data.filter((transaction) => transaction.status === "Completed"));
+      setFilteredTransactions(transactions.filter((transaction) => transaction.status === "completed"));
     } else if (activeTab === "pending") {
-      setFilteredData(data.filter((transaction) => transaction.status === "Pending"));
+      setFilteredTransactions(transactions.filter((transaction) => transaction.status === "pending"));
     } else if (activeTab === "failed") {
-        setFilteredData(data.filter((transaction) => transaction.status === "Failed"));
-      }
+      setFilteredTransactions(transactions.filter((transaction) => transaction.status === "failed"));
+    }
   }, [activeTab]);
 
   useEffect(() => {
-    const filtered = data.filter((transaction) => {
-      const transactionFrom = transaction.from.toLowerCase();
+    const filtered = transactions.filter((transaction) => {
+      const transactionFrom = transaction.userId.toLowerCase();
       const transactionTo = transaction.to.toLowerCase();
       const transactionID = transaction.id.toLowerCase();
       const query = searchQuery.toLowerCase();
@@ -96,27 +106,27 @@ export default function Transactions() {
         transactionID.includes(query)
       );
     });
-    setFilteredData(filtered);
+    setFilteredTransactions(filtered);
   }, [searchQuery]);
 
   return (
     <div>
-      
+
       {/* Navigation Tabs */}
       <div className="w-full flex items-center mb-4">
         <div className="flex w-fit">
-            {navigationTabs.map((tab) => (
-                <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 text-black ${activeTab === tab.id
-                    ? "border-b-2 border-primary font-semibold"
-                    : "hover:text-gray-700 cursor-pointer"
-                    }`}
-                >
-                {tab.title}
-                </button>
-            ))}
+          {navigationTabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-4 py-2 text-black ${activeTab === tab.id
+                ? "border-b-2 border-primary font-semibold"
+                : "hover:text-gray-700 cursor-pointer"
+                }`}
+            >
+              {tab.title}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -144,12 +154,23 @@ export default function Transactions() {
         </div>
 
       </div>
-      <TransactionTable headings={headings} data={filteredData} />
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+      {loading ? (
+        <SkeletonTableLoader headings={headings} rowCount={10} />
+      ) : error ?  (
+        <div className="flex justify-center items-center py-10">{error}</div>
+      ) : filteredTransactions && filteredTransactions.length === 0 ? (
+        <div className="flex justify-center items-center py-10">No transactions found</div>
+      ) : (
+        <div>
+          <TransactionTable headings={headings} data={filteredTransactions} />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </div>
+      )}
+
     </div>
   );
 }

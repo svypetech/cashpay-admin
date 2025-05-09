@@ -4,16 +4,9 @@ import type React from "react"
 import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import AdminSidebar from "@/src/components/admins/AdminSidebar"
-
-interface Admin {
-    id: string;
-    name: string;
-    email: string;
-    joinedDate: string;
-    status: string;
-    role: string;
-    profile?: string;
-}
+import { Admin } from "@/src/Types/Admin"
+import { formatJoiningDate } from "@/src/lib/functions"
+import axios from "axios"
 
 interface Props {
     headings: string[]
@@ -91,14 +84,53 @@ const AdminTable: React.FC<Props> = ({ data, headings }) => {
         setActiveDropdown(null)
     }
 
-    const handleSuspendAdmin = (admin: Admin) => {
-        console.log("Suspend admin:", admin)
-        setActiveDropdown(null)
+    const handleSuspendAdmin = async (admin: Admin) => {
+        try {
+            const response = await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/suspendUser`, {
+                id: admin._id,
+            }, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                }
+            })
+            console.log("Response:", response.data)
+            if (response.data.success) {
+                alert("Admin suspended successfully")
+            }
+            else {
+                alert("Failed to suspend admin")
+            }
+        } catch (error) {
+            console.error("Error suspending admin:", error)
+        } finally {
+            setActiveDropdown(null)
+            // isLoading(false) 
+        }
+        
     }
 
-    const handleBanAdmin = (admin: Admin) => {
-        console.log("Ban admin:", admin)
-        setActiveDropdown(null)
+    const handleBanAdmin = async (admin: Admin) => {
+        try {
+            const response = await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/banUser`, {
+                id: admin._id,
+            }, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                }
+            })
+            console.log("Response:", response.data)
+            if (response.data.success) {
+                alert("Admin banned successfully")
+            }
+            else {
+                alert("Failed to ban admin")
+            }
+        } catch (error) {
+            console.error("Error banning admin:", error)
+        } finally {
+            setActiveDropdown(null)
+            // isLoading(false) 
+        }
     }
 
     const handleDeleteAdmin = (admin: Admin) => {
@@ -129,13 +161,12 @@ const AdminTable: React.FC<Props> = ({ data, headings }) => {
                                         {admin.name}
                                     </td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[150px] break-words">{admin.email}</td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px]">{admin.joinedDate}</td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px]">{admin.status}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px]">{formatJoiningDate(admin.date)}</td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px]">{admin.role}</td>
                                     <td className="relative px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[60px] text-center">
                                         <div className="dropdown-container relative">
                                             <button
-                                                className="absolute right-0 md:relative md:right-auto cursor-pointer"
+                                                className="z-70 absolute right-0 md:relative md:right-auto cursor-pointer"
                                                 onClick={() => toggleDropdown(index)}
                                             >
                                                 <Image
@@ -149,7 +180,7 @@ const AdminTable: React.FC<Props> = ({ data, headings }) => {
 
                                             {activeDropdown === index && (
                                                 <div
-                                                    className="absolute z-10 right-0 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-100"
+                                                    className="absolute z-80 right-0 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-100"
                                                     ref={(el) => {
                                                         dropdownRefs.current[index] = el;
                                                     }}
@@ -194,15 +225,7 @@ const AdminTable: React.FC<Props> = ({ data, headings }) => {
                 <AdminSidebar
                     showSidebar={showAdminSidebar}
                     onClose={() => setShowAdminSidebar(false)}
-                    admin={{
-                        id: selectedAdmin.id,
-                        profileImage: selectedAdmin.profile || "/images/user-avatar.png",
-                        name: selectedAdmin.name,
-                        email: selectedAdmin.email,
-                        joiningDate: selectedAdmin.joinedDate,
-                        status: selectedAdmin.status,
-                        role: selectedAdmin.role,
-                    }}
+                    admin={selectedAdmin}
                 />
             )}
         </div>

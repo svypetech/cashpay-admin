@@ -35,21 +35,21 @@ export default function ConfirmDialog({
 
         <div className="border-t border-gray-200 my-4"></div>
 
-        <p className="text-black mt-12 text-left">{message}</p>
+        <p className={`${infoMessage === "" ? "" : "mb-10"} text-black mt-12 text-left`}>{message}</p>
 
         {infoMessage && <p className="text-xs text-red-500 mt-2 mb-8 text-center">{infoMessage}</p>}
 
         <div className="flex gap-4">
           <button
             onClick={onCancel}
-            className={`flex-1 px-4 py-2 border text-sm ${infoMessage? 'border-red-500 text-red-500 hover:bg-red-50' : 'text-primary border-primary hover:bg-blue-50'} rounded-md font-medium`}
+            className={`flex-1 px-4 py-1 cursor-pointer border text-sm ${infoMessage? 'border-red-500 text-red-500 hover:bg-red-50' : 'text-primary border-primary hover:bg-blue-50'} rounded-md font-medium`}
             disabled={isLoading}
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="flex-1 px-4 py-2 bg-primary text-sm text-white rounded-md hover:bg-blue-900 font-medium"
+            className="flex-1 px-4 py-1 cursor-pointer bg-primary text-sm text-white rounded-md hover:bg-blue-900 font-medium"
             disabled={isLoading}
           >
             {isLoading ? "Processing..." : "Confirm"}

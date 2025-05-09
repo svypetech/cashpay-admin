@@ -2,7 +2,6 @@
 
 import ActiveUsers from "@/src/components/users/ActiveUsers";
 import UserEngagement from "@/src/components/users/UserEngagement";
-import { Search, Calendar, Download } from "lucide-react"
 import Image from "next/image";
 import { useState } from "react";
 
@@ -10,7 +9,7 @@ export default function ActiveUsersPage() {
   const [activeTab, setActiveTab] = useState("active users")
 
   return (
-      <main className="container mx-auto px-4 py-6">
+      <main className="px-6 sm:px-10 py-6">
         {/* Navigation Tabs */}
         <div className="w-dull flex justify-center items-center mb-4">
             <div className="flex w-fit">
@@ -36,7 +35,7 @@ export default function ActiveUsersPage() {
           </div>
 
         {/* Search and Actions */}
-        <div className="flex flex-col md:grid md:grid-cols-4 justify-between items-center mb-2 gap-4 md:px-10">
+        <div className="flex flex-col md:grid md:grid-cols-4 justify-between items-center mb-2 gap-4">
           <div className="relative w-full md:w-auto md:col-span-2">
             <div className="relative">
               <input

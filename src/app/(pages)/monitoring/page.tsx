@@ -24,7 +24,7 @@ export default function Monitoring() {
   };
   
   return (
-    <div className="flex flex-col gap-4 relative p-3 md:px-[50px]">
+    <div className="flex flex-col gap-4 relative px-6 sm:px-10 py-6">
       <div className="flex items-center justify-center">
         <Tabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} size="normal" />
       </div>

@@ -116,7 +116,7 @@ export default function P2PTrading() {
     }, [searchQuery]);
 
     return (
-        <div className="px-2 md:px-10">
+        <div className="px-6 sm:px-10 py-6">
 
             {/* Navigation Tabs */}
             <div className="w-full flex items-center mb-4">

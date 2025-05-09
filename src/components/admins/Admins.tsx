@@ -1,14 +1,23 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Pagination from "../pagination/pagination";
 import AdminTable from "../tables/AdminTable";
 import CreateRoleSidebar from "./CreateRoleSidebar";
 import { Plus } from "lucide-react";
 import Image from "next/image";
 import AddAdminPopup from "./CreateAdmin";
+import useGetAdmins from "@/src/hooks/admins/getAdmins";
+import axios from "axios";
+import Sort from "../ui/Sort";
+import SkeletonTableLoader from "../skeletons/SkeletonTableLoader";
 
-const headings = ["ID", "Name", "E-mail", "Joined date", "Status", "Role", "Actions"];
+const headings = ["ID", "Name", "E-mail", "Joined date", "Role", "Actions"];
+// Sort options
+const sortOptions = [
+  { label: "Date", value: "date" },
+  { label: "Title", value: "title"},
+];
 
 export default function Admins() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -18,101 +27,82 @@ export default function Admins() {
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
+  const [sortBy, setSortBy] = useState("") // Default sort option
+  const { admins, isLoading: loadingAdmins, error } = useGetAdmins(currentPage, 10, sortBy)
+  const [filteredData, setFilteredData] = useState(admins)
   const [roles, setRoles] = useState([
     { id: "0", title: "All", description: "All admins" },
     { id: "1", title: "Super Admin", description: "Full access to all features" },
     { id: "2", title: "Support Agent", description: "Can only view data" },
     { id: "3", title: "Financial Manager", description: "Can manage users and transactions" },
   ])
-  const [admins, setAdmins] = useState([
-    {
-      id: "ID#CP-9203",
-      name: "John Doe",
-      email: "johndoe@gmail.com",
-      joinedDate: "18-03-25",
-      status: "+93 2328238902",
-      role: "Super Admin"
-    },
-    {
-      id: "ID#CP-9204",
-      name: "Jane Smith",
-      email: "janesmith@gmail.com",
-      joinedDate: "18-03-25",
-      status: "+93 2328238902",
-      role: "Support Agent"
-    },
-    {
-      id: "ID#CP-9205",
-      name: "Alice Johnson",
-      email: "alicejohnson@gmail.com",
-      joinedDate: "18-03-25",
-      status: "+93 2328238902",
-      role: "Financial Manager"
-    },
-    {
-      id: "ID#CP-9206",
-      name: "Bob Wilson",
-      email: "bobwilson@gmail.com",
-      joinedDate: "18-03-25",
-      status: "+93 2328238902",
-      role: "Support Agent"
-    },
-    {
-      id: "ID#CP-9207",
-      name: "Carol Brown",
-      email: "carolbrown@gmail.com",
-      joinedDate: "18-03-25",
-      status: "+93 2328238902",
-      role: "Financial Manager"
-    }
-  ])
-  const [filteredData, setFilteredData] = useState(admins)
 
+  // Apply filters and sort when dependencies change
   useEffect(() => {
-    setFilteredData(admins.filter((user) => {
+    // First, filter by tab
+    let result = admins.filter((user) => {
       if (activeTab === "all") return true;
       return user.role.toLowerCase() === activeTab.toLowerCase();
-    }))
-  }, [activeTab, admins])
+    });
 
-  useEffect(() => {
-    setFilteredData(admins.filter((user) => {
-      return user.name.toLowerCase().includes(searchQuery.toLowerCase()) || user.email.toLowerCase().includes(searchQuery.toLowerCase())
-    }))
-  }, [searchQuery, admins])
+    // Then, filter by search query
+    if (searchQuery.trim()) {
+      result = result.filter((user) => {
+        // Check if email exists before calling toLowerCase
+        const email = user.email ? user.email.toLowerCase() : '';
+        return email.includes(searchQuery.toLowerCase());
+      });
+    }
+
+    // Finally, apply sorting
+    if (sortBy) {
+      result = [...result].sort((a, b) => {
+        if (sortBy === "date_desc") {
+          // Sort by date descending (newest first)
+          return new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime();
+        } else if (sortBy === "date_asc") {
+          // Sort by date ascending (oldest first)
+          return new Date(a.date || 0).getTime() - new Date(b.date || 0).getTime();
+        }
+        return 0;
+      });
+    }
+
+    setFilteredData(result);
+  }, [activeTab, admins, searchQuery, sortBy]);
+
+  // Handle sort
+  const handleSort = (value: string) => {
+    setSortBy(value);
+    console.log("Sorting by:", value);
+  };
 
   const handleAddAdmin = async (data: { email: string; password: string; roleId: string }) => {
     setIsLoading(true)
     try {
       // Simulate API call
       console.log("Adding admin:", data)
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // Map role ID to role name
-      const roleMap = {
-        super_admin: "Super Admin",
-        support_agent: "Support Agent",
-        financial_manager: "Financial Manager",
-      }
-
-      // Add new admin to the list
-      const newAdmin = {
-        id: (admins.length + 1).toString(),
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin`, {
         email: data.email,
-        role: roleMap[data.roleId as keyof typeof roleMap],
-        name: data.email.split("@")[0], // Example name from email
-        joinedDate: new Date().toLocaleDateString("en-GB"),
-        status: "+93 2328238902", // Example phone number
-        profile: "/images/user-avatar.png", // Example profile image
+        password: data.password,
+        role: data.roleId,
+      }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        }
+      })
+      console.log("Response:", res.data)
+      if(res.data.success) {
+        alert("Admin added successfully")
+      } else {
+        alert("Failed to add admin")
       }
-      setAdmins([...admins, newAdmin])
-
-      // Close popup
-      setIsPopupOpen(false)
     } catch (error) {
+      alert("Failed to add admin")
       console.error("Error adding admin:", error)
     } finally {
       setIsLoading(false)
+      setIsPopupOpen(false)
     }
   }
 
@@ -121,7 +111,20 @@ export default function Admins() {
     try {
       // Simulate API call
       console.log("Creating role:", data)
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin`, {
+        title: data.title,
+        description: data.description,
+        canViewTransactions: data.permissions.includes("view_transactions"),
+        canApproveKyc: data.permissions.includes("approve_kyc"),
+        canResolveDispute: data.permissions.includes("resolve_disputes"),
+        canAccessApiLogs: data.permissions.includes("access_api_logs"),
+        canAccessSystemSettings: data.permissions.includes("access_system_settings"),
+      }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        }
+      })
+      console.log("Response:", res.data)
 
       // Add new role to the list
       const newRole = {
@@ -147,7 +150,6 @@ export default function Admins() {
   return (
     <div>
 
-      
       {/* Navigation Tabs */}
       <div className="px-10 w-full flex items-center mb-4">
         <div className="flex w-fit">
@@ -169,7 +171,7 @@ export default function Admins() {
       </div>
 
       {/* Search and Actions */}
-      <div className={`flex flex-col md:grid md:grid-cols-8 justify-between items-center mb-2 gap-4 md:px-10`}>
+      <div className={`flex flex-col md:grid md:grid-cols-8 justify-between items-center mb-2 gap-4`}>
         <div className={`relative w-full md:w-auto md:col-span-3`}>
           <div className="relative">
             <input
@@ -179,42 +181,56 @@ export default function Admins() {
               className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-gray-700 focus:border-transparent"
             />
             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <Image src="/icons/search.svg" alt="Arrow right" width={24} height={24} />
+              <Image src="/icons/search.svg" alt="Search" width={24} height={24} />
             </div>
           </div>
         </div>
 
-        <div className={`flex items-center gap-4 w-full font-[satoshi] md:col-span-2`}>
-          <button className="w-full flex justify-between items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50">
-            <span>Sort by</span>
-            <Image src="/icons/dropdownIcon.svg" alt="Arrow right" width={24} height={24} />
-          </button>
-        </div>
+        <Sort
+          className="w-full md:md:col-span-2"
+          title="Sort by"
+          options={sortOptions}
+          onSort={handleSort}
+        />
 
         <div className="flex items-center gap-4 w-full md:col-span-3 font-[satoshi]">
-          <button onClick={() => setIsPopupOpen(true)} className={`w-[50%] cursor-pointer flex justify-center items-center gap-2 px-4 py-2 font-bold border border-primary rounded-lg text-primary bg-white hover:bg-blue-50 ml-auto md:ml-0`}>
+          <button onClick={() => setIsPopupOpen(true)} className={`w-full cursor-pointer flex justify-center items-center gap-2 px-4 py-2 font-bold border border-primary rounded-lg text-primary bg-white hover:bg-blue-50 ml-auto md:ml-0`}>
             <span>Add Admin</span>
             <Plus className="h-6 w-6 text-primary" />
           </button>
 
-          <button onClick={() => setIsSidebarOpen(true)} className={`w-[50%] cursor-pointer flex justify-center items-center gap-2 px-4 py-2 font-bold border bg-primary rounded-lg text-white hover:bg-blue-900 ml-auto md:ml-0`}>
-            <span>Create a new Role</span>            
-          </button>
+          {/* <button onClick={() => setIsSidebarOpen(true)} className={`w-[50%] cursor-pointer flex justify-center items-center gap-2 px-4 py-2 font-bold border bg-primary rounded-lg text-white hover:bg-blue-900 ml-auto md:ml-0`}>
+            <span>Create a new Role</span>
+          </button> */}
         </div>
       </div>
+      {loadingAdmins ? (
+        <SkeletonTableLoader  headings={headings} rowCount={10}/>
+      ) : error ? (
+        <div className="text-red-500 py-10 text-center">Error loading users</div>
+      ) : (
+        <div>
+          {filteredData.length > 0 ? (
+            <>
+              <AdminTable headings={headings} data={filteredData} />
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            </>
+          ) : (
+            <div className="text-center py-10 text-gray-500">No admins found</div>
+          )}
+        </div>
+      )}
 
-      <AdminTable headings={headings} data={filteredData} />
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
-      <CreateRoleSidebar
+      {/* <CreateRoleSidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
         onSubmit={handleCreateRole}
         isLoading={isLoading}
-      />
+      /> */}
 
       <AddAdminPopup
         isOpen={isPopupOpen}

@@ -38,6 +38,7 @@ export default function P2PTrading() {
             {activeTab === "active" && <P2PActiveTrading />}
             {activeTab === "disputed" && <P2PDisputedTrading />}
             {activeTab === "stuck" && <P2PStuckTrading />}
+
         </div>
     );
 }

@@ -4,13 +4,16 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Mail, Lock, Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import Image from "next/image"
+import axios from "axios"
+import { useRouter } from "next/navigation"
 
 // Define the form schema with Zod
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
+  role: z.string().optional(), // Optional field for role
 })
 
 // Infer the type from the schema
@@ -18,6 +21,7 @@ type FormValues = z.infer<typeof formSchema>
 
 export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
 
   // Initialize react-hook-form with zod resolver
   const {
@@ -37,19 +41,27 @@ export default function SignIn() {
     setIsLoading(true)
 
     try {
-      // Simulate API call
-      console.log("Form data:", data)
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      
+      data.role = "super admin";
+      const response = await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/loginAdmin`, data)
+      console.log("Login response:", response.data)
 
-      // Redirect or handle successful login
-      window.location.href = "/dashboard"
+      if (response.data.success === true) {
+        // Store the token in local storage
+        localStorage.setItem("user", JSON.stringify(response.data.user))
+        localStorage.setItem("token", response.data.token)
+        router.push("/dashboard")
+      }
+      if (response.data.success === false) {
+        alert(response.data.error)
+      }
     } catch (error) {
       console.error("Login failed:", error)
     } finally {
       setIsLoading(false)
     }
   }
-
+  // min-h-[1024px] for full image
   return (
     <div className="flex min-h-screen flex-col md:flex-row justify-center">
       {/* Left side - Login form */}

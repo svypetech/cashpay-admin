@@ -2,7 +2,7 @@ import StatCard from "../cards/StatsCard";
 import { ArrowLeftRight, ExternalLink, User } from "lucide-react"
 import TotalUsersCard from "../cards/TotalUsers";
 import SystemHealthGauge from "../cards/SystemHealth";
-import TransactionsTableDashboarD from "../cards/TransactionsTableDashboard";
+import TransactionsTableDashboard from "../cards/TransactionsTableDashboard";
 import UsersTableDashboard from "../cards/UsersTableDashboard";
 
 const userStatsData = {
@@ -26,7 +26,7 @@ export default function Overview() {
 
       {/* First Row - Transactions (3 cols) + System Health (1 col) */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
-        <TransactionsTableDashboarD />
+        <TransactionsTableDashboard />
         <SystemHealthGauge value={75} />
       </div>
 

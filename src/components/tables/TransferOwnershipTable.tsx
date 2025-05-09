@@ -2,22 +2,16 @@
 import React, { useEffect, useState } from 'react';
 import { useDarkMode } from '../../app/context/DarkModeContext';
 import Image from 'next/image';
-
-interface User {
-    id: string;
-    name: string;
-    email: string;
-    type: string;
-}
+import { Admin } from '@/src/Types/Admin';
 
 interface Props {
     headings: string[];
-    users: User[];
+    admins: Admin[];
     handleSelectUser: (userId: string) => void;
     selectedUserId: string;
 }
 
-const TransferOwnershipTable: React.FC<Props> = ({ headings, users, handleSelectUser, selectedUserId }) => {
+const TransferOwnershipTable: React.FC<Props> = ({ headings, admins, handleSelectUser, selectedUserId }) => {
     const { darkMode } = useDarkMode();
     const [showDark, setShowDark] = useState(darkMode);
 
@@ -43,47 +37,47 @@ const TransferOwnershipTable: React.FC<Props> = ({ headings, users, handleSelect
                         </tr>
                     </thead>
                     <tbody>
-                        {Array.isArray(users) &&
-                            users.map((user, index) => (
+                        {Array.isArray(admins) &&
+                            admins.map((admin, index) => (
                                 <tr
-                                    onClick={() => console.log('User clicked', user.id)}
-                                    key={user.id}
+                                    onClick={() => console.log('User clicked', admin.id)}
+                                    key={admin.id}
                                     className="border-b text-[12px] sm:text-[16px] cursor-pointer"
                                 >
                                     <td
                                         className="px-2 sm:px-4 py-3 sm:py-4 font-satoshi min-w-[100px] whitespace-nowrap"
                                     >
-                                        {user.id}
+                                        {admin.id}
                                     </td>
                                     <td
                                         className="px-2 sm:px-4 py-3 sm:py-4 font-satoshi font-bold text-primary min-w-[100px] whitespace-nowrap"
                                     >
-                                        {user.name}
+                                        {admin.name ? admin.name : "-"}
                                     </td>
                                     <td
                                         className="px-2 sm:px-4 py-3 sm:py-4 font-satoshi min-w-[100px] whitespace-nowrap"
                                     >
-                                        {user.email}
+                                        {admin.email}
                                     </td>
                                     <td
                                         className="px-2 sm:px-4 py-3 sm:py-4 font-satoshi min-w-[100px] whitespace-nowrap"
                                     >
-                                        {user.type}
+                                        {admin.role}
                                     </td>
                                     <td
                                         className="px-2 sm:px-4 py-3 sm:py-4 font-satoshi min-w-[80px] whitespace-nowrap text-center"
                                     >
                                         <button
-                                            onClick={() => handleSelectUser(user.id)}
+                                            onClick={() => handleSelectUser(admin._id)}
                                             className="cursor-pointer"
                                         >
                                             <Image
                                                 src={
-                                                    selectedUserId === user.id
+                                                    selectedUserId === admin._id
                                                         ? '/icons/selected-option.svg'
                                                         : '/icons/available-option.svg'
                                                 }
-                                                alt={selectedUserId === user.id ? 'Selected' : 'Options'}
+                                                alt={selectedUserId === admin._id ? 'Selected' : 'Options'}
                                                 width={24}
                                                 height={24}
                                                 className="w-4 h-4 mx-auto"

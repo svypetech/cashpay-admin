@@ -3,6 +3,8 @@ import Image from 'next/image';
 import { useState } from 'react';
 import TransferOwnershipTable from '../tables/TransferOwnershipTable';
 import ConfirmDialog from './ConfirmDialog';
+import useGetAdmins from '@/src/hooks/admins/getAdmins';
+import axios from 'axios';
 
 
 const headings = ['Agent ID', 'Name', 'Email', 'Type', 'Actions'];
@@ -93,6 +95,7 @@ export default function TransferOwnershipDialog({
     const [error, setError] = useState('');
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { admins, isLoading: isLoadingAdmins, error: fetchError } = useGetAdmins(1, 10); 
 
     if (!isOpen) return null;
 
@@ -105,7 +108,6 @@ export default function TransferOwnershipDialog({
             setError('Please select a user');
             return;
         }
-        console.log(`Ownership transferred to ${selectedUserId}`);
         setShowConfirmDialog(true);
         setError('');
     };
@@ -113,12 +115,17 @@ export default function TransferOwnershipDialog({
     const handleConfirmChange = async () => {
         setIsSubmitting(true);
         setShowConfirmDialog(false);
-        // Simulate API call to transfer ownership
-        console.log("Transferring ownership to:", selectedUserId);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        
         onConfirm(selectedUserId); // Call the onConfirm prop with the selected user ID
         setIsSubmitting(false);
     };
+
+    if (isOpen && isLoadingAdmins) {
+        return <div className="fixed inset-0 bg-black/30 bg-opacity-50 flex items-center justify-center z-50 p-4">Loading...</div>;
+    }
+    if (isOpen && fetchError) {
+        return <p>Error fetching admins: {fetchError}</p>;
+    }
 
     return (
         <div className="fixed inset-0 bg-black/30 bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -150,7 +157,7 @@ export default function TransferOwnershipDialog({
                 </div>
 
                 <div className="flex-1 overflow-y-auto pr-2">
-                    <TransferOwnershipTable users={users} headings={headings} selectedUserId={selectedUserId} handleSelectUser={handleSelectUser} />
+                    <TransferOwnershipTable admins={admins} headings={headings} selectedUserId={selectedUserId} handleSelectUser={handleSelectUser} />
                 </div>
 
                 {error && (

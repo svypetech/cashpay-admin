@@ -6,6 +6,13 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true, // Skip ESLint during build
   },
+  images: {
+    domains: [
+      // Include your existing domains here
+      'storage.googleapis.com',
+      'logos.covalenthq.com',
+    ],
+  }
 };
 
 export default nextConfig;

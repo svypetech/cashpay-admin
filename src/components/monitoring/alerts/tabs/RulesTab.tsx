@@ -19,6 +19,14 @@ export default function RulesTab() {
   const [selectedRule, setSelectedRule] = useState<any>(null);
   const [alertsData, setAlertsData] = useState(rulesData);
   const [filteredAlertsData, setFilteredAlertsData] = useState(rulesData);
+  const [sortOptions, setSortOptions] = useState([
+    { label: "Threshold", value: "threshold" },
+    { label: "Duration", value: "duration" },
+  ]);
+
+  const handleSort = (sortBy: string) => {
+    
+  }
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -94,7 +102,7 @@ export default function RulesTab() {
         </div>
 
         <div className="flex gap-4 items-center sm:w-[40%] w-full">
-          <Sort title="Sort by" className="sm:w-[60%] w-[50%]" />
+          <Sort title="Sort by" options={sortOptions} onSort={handleSort} className="sm:w-[60%] w-[50%]" />
           <button 
             className="sm:w-[40%] w-[50%] bg-primary text-white font-medium md:my-1 py-2 px-4 rounded-lg hover:bg-primary/90"
             onClick={openAddModal}

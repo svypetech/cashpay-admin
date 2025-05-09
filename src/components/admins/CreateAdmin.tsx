@@ -23,9 +23,9 @@ export default function AddAdminPopup({ isOpen, onClose, onSubmit, isLoading = f
     const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false)
 
     const roles: Role[] = [
-        { id: "super_admin", name: "Super Admin" },
-        { id: "support_agent", name: "Support Agent" },
-        { id: "financial_manager", name: "Financial Manager" },
+        { id: "super admin", name: "Super Admin" },
+        { id: "support agent", name: "Support Agent" },
+        { id: "financial manager", name: "Financial Manager" },
     ]
 
     const handleSubmit = () => {
@@ -59,7 +59,12 @@ export default function AddAdminPopup({ isOpen, onClose, onSubmit, isLoading = f
                 <div className="mb-6 flex items-center justify-between">
                     <div></div>
                     <button
-                        onClick={onClose}
+                        onClick={() => {
+                            setEmail("")
+                            setPassword("")
+                            setSelectedRoleId("")
+                            onClose();
+                        }}
                         className="rounded-full cursor-pointer p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
                     >
                         <X className="h-8 w-8 text-black" />
@@ -133,7 +138,7 @@ export default function AddAdminPopup({ isOpen, onClose, onSubmit, isLoading = f
                 <button
                     onClick={handleSubmit}
                     disabled={isLoading || !email || !password || !selectedRoleId}
-                    className="mt-6 w-full rounded-xl bg-primary py-3 font-medium text-white transition-colors hover:bg-blue-900 disabled:cursor-not-allowed"
+                    className="mt-6 w-full rounded-xl bg-primary py-3 font-medium cursor-pointer text-white transition-colors hover:bg-blue-900 disabled:cursor-not-allowed"
                 >
                     {isLoading ? "Sending..." : "Send Invite"}
                 </button>

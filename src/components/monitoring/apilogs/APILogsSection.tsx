@@ -18,10 +18,14 @@ const headings = [
 export default function MainSection() {
   const [data, setData] = useState(Data);
   const [filteredData, setFilteredData] = useState(Data);
-  
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(15);
-  
+  const [sortOptions, setSortOptions] = useState([
+    { label: "Timestamp", value: "timestamp" },
+    { label: "Status", value: "status" },
+  ]);
+
+  const handleSort = () => {}
   
 
   const handlePageChange = (page: number) => {
@@ -46,8 +50,8 @@ export default function MainSection() {
       
       <div className="flex flex-col gap-3 sm:flex-row sm:gap-5 mt-[20px]">
         <Search className="sm:w-[50%] w-full" onSearch={handleSearch} />
-        <Sort className="sm:w-[25%] w-full" title="Filter" />
-        <Sort className="sm:w-[25%] w-full" title="Filter" />
+        <Sort onSort={handleSort} options={sortOptions} className="sm:w-[25%] w-full" title="Filter" />
+        <Sort onSort={handleSort} options={sortOptions} className="sm:w-[25%] w-full" title="Filter" />
 
       </div>
       

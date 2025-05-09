@@ -3,34 +3,26 @@
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import { ChevronDown, ChevronUp, X } from "lucide-react"
+import { formatJoiningDate } from "@/src/lib/functions"
+import axios from "axios"
+import { Admin } from "@/src/Types/Admin"
 
 interface AdminProfileSidebarProps {
     showSidebar: boolean
     onClose: () => void
-    admin?: {
-        id: string
-        name: string
-        email: string
-        joiningDate: string
-        role?: string
-        status?: string
-        profileImage?: string
-    }
+    admin: Admin
 }
 
-const roles = ["Super Admin", "Support Agent", "Financial Manager"];
+const roles = [
+    { id: "super admin", title: "Super Admin" },
+    { id: "support agent", title: "Support Agent" },
+    { id: "financial manager", title: "Financial Manager" },
+]
 
 export default function AdminSidebar({
     showSidebar,
     onClose,
-    admin = {
-        id: "CP-001",
-        name: "John Doe",
-        email: "johndoe@gmail.com",
-        joiningDate: "12-03-20",
-        status: "+93 2328238902",
-        profileImage: "/images/user-avatar.png",
-    },
+    admin
 }: AdminProfileSidebarProps) {
     const [isEditing, setIsEditing] = useState(false)
     const [showDropdown, setShowDropdown] = useState(false)
@@ -70,19 +62,41 @@ export default function AdminSidebar({
         setShowDropdown(false);
     };
 
+    const handleAssignRole = async () => {
+        setIsEditing(false)
+        setShowDropdown(false)
+        const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin`, {
+            role: selectedRole,
+            title: admin.title,
+            description: admin.description,
+            email: admin.email,
+            password: admin.password,
+            canViewTransactions: admin.canViewTransactions,
+            canApproveKyc: admin.canApproveKyc,
+            canResolveDispute: admin.canResolveDispute,
+            canAccessApiLogs: admin.canAccessApiLogs,
+            canAccessSystemSettings: admin.canAccessSystemSettings,
+        }, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            }
+        })
+        console.log("Assigned role:", selectedRole)
+    }
+
     if (!isVisible && !showSidebar) return null
 
     return (
-        <div className="fixed inset-0 z-50 overflow-hidden">
+        <div className="fixed inset-0 z-100 overflow-hidden">
             {/* Overlay with fade animation */}
-            <div 
-                className={`absolute inset-0 bg-black/50 transition-opacity duration-300 ${shouldSlideIn ? 'opacity-100' : 'opacity-0'}`} 
-                onClick={onClose} 
-                aria-hidden="true" 
+            <div
+                className={`absolute inset-0 bg-black/50 transition-opacity duration-300 ${shouldSlideIn ? 'opacity-100' : 'opacity-0'}`}
+                onClick={onClose}
+                aria-hidden="true"
             />
 
             {/* Sidebar with slide animation */}
-            <div 
+            <div
                 className={`absolute inset-y-0 right-0 w-full max-w-md bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${shouldSlideIn ? 'translate-x-0' : 'translate-x-full'}`}
             >
                 <div className="flex h-full flex-col overflow-y-auto">
@@ -98,8 +112,8 @@ export default function AdminSidebar({
                     <div className="flex flex-col items-center px-6 py-8 font-[satoshi]">
                         {/* Profile Image */}
                         <div className="mb-4 h-32 w-32 overflow-hidden rounded-full">
-                            <Image
-                                src={admin.profileImage || "/placeholder.svg?height=200&width=200"}
+                            <img
+                                src={admin.image || "/placeholder.svg?height=200&width=200"}
                                 alt={admin.name}
                                 width={128}
                                 height={128}
@@ -128,7 +142,7 @@ export default function AdminSidebar({
                                         <Image src="/icons/calendar.svg" alt="User Icon" width={25} height={25} className="h-5 w-5 text-gray-400" />
                                         <span className="font-bold">Joining</span>
                                     </div>
-                                    <span className="text-sm">{admin.joiningDate}</span>
+                                    <span className="text-sm">{formatJoiningDate(admin.date)}</span>
                                 </div>
                             </div>
                         </div>
@@ -141,13 +155,15 @@ export default function AdminSidebar({
                                     <button className="cursor-pointer hover:scale-105" onClick={() => setIsEditing(true)} >
                                         <Image src={"/icons/edit-black.svg"} alt={"user avatar"} width={24} height={24} className="object-cover" />
                                     </button>) :
-                                    (<button className={`px-4 py-2 border text-sm text-primary border-primary hover:bg-blue-50 rounded-md font-medium cursor-pointer`} onClick={() => setIsEditing(false)} >
+                                    (<button
+                                        onClick={handleAssignRole}
+                                        className={`px-4 py-2 border text-sm text-primary border-primary hover:bg-blue-50 rounded-md font-medium cursor-pointer`} >
                                         Save
                                     </button>)}
                             </div>
 
                             <div className={`relative w-full border-b border-gray-300 flex items-center justify-between py-3 px-1 text-left rounded-md group ${showDropdown ? "mb-50" : "mb-16"} `} >
-                                <span className="font-light px-4">{selectedRole}</span>
+                                <span className="font-light px-4">{roles.find((role) => role.id === selectedRole)?.title || "Select Role"}</span>
                                 <button onClick={() => setShowDropdown(prev => !prev)} >
                                     <ChevronDown className={`h-5 w-5 text-gray-400 group-hover:text-gray-600 cursor-pointer ${isEditing ? showDropdown ? "hidden" : "" : "hidden"}`} />
                                     <ChevronUp className={`h-5 w-5 text-gray-400 group-hover:text-gray-600 cursor-pointer ${isEditing ? showDropdown ? "" : "hidden" : "hidden"}`} />
@@ -157,11 +173,11 @@ export default function AdminSidebar({
                                     <ul className="absolute top-12 z-10 mt-1 w-full pb-10">
                                         {roles.map((role) => (
                                             <li
-                                                key={role}
+                                                key={role.id}
                                                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                                onClick={() => handleSelect(role)}
+                                                onClick={() => handleSelect(role.id)}
                                             >
-                                                {role}
+                                                {role.title}
                                             </li>
                                         ))}
                                     </ul>

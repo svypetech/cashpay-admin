@@ -4,6 +4,7 @@ import Image from "next/image";
 import type React from "react"
 import { useEffect, useState, useRef } from "react"
 import OrderDetailsSidebar from "../cards/OrderDetailsSidebar";
+import { set } from "date-fns";
 
 
 interface CardOrder {
@@ -131,7 +132,7 @@ const CardOrdersTable: React.FC<Props> = ({ data, headings }) => {
                                     <td className="relative px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[60px] text-center">
                                         <div className="dropdown-container relative">
                                             <button
-                                                className="absolute right-0 md:relative md:right-auto cursor-pointer"
+                                                className="z-70 absolute right-0 md:relative md:right-auto cursor-pointer"
                                                 onClick={() => toggleDropdown(index)}
                                             >
                                                 <Image
@@ -145,7 +146,7 @@ const CardOrdersTable: React.FC<Props> = ({ data, headings }) => {
 
                                             {activeDropdown === index && (
                                                 <div
-                                                    className="absolute z-10 right-0 w-56 bg-white rounded-md shadow-lg"
+                                                    className="absolute z-80 right-0 w-56 bg-white rounded-md shadow-lg"
                                                     ref={(el) => {
                                                         dropdownRefs.current[index] = el;
                                                     }}
@@ -153,6 +154,7 @@ const CardOrdersTable: React.FC<Props> = ({ data, headings }) => {
                                                     <button
                                                         className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
                                                         onClick={() => {
+                                                            setActiveDropdown(null)
                                                             order = { ...order, userID: "User123", userEmail: "johndoe@gmail.com", userName: "John Doe", userJoiningDate: "2023-01-01" } // Example data
                                                             setSelectedOrder(order)
                                                             setShowSidebar(true)

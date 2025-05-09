@@ -4,87 +4,33 @@ import { useEffect, useState } from "react";
 import Pagination from "@/src/components/pagination/pagination";
 import Image from "next/image";
 import WalletTable from "@/src/components/tables/WalletTable";
+import useWallet from "@/src/hooks/Transactions/useWallet";
+import SkeletonTableLoader from "../skeletons/SkeletonTableLoader";
 
 const headings = ["User ID", "Name", "Card User", "Crypto Holdings", "Total Balance (USDT)", "Actions"];
-const data = [
-    {
-      userId: "ID#CP-9203",
-      name: "John Doe",
-      cardUser: true,
-      cryptoHoldings: 5,
-      totalBalance: 1700.00,
-      actions: ["View Wallet", "Ban User", "Suspend User"]
-    },
-    {
-      userId: "ID#CP-9203",
-      name: "Jane Smith",
-      cardUser: true,
-      cryptoHoldings: 5,
-      totalBalance: 1700.00,
-      actions: ["View Wallet", "Ban User", "Suspend User"]
-    },
-    {
-      userId: "ID#CP-9203",
-      name: "Jack Sparrow",
-      cardUser: true,
-      cryptoHoldings: 5,
-      totalBalance: 1700.00,
-      actions: ["View Wallet", "Ban User", "Suspend User"]
-    },
-    {
-      userId: "ID#CP-9203",
-      name: "Daniel Bryan",
-      cardUser: true,
-      cryptoHoldings: 5,
-      totalBalance: 1700.00,
-      actions: ["View Wallet", "Ban User", "Suspend User"]
-    },
-    {
-      userId: "ID#CP-9203",
-      name: "John Wick",
-      cardUser: true,
-      cryptoHoldings: 5,
-      totalBalance: 1700.00,
-      actions: ["View Wallet", "Ban User", "Suspend User"]
-    },
-    {
-      userId: "ID#CP-9203",
-      name: "Arslan Khan",
-      cardUser: true,
-      cryptoHoldings: 5,
-      totalBalance: 1700.00,
-      actions: ["View Wallet", "Ban User", "Suspend User"]
-    },
-    {
-      userId: "ID#CP-9203",
-      name: "Lionel Messi",
-      cardUser: true,
-      cryptoHoldings: 5,
-      totalBalance: 1700.00,
-      actions: ["View Wallet", "Ban User", "Suspend User"]
-    }
-  ];
 
 export default function Wallet() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(15); // Example total pages
+
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredData, setFilteredData] = useState(data);
+  const [filteredData, setFilteredData] = useState([]);
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
 
+
+  let { wallets, loading, isError, totalPages } = useWallet({
+    currentPage,
+    limit: 10,
+    sortBy: "id",
+    searchQuery,
+  });
   useEffect(() => {
-    const filtered = data.filter((user) => {
-        return (
-            user.userId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            user.totalBalance.toString().toLowerCase().includes(searchQuery.toLowerCase())
-        );
-    });
-    setFilteredData(filtered);
-  }, [searchQuery]);
+    if (loading) return;
+
+    setFilteredData(wallets);
+  }, [searchQuery, wallets]);
 
   return (
     <div>
@@ -112,12 +58,27 @@ export default function Wallet() {
         </div>
 
       </div>
-      <WalletTable headings={headings} data={filteredData} />
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+      {loading ? (
+        <SkeletonTableLoader headings={headings} rowCount={10} />
+      ) : isError ? (
+        <div className="flex items-center justify-center h-full">
+          <p className="text-red-500">Error loading wallets</p>
+        </div>
+      ) : filteredData.length === 0 ? (
+        <div className="flex items-center justify-center h-full">
+          <p className="text-gray-500">No wallets found</p>
+        </div>
+      ) : (
+        <>
+          <WalletTable headings={headings} data={filteredData} />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </>
+      )}
+
     </div>
   );
 }

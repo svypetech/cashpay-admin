@@ -9,10 +9,10 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("overview")
 
   return (
-    <main className="w-full md:px-4 py-6 font-[satoshi]">
+    <main className="w-full font-[satoshi] px-6 sm:px-10 py-6">
       {/* Tabs */}
       <div className="flex justify-center mb-2">
-        <div className="w-full mx-auto max-w-6xl bg-white rounded-lg p-6">
+        <div className="w-full bg-white rounded-lg">
           <div className="flex justify-center items-center mb-2">
             <div className="flex w-fit">
               <button

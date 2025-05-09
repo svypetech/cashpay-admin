@@ -11,6 +11,14 @@ export default function HistoryTab() {
   const [historyData, setHistoryData] = useState(HistoryData);
   const [filteredHistoryData, setFilteredHistoryData] = useState(HistoryData);
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortOptions, setSortOptions] = useState([
+    { label: "Triggered On", value: "triggeredOn" },
+    { label: "Status", value: "status" },
+  ]);
+
+  const handleSort = (sortBy: string) => {
+
+  }
 
   const handlePageChange = (page: number) => {
 
@@ -34,7 +42,7 @@ export default function HistoryTab() {
           <Search onSearch={handleSearch} className="" />
         </div>
 
-        <Sort title="Sort by" className="sm:w-[25%]" />
+        <Sort title="Sort by" onSort={handleSort} options={sortOptions} className="sm:w-[25%]" />
       </div>
 
       <HistoryTable headings={historyTableHeadings} data={filteredHistoryData} />

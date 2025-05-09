@@ -2,38 +2,50 @@
 
 import type React from "react"
 import { useEffect, useState, useRef } from "react"
-import { useDarkMode } from "../../app/context/DarkModeContext"
-import UserProfileSidebar from "../users/UserInfoSidebar"
-import Image from "next/image"
 
-interface User {
-    id: string
-    name: string
-    email: string
-    joinedDate: string
-    status: string
-    profile: string
-}
+import UserProfileSidebar from "../users/UserProfileSidebar"
+import Image from "next/image"
+import ColourfulBlock from "../ui/ColourfulBlock"
+import { User } from "@/src/Types/User"
 
 interface Props {
     headings: string[]
     data: User[]
+    setData: React.Dispatch<React.SetStateAction<User[]>>
 }
 
-const UserTable: React.FC<Props> = ({ data, headings }) => {
-    const { darkMode } = useDarkMode() // Get dark mode state
-    const [showDark, setShowDark] = useState(darkMode)
+
+function formatDate(dateString: string): string {
+    if (!dateString) return 'N/A';
+
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return 'Invalid date';
+
+        // Format with locale then replace slashes with hyphens
+        return date.toLocaleDateString('en-GB', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        }).replace(/\//g, '-');
+
+    } catch (error) {
+        return 'Invalid date format';
+    }
+}
+
+
+
+
+
+const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
     const [activeDropdown, setActiveDropdown] = useState<number | null>(null)
     const [showUserSidebar, setShowUserSidebar] = useState(false)
     const [selectedUser, setSelectedUser] = useState<User | null>(null)
     const tableRef = useRef<HTMLDivElement>(null)
     const dropdownRefs = useRef<(HTMLDivElement | null)[]>([])
 
-    useEffect(() => {
-        // Delay state update slightly to enable smooth transition
-        const timeout = setTimeout(() => setShowDark(darkMode), 100)
-        return () => clearTimeout(timeout)
-    }, [darkMode])
+
 
     useEffect(() => {
         // Close dropdown when clicking outside
@@ -53,7 +65,7 @@ const UserTable: React.FC<Props> = ({ data, headings }) => {
     }, [activeDropdown])
 
     useEffect(() => {
-        // Adjust dropdown position
+        // Adjust dropdown position for the last few rows
         if (activeDropdown !== null && tableRef.current && dropdownRefs.current[activeDropdown]) {
             const tableRect = tableRef.current.getBoundingClientRect()
             const dropdownRect = dropdownRefs.current[activeDropdown]!.getBoundingClientRect()
@@ -64,30 +76,22 @@ const UserTable: React.FC<Props> = ({ data, headings }) => {
                 const spaceBelow = tableRect.bottom - rowRect.bottom
                 const dropdownHeight = dropdownRect.height
 
-                // Always open dropdown downwards for the first row or single row
-                if (activeDropdown === 0 || activeDropdown === 1 || data.length === 2) {
+                // If there's not enough space below, open the dropdown upwards
+                if (spaceBelow < dropdownHeight) {
+                    dropdownRefs.current[activeDropdown]!.style.bottom = "100%"
+                    dropdownRefs.current[activeDropdown]!.style.top = "auto"
+                    dropdownRefs.current[activeDropdown]!.style.marginBottom = "8px"
+                    dropdownRefs.current[activeDropdown]!.style.marginTop = "0"
+                } else {
+                    // Otherwise, open downwards (default)
                     dropdownRefs.current[activeDropdown]!.style.top = "100%"
                     dropdownRefs.current[activeDropdown]!.style.bottom = "auto"
                     dropdownRefs.current[activeDropdown]!.style.marginTop = "8px"
                     dropdownRefs.current[activeDropdown]!.style.marginBottom = "0"
-                } else {
-                    // For other rows with multiple rows, open upwards if not enough space below
-                    if (spaceBelow < dropdownHeight) {
-                        dropdownRefs.current[activeDropdown]!.style.bottom = "100%"
-                        dropdownRefs.current[activeDropdown]!.style.top = "auto"
-                        dropdownRefs.current[activeDropdown]!.style.marginBottom = "8px"
-                        dropdownRefs.current[activeDropdown]!.style.marginTop = "0"
-                    } else {
-                        // Open downwards
-                        dropdownRefs.current[activeDropdown]!.style.top = "100%"
-                        dropdownRefs.current[activeDropdown]!.style.bottom = "auto"
-                        dropdownRefs.current[activeDropdown]!.style.marginTop = "8px"
-                        dropdownRefs.current[activeDropdown]!.style.marginBottom = "0"
-                    }
                 }
             }
         }
-    }, [activeDropdown, data.length])
+    }, [activeDropdown])
 
     const toggleDropdown = (index: number) => {
         setActiveDropdown(activeDropdown === index ? null : index)
@@ -99,55 +103,60 @@ const UserTable: React.FC<Props> = ({ data, headings }) => {
         setActiveDropdown(null)
     }
 
-    const handleSuspendUser = (user: User) => {
-        console.log("Suspend user:", user)
-        setActiveDropdown(null)
-    }
 
-    const handleBanUser = (user: User) => {
-        console.log("Ban user:", user)
-        setActiveDropdown(null)
-    }
 
     return (
-        <div className="flex-1 rounded-lg w-full py-5">
+        <div className="flex-1 rounded-lg w-full   py-5">
             {/* Table */}
-            <div className="rounded-lg overflow-x-auto w-full min-h-[200px]" ref={tableRef}>
-                <table className="w-full text-left table-auto min-w-[600px]">
+            <div className="rounded-lg overflow-x-auto w-full" ref={tableRef}>
+                <table className="w-full text-left table-auto min-w-[700px]">
                     <thead className="bg-secondary/10">
-                        <tr className="font-satoshi text-[12px] md:text-[16px] py-3 md:py-4 px-2 md:px-4">
-                            {headings.map((heading, index) => (
-                                <th key={index} className="px-2 md:px-4 py-3 md:py-4 text-left">
-                                    {heading}
-                                </th>
-                            ))}
+                        <tr className="font-satoshi text-[12px] sm:text-[16px] whitespace-nowrap">
+                            <th className="p-2 sm:p-6 text-left font-[700] w-[12%]">
+                                {headings[0]}
+                            </th>
+                            <th className="p-2 sm:p-6 text-left font-[700] w-[15%]">
+                                {headings[1]}
+                            </th>
+                            <th className="p-2 sm:p-6 text-left font-[700] w-[23%]">
+                                {headings[2]}
+                            </th>
+                            <th className="p-2 sm:p-6 text-left font-[700] w-[20%]">
+                                {headings[3]}
+                            </th>
+                            <th className="p-2 sm:p-6 text-left font-[700] w-[20%]">
+                                {headings[4]}
+                            </th>
+                            <th className="p-2 sm:p-6 text-left font-[700] w-[10%]">
+                                {headings[5]}
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
                         {Array.isArray(data) &&
                             data.map((user, index) => (
-                                <tr key={index} className="border-b text-[12px] md:text-[16px]">
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[100px] break-words">{user.id}</td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi font-bold text-primary min-w-[120px] break-words">
-                                        {user.name}
+                                <tr key={index} className="border-b border-gray-200 text-[12px] sm:text-[16px]">
+                                    <td className="p-2 sm:p-6 font-satoshi min-w-[100px] break-words whitespace-nowrap">{user._id}</td>
+                                    <td className="p-2 sm:p-6 font-satoshi font-bold text-primary min-w-[120px] break-words whitespace-nowrap">
+                                        {user.name ? user.name?.firstName + " " + user.name?.lastName : "N/A"}
                                     </td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[150px] break-words">{user.email}</td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[100px]">{user.joinedDate}</td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px]">
-                                        {user.status === "Verified" ? (
-                                            <span className="text-left bg-[#71FB5533] text-[#20C000] px-4 py-2 rounded-xl text-xs md:text-base font-semibold whitespace-nowrap">
-                                                Verified
-                                            </span>
-                                        ) : (
-                                            <span className="text-[#727272] bg-[#72727233] px-4 py-2 rounded-xl text-xs md:text-base font-semibold whitespace-nowrap">
-                                                Pending
-                                            </span>
-                                        )}
+                                    <td className="p-2 sm:p-6 font-satoshi min-w-[150px] break-words whitespace-nowrap">{user.email ? user.email : "N/A"}</td>
+                                    <td className="p-2 sm:p-6 font-satoshi min-w-[100px] whitespace-nowrap">{formatDate(user.date)}</td>
+                                    <td className="p-2 sm:p-6 font-satoshi min-w-[120px] py-[20px]">
+
+
+                                        <ColourfulBlock
+                                            text={user.verificationStatus}
+                                            className={`text-left px-4 py-2 rounded-xl  md:text-md font-semibold whitespace-nowrap ${user.verificationStatus === "Approved" ? "bg-[#71FB5533] text-[#20C000]" : "text-[#727272] bg-[#72727233]"
+                                                }`}
+
+
+                                        />
                                     </td>
-                                    <td className="relative px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[60px] text-center">
+                                    <td className="relative p-2 sm:p-6 font-satoshi min-w-[60px] text-center">
                                         <div className="dropdown-container relative">
                                             <button
-                                                className="absolute right-0 md:relative md:right-auto cursor-pointer"
+                                                className="absolute z-70 right-0 md:relative md:right-auto cursor-pointer"
                                                 onClick={() => toggleDropdown(index)}
                                             >
                                                 <Image
@@ -161,7 +170,7 @@ const UserTable: React.FC<Props> = ({ data, headings }) => {
 
                                             {activeDropdown === index && (
                                                 <div
-                                                    className="absolute z-10 right-0 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-100"
+                                                    className="absolute z-80  right-0 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-100"
                                                     ref={(el) => {
                                                         dropdownRefs.current[index] = el;
                                                     }}
@@ -172,19 +181,8 @@ const UserTable: React.FC<Props> = ({ data, headings }) => {
                                                     >
                                                         View
                                                     </button>
-                                                    <div className="border-t border-gray-100"></div>
-                                                    <button
-                                                        className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
-                                                        onClick={() => handleSuspendUser(user)}
-                                                    >
-                                                        Suspend User
-                                                    </button>
-                                                    <button
-                                                        className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
-                                                        onClick={() => handleBanUser(user)}
-                                                    >
-                                                        Ban User
-                                                    </button>
+
+
                                                 </div>
                                             )}
                                         </div>
@@ -198,15 +196,15 @@ const UserTable: React.FC<Props> = ({ data, headings }) => {
             {/* User Profile Sidebar */}
             {selectedUser && (
                 <UserProfileSidebar
+                    setData={setData}
                     showSidebar={showUserSidebar}
-                    onClose={() => setShowUserSidebar(false)}
+                    onClose={() => {
+                        setShowUserSidebar(false)
+                        setSelectedUser(null)
+                    }}
                     user={{
-                        id: selectedUser.id,
-                        profileImage: selectedUser.profile || "/images/user-avatar.png",
-                        name: selectedUser.name,
-                        email: selectedUser.email,
-                        joiningDate: selectedUser.joinedDate,
-                        status: selectedUser.status,
+                        ...selectedUser,
+                        date: formatDate(selectedUser.date),
                     }}
                 />
             )}
