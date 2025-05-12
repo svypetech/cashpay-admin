@@ -1,3 +1,4 @@
+// This is admin user type
 export interface Admin {
   canAccessApiLogs: boolean;
   canAccessSystemSettings: boolean;
