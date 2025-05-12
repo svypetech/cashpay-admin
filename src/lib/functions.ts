@@ -43,3 +43,41 @@ export // Format joining date using date-fns
             return dateString; // Return original on error
         }
     };
+
+export function cal_USDT_Value({
+    balance,
+    contract_decimals,
+    quote_rate,
+}: {
+    balance: string;
+    contract_decimals: number;
+    quote_rate: number;
+}) {
+    console.log("quote_rate", quote_rate);
+    const usdtValue = (Number(balance) / 10 ** contract_decimals) * quote_rate;
+    return usdtValue;
+}
+
+
+export const formatNumberToTwoDecimals = (value: number): string => {
+  // Convert to string and split by decimal point
+  const [whole, decimal] = value.toString().split('.');
+  
+  // If there's no decimal part, add .00
+  if (!decimal) {
+    return `${whole}.00`;
+  }
+  
+  // If decimal part is shorter than 2 digits, pad with zeros
+  if (decimal.length === 1) {
+    return `${whole}.${decimal}0`;
+  }
+  
+  // If decimal part is longer than 2 digits, truncate (not round)
+  if (decimal.length > 2) {
+    return `${whole}.${decimal.substring(0, 2)}`;
+  }
+  
+  // Return the original number if it already has exactly 2 decimal places
+  return `${whole}.${decimal}`;
+};

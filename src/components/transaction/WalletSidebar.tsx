@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { X } from "lucide-react";
 import {Wallet} from "@/src/Types/Wallet"
+import { cal_USDT_Value, formatNumberToTwoDecimals } from "@/src/lib/functions";
 interface WalletSidebarProps {
   showSidebar: boolean;
   onClose: () => void;
@@ -104,7 +105,7 @@ export default function WalletSidebar({
             <div className="flex flex-col mt-4">
               <p className="text-lg font-semibold">Total Balance</p>
               <p className="text-2xl font-bold text-primary">
-                USD {wallet?.totalBalanceUSD.toFixed(2)}
+                USD {formatNumberToTwoDecimals(wallet?.totalBalanceUSD)}
               </p>
             </div>
           </div>
@@ -118,7 +119,7 @@ export default function WalletSidebar({
                     key={index}
                     symbol={item.contract_ticker_symbol}
                     amount={item.balance}
-                    usdValue={0}
+                    usdValue={cal_USDT_Value({balance: item.balance, contract_decimals: item.contract_decimals, quote_rate: item.quote_rate})}
                     iconUrl={item.logo_url || "/placeholder.svg"}
                   />
                 ))}
@@ -158,7 +159,7 @@ function CryptoCard({ symbol, amount, usdValue, iconUrl }: CryptoCardProps) {
         </div>
         <div className="text-right">
           <p className="text-md text-primary">
-            = {usdValue.toFixed(2)} <span className="font-bold">USD</span>
+            = {formatNumberToTwoDecimals(usdValue)} <span className="font-bold">USD</span>
           </p>
         </div>
       </div>

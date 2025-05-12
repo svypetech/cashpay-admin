@@ -84,10 +84,10 @@ const AdminTable: React.FC<Props> = ({ data, headings }) => {
         setActiveDropdown(null)
     }
 
-    const handleSuspendAdmin = async (admin: Admin) => {
+    const handleSuspendAdmin = async (id: string) => {
         try {
             const response = await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/suspendUser`, {
-                id: admin._id,
+                id: id,
             }, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -106,13 +106,13 @@ const AdminTable: React.FC<Props> = ({ data, headings }) => {
             setActiveDropdown(null)
             // isLoading(false) 
         }
-        
+
     }
 
-    const handleBanAdmin = async (admin: Admin) => {
+    const handleBanAdmin = async (id: string) => {
         try {
             const response = await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/banUser`, {
-                id: admin._id,
+                id: id,
             }, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -194,13 +194,13 @@ const AdminTable: React.FC<Props> = ({ data, headings }) => {
                                                     <div className="border-t border-gray-100"></div>
                                                     <button
                                                         className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
-                                                        onClick={() => handleSuspendAdmin(admin)}
+                                                        onClick={() => handleSuspendAdmin(admin._id)}
                                                     >
                                                         Suspend Admin
                                                     </button>
                                                     <button
                                                         className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
-                                                        onClick={() => handleBanAdmin(admin)}
+                                                        onClick={() => handleBanAdmin(admin._id)}
                                                     >
                                                         Ban Admin
                                                     </button>
@@ -226,6 +226,8 @@ const AdminTable: React.FC<Props> = ({ data, headings }) => {
                     showSidebar={showAdminSidebar}
                     onClose={() => setShowAdminSidebar(false)}
                     admin={selectedAdmin}
+                    onSuspendAdmin={handleSuspendAdmin}
+                    onBanAdmin={handleBanAdmin}
                 />
             )}
         </div>

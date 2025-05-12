@@ -40,7 +40,7 @@ export interface Wallet {
     is_spam: boolean;
     balance: string;
     balance_24h: string;
-    quote_rate: number | null;
+    quote_rate: number;
     quote_rate_24h: number | null;
     quote: number | null;
     pretty_quote: string | null;

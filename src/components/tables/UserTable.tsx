@@ -7,6 +7,8 @@ import UserProfileSidebar from "../users/UserProfileSidebar"
 import Image from "next/image"
 import ColourfulBlock from "../ui/ColourfulBlock"
 import { User } from "@/src/Types/User"
+import handleSuspendUser from "@/src/hooks/users/suspendUser"
+import handleBanUser from "@/src/hooks/users/banUser"
 
 interface Props {
     headings: string[]
@@ -33,10 +35,6 @@ function formatDate(dateString: string): string {
         return 'Invalid date format';
     }
 }
-
-
-
-
 
 const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
     const [activeDropdown, setActiveDropdown] = useState<number | null>(null)
@@ -103,8 +101,6 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
         setActiveDropdown(null)
     }
 
-
-
     return (
         <div className="flex-1 rounded-lg w-full   py-5">
             {/* Table */}
@@ -112,22 +108,22 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
                 <table className="w-full text-left table-auto min-w-[700px]">
                     <thead className="bg-secondary/10">
                         <tr className="font-satoshi text-[12px] sm:text-[16px] whitespace-nowrap">
-                            <th className="p-2 sm:p-6 text-left font-[700] w-[12%]">
+                            <th className="p-2 sm:p-5 text-left font-[700] w-[12%]">
                                 {headings[0]}
                             </th>
-                            <th className="p-2 sm:p-6 text-left font-[700] w-[15%]">
+                            <th className="p-2 sm:p-5 text-left font-[700] w-[15%]">
                                 {headings[1]}
                             </th>
-                            <th className="p-2 sm:p-6 text-left font-[700] w-[23%]">
+                            <th className="p-2 sm:p-5 text-left font-[700] w-[23%]">
                                 {headings[2]}
                             </th>
-                            <th className="p-2 sm:p-6 text-left font-[700] w-[20%]">
+                            <th className="p-2 sm:p-5 text-left font-[700] w-[20%]">
                                 {headings[3]}
                             </th>
-                            <th className="p-2 sm:p-6 text-left font-[700] w-[20%]">
+                            <th className="p-2 sm:p-5 text-left font-[700] w-[20%]">
                                 {headings[4]}
                             </th>
-                            <th className="p-2 sm:p-6 text-left font-[700] w-[10%]">
+                            <th className="p-2 sm:p-5 text-left font-[700] w-[10%]">
                                 {headings[5]}
                             </th>
                         </tr>
@@ -136,24 +132,24 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
                         {Array.isArray(data) &&
                             data.map((user, index) => (
                                 <tr key={index} className="border-b border-gray-200 text-[12px] sm:text-[16px]">
-                                    <td className="p-2 sm:p-6 font-satoshi min-w-[100px] break-words whitespace-nowrap">{user._id}</td>
-                                    <td className="p-2 sm:p-6 font-satoshi font-bold text-primary min-w-[120px] break-words whitespace-nowrap">
+                                    <td className="p-2 sm:p-5 font-satoshi min-w-[100px] break-words whitespace-nowrap">{user._id}</td>
+                                    <td className="p-2 sm:p-5 font-satoshi font-bold text-primary min-w-[120px] break-words whitespace-nowrap">
                                         {user.name ? user.name?.firstName + " " + user.name?.lastName : "N/A"}
                                     </td>
-                                    <td className="p-2 sm:p-6 font-satoshi min-w-[150px] break-words whitespace-nowrap">{user.email ? user.email : "N/A"}</td>
-                                    <td className="p-2 sm:p-6 font-satoshi min-w-[100px] whitespace-nowrap">{formatDate(user.date)}</td>
-                                    <td className="p-2 sm:p-6 font-satoshi min-w-[120px] py-[20px]">
+                                    <td className="p-2 sm:p-5 font-satoshi min-w-[150px] break-words whitespace-nowrap">{user.email ? user.email : "N/A"}</td>
+                                    <td className="p-2 sm:p-5 font-satoshi min-w-[100px] whitespace-nowrap">{formatDate(user.date)}</td>
+                                    <td className="p-2 sm:p-5 font-satoshi min-w-[120px] py-[20px]">
 
 
                                         <ColourfulBlock
                                             text={user.verificationStatus}
-                                            className={`text-left px-4 py-2 rounded-xl  md:text-md font-semibold whitespace-nowrap ${user.verificationStatus === "Approved" ? "bg-[#71FB5533] text-[#20C000]" : "text-[#727272] bg-[#72727233]"
+                                            className={`text-left rounded-xl  md:text-md font-semibold whitespace-nowrap ${user.verificationStatus === "Approved" ? "bg-[#71FB5533] text-[#20C000]" : "text-[#727272] bg-[#72727233]"
                                                 }`}
 
 
                                         />
                                     </td>
-                                    <td className="relative p-2 sm:p-6 font-satoshi min-w-[60px] text-center">
+                                    <td className="relative p-2 sm:p-5 font-satoshi min-w-[60px] text-center">
                                         <div className="dropdown-container relative">
                                             <button
                                                 className="absolute z-70 right-0 md:relative md:right-auto cursor-pointer"
@@ -180,6 +176,24 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
                                                         onClick={() => handleViewUser(user)}
                                                     >
                                                         View
+                                                    </button>
+                                                    <button
+                                                        className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
+                                                        onClick={() => {
+                                                            setActiveDropdown(null)
+                                                            handleSuspendUser(user._id)
+                                                        }}
+                                                    >
+                                                        Suspend User
+                                                    </button>
+                                                    <button
+                                                        className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
+                                                        onClick={() => {
+                                                            setActiveDropdown(null)
+                                                            handleBanUser(user._id)
+                                                        }}
+                                                    >
+                                                        Ban User
                                                     </button>
 
 

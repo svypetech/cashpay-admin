@@ -8,6 +8,8 @@ import { Loader2 } from "lucide-react";
 import { User } from "@/src/Types/User";
 import VerificationAccordion from "../cards/VerficationStatus";
 import VerificationSteps from "../cards/VerificationForm";
+import handleBanUser from "@/src/hooks/users/banUser";
+import handleSuspendUser from "@/src/hooks/users/suspendUser";
 
 
 interface UserProfileSidebarProps {
@@ -25,6 +27,8 @@ export default function UserProfileSidebar({
 }: UserProfileSidebarProps) {
     const [isVisible, setIsVisible] = useState(false);
     const [slideIn, setSlideIn] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [actionType, setActionType] = useState("");
     const [verificationStarted, setVerificationStarted] = useState(false);
     const [steps, setSteps] = useState([
         { title: "Personal Details", completed: user.KycProfileAdded },
@@ -289,10 +293,22 @@ export default function UserProfileSidebar({
 
                             {/* Action Buttons */}
                             <div className="flex justify-between mt-auto w-full gap-4 px-5">
-                                <button className="rounded-md border px-6 py-2 border-[#DF1D1D] text-[#DF1D1D] hover:bg-red-50 cursor-pointer font-bold">
-                                    Suspend
+                                <button className="rounded-md border px-6 py-2 border-[#DF1D1D] text-[#DF1D1D] hover:bg-red-50 cursor-pointer font-bold"
+                                    onClick={() => {
+                                        setActionType("suspend")
+                                        handleSuspendUser(user._id, setIsSubmitting)
+                                    }}
+                                >
+                                    {isSubmitting && actionType === "suspend" ? "Suspending..." : "Suspend"}
                                 </button>
-                                <button className="rounded-md px-6 py-2 bg-[#DF1D1D] text-white hover:bg-red-700 cursor-pointer font-bold">Ban</button>
+                                <button className="rounded-md px-6 py-2 bg-[#DF1D1D] text-white hover:bg-red-700 cursor-pointer font-bold"
+                                    onClick={() => {
+                                        setActionType("ban")
+                                        handleBanUser(user._id, setIsSubmitting)
+                                    }}
+                                >
+                                    {isSubmitting && actionType === "ban" ? "Banning..." : "Ban"}
+                                </button>
                             </div>
                         </div>
                     </div>

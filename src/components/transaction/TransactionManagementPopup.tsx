@@ -147,18 +147,8 @@ export default function TransactionManagementPopup({
                 <span className="w-28 text-sm font-bold bg-[#27AAE11A] px-4 py-1 rounded-md">Block</span>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-800">
-                    {shortenAddress(transaction.web3Data.transaction.blockHash, 6)}
+                    {transaction.web3Data.transaction.blockNumber}
                   </span>
-                  <button 
-                    onClick={() => copyToClipboard(transaction.web3Data.transaction.blockHash, 'block')}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    {copiedField === 'block' ? (
-                      <span className="text-xs text-green-500">Copied!</span>
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
-                  </button>
                 </div>
               </div>
 

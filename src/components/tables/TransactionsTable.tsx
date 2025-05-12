@@ -12,7 +12,6 @@ interface Props {
 }
 
 const TransactionTable: React.FC<Props> = ({ data, headings }) => {
-    const [activeDropdown, setActiveDropdown] = useState<number | null>(null)
     const [showPopup, setShowPopup] = useState(false)
     const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
     const tableRef = useRef<HTMLDivElement>(null)
@@ -37,7 +36,7 @@ const TransactionTable: React.FC<Props> = ({ data, headings }) => {
                                 <tr key={index} onClick={() => {
                                     setSelectedTransaction(transaction)
                                     setShowPopup(true)
-                                    }} className="border-b text-[12px] md:text-[16px] cursor-pointer">
+                                    }} className="border-b border-gray-200 text-[12px] md:text-[16px] cursor-pointer">
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi font-bold text-primary min-w-[100px] break-words">
                                         {transaction.id ? shortenAddress(transaction.id) : "N/A"}
                                     </td>
@@ -47,25 +46,28 @@ const TransactionTable: React.FC<Props> = ({ data, headings }) => {
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[150px] break-words">
                                         {transaction.web3Data.transaction.to ? shortenAddress(transaction.web3Data.transaction.to) : "N/A"}
                                     </td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[150px] break-words">
+                                        {transaction.amount ? (transaction.amount + " " + transaction.tokenName) : "N/A"}
+                                    </td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px]">
-                                        {transaction.status === "completed" && (
+                                        {transaction.status.toLowerCase() === "completed" && (
                                             <span className="text-left bg-[#71FB5533] text-[#20C000] px-4 py-2 rounded-xl text-xs md:text-base font-semibold whitespace-nowrap">
                                                 Success
                                             </span>
                                         )}
-                                        {transaction.status === "pending" && (
+                                        {transaction.status.toLowerCase() === "pending" && (
                                             <span className="text-[#727272] bg-[#72727233] px-4 py-2 rounded-xl text-xs md:text-base font-semibold whitespace-nowrap">
                                                 Pending
                                             </span>
                                         )}
-                                        {transaction.status === "failed" && (
+                                        {transaction.status.toLowerCase() === "failed" && (
                                             <span className="text-[#FF0000] bg-[#FF000033] px-4 py-2 rounded-xl text-xs md:text-base font-semibold whitespace-nowrap">
                                                 Failed
                                             </span>
                                         )}
                                     </td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[100px] font-medium">
-                                        {transaction.web3Data.transaction.blockHash ? shortenAddress(transaction.web3Data.transaction.blockHash) : "N/A"}
+                                        {transaction.web3Data.transaction.blockNumber ? (transaction.web3Data.transaction.blockNumber) : "N/A"}
                                     </td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[60px] text-center whitespace-nowrap">{timeAgo(transaction.date)}</td>
                                 </tr>

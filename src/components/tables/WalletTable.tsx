@@ -5,6 +5,9 @@ import type React from "react"
 import { useEffect, useState, useRef } from "react"
 import WalletSidebar from "../transaction/WalletSidebar";
 import {Wallet} from "@/src/Types/Wallet"
+import { formatNumberToTwoDecimals } from "@/src/lib/functions";
+import handleSuspendUser from "@/src/hooks/users/suspendUser";
+import handleBanUser from "@/src/hooks/users/banUser";
 
 interface Props {
     headings: string[]
@@ -103,7 +106,7 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
                                         <span className="relative left-[30px]">{wallet.cryptoHoldings}</span>
                                         
                                     </td>
-                                    <td className="p-2 md:p-4 font-satoshi min-w-[100px]">{wallet.totalBalanceUSD}</td>
+                                    <td className="p-2 md:p-4 font-satoshi min-w-[100px]">{formatNumberToTwoDecimals(wallet.totalBalanceUSD)}</td>
                                     <td className="relative p-2 md:p-4 font-satoshi min-w-[60px] text-center">
                                         <div className="dropdown-container relative">
                                             <button
@@ -138,13 +141,19 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
                                                     <div className="border-t border-gray-100"></div>
                                                     <button
                                                         className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
-                                                        onClick={() => { }}
+                                                        onClick={() => {
+                                                            setActiveDropdown(null)
+                                                            // handleBanUser(wallet.userId.toString())
+                                                        }}
                                                     >
                                                         Ban User
                                                     </button>
                                                     <button
                                                         className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
-                                                        onClick={() => { }}
+                                                        onClick={() => {
+                                                            setActiveDropdown(null)
+                                                            // handleSuspendUser(wallet.userId.toString())
+                                                        }}
                                                     >
                                                         Suspend User
                                                     </button>

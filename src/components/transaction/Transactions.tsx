@@ -8,54 +8,7 @@ import useFetchTransactions from "@/src/hooks/Transactions/transactionsManagemen
 import Transaction from "@/src/Types/TransactionManagement";
 import SkeletonTableLoader from "../skeletons/SkeletonTableLoader";
 
-const headings = ["ID", "From", "To", "Status", "Block#", "Date"];
-const data = [
-  {
-    hash: "0x3a33151e6d5de02...c666",
-    id: "0x9afca6...f684",
-    from: "0xae0fb...2834f",
-    to: "0xEb851...7B02C",
-    status: "Completed",
-    block: "#8422531",
-    date: "2h ago"
-  },
-  {
-    hash: "0x3a33151e6d5de02...c666",
-    id: "0x9afca6...f685",
-    from: "0xae0fb...2834f",
-    to: "0xEb851...7B02C",
-    status: "Pending",
-    block: "#8422531",
-    date: "2h ago"
-  },
-  {
-    hash: "0x3a33151e6d5de02...c666",
-    id: "0x9afca6...f686",
-    from: "0xae0fb...2834f",
-    to: "0xEb851...7B02C",
-    status: "Completed",
-    block: "#8422531",
-    date: "2h ago"
-  },
-  {
-    hash: "0x3a33151e6d5de02...c666",
-    id: "0x9afca6...f687",
-    from: "0xae0fb...2834f",
-    to: "0xEb851...7B02C",
-    status: "Failed",
-    block: "#8422531",
-    date: "2h ago"
-  },
-  {
-    hash: "0x3a33151e6d5de02...c666",
-    id: "0x9afca6...f688",
-    from: "0xae0fb...2834f",
-    to: "0xEb851...7B02C",
-    status: "Completed",
-    block: "#8422531",
-    date: "2h ago"
-  }
-];
+const headings = ["ID", "From", "To", "Amount", "Status", "Block#", "Date"];
 
 const navigationTabs = [
   { id: "all", title: "All" },

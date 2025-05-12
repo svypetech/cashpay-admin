@@ -10,6 +10,8 @@ import { Admin } from "@/src/Types/Admin"
 interface AdminProfileSidebarProps {
     showSidebar: boolean
     onClose: () => void
+    onBanAdmin: (adminId: string) => void
+    onSuspendAdmin: (adminId: string) => void
     admin: Admin
 }
 
@@ -22,6 +24,8 @@ const roles = [
 export default function AdminSidebar({
     showSidebar,
     onClose,
+    onBanAdmin,
+    onSuspendAdmin,
     admin
 }: AdminProfileSidebarProps) {
     const [isEditing, setIsEditing] = useState(false)
@@ -187,10 +191,16 @@ export default function AdminSidebar({
 
                         {/* Action Buttons */}
                         <div className="flex justify-between mt-auto w-full gap-4 px-5">
-                            <button className="rounded-md border px-6 py-2 border-[#DF1D1D] text-[#DF1D1D] hover:bg-red-50 cursor-pointer font-bold">
+                            <button className="rounded-md border px-6 py-2 border-[#DF1D1D] text-[#DF1D1D] hover:bg-red-50 cursor-pointer font-bold"
+                                onClick={() => {onSuspendAdmin(admin._id)}}
+                            >
                                 Suspend
                             </button>
-                            <button className="rounded-md px-6 py-2 bg-[#DF1D1D] text-white hover:bg-red-700 cursor-pointer font-bold">Ban</button>
+                            <button className="rounded-md px-6 py-2 bg-[#DF1D1D] text-white hover:bg-red-700 cursor-pointer font-bold"
+                                onClick={() => {onBanAdmin(admin._id)}}
+                            >
+                                Ban
+                            </button>
                         </div>
                     </div>
                 </div>

@@ -138,7 +138,8 @@ export default function SignIn() {
       {/* Right side - Branding */}
       <div className="hidden xl:flex md:w-1/2 flex-col items-center justify-center bg-[#001233] text-white relative">
         <Image
-          src={"/icons/signinIcon.svg"}
+          // src={"/icons/signinIcon.svg"}
+          src={"/images/signin.png"}
           alt="Background"
           fill
           className="object-cover object-center h-full w-full"
