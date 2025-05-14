@@ -7,7 +7,7 @@ import Tabs from "../ui/Tabs";
 import Search from "../ui/Search";
 import Sort from "../ui/Sort";
 import SkeletonTableLoader from "@/src/components/skeletons/SkeletonTableLoader";
-import useUser from "@/src/hooks/users/useUser";
+import useFetchUsers from "@/src/hooks/users/getUsers";
 
 const headings = [
   "User ID",
@@ -32,7 +32,7 @@ export default function UsersComponent() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("userStatus");
   
-  const { users: allUsers, totalPages, isLoading, isError, setUsers } = useUser(currentPage, 10, sortBy);
+  const { users: allUsers, totalPages, isLoading, isError, setUsers } = useFetchUsers(currentPage, 10, sortBy);
   
   // Define tabs for the Tabs component
   const tabs = ["All", "Verified", "Pending Verifications"];

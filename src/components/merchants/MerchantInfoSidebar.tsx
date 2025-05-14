@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import Image from "next/image";
-import Tabs from "../ui/Tabs"; // Import the Tabs component
+import Tabs from "../ui/Tabs";
 import BankAccountsTab from "./BankAccountsTab";
 
 interface Merchant {
@@ -18,7 +18,7 @@ interface Merchant {
   views?: number;
   successRateChange: number;
   viewsRate?: number;
-  pendingBankVerification?: boolean; // Add this property to show the orange dot
+  pendingBankVerification?: boolean;
 }
 
 interface BankAccount {
@@ -47,6 +47,8 @@ export default function MerchantInfoSidebar({
   onBan,
 }: MerchantInfoSidebarProps) {
   const [activeTab, setActiveTab] = useState<"Overview" | "Bank Accounts">("Overview");
+  const [isVisible, setIsVisible] = useState(false);
+  const [shouldSlideIn, setShouldSlideIn] = useState(false);
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([
     {
       id: "bank1",
@@ -89,18 +91,32 @@ export default function MerchantInfoSidebar({
   // Format join date nicely
   const formattedDate = merchant.joinDate || "19-03-20";
   
-  // Prevent body scrolling when sidebar is open
+  // Handle animation and visibility states - UPDATED to match UserInfoSidebar
   useEffect(() => {
     if (showSidebar) {
-      document.body.style.overflow = "hidden";
+      setIsVisible(true) // Render the sidebar
+      // Use a small timeout to ensure DOM is ready before starting animation
+      setTimeout(() => {
+        setShouldSlideIn(true) // Trigger slide-in animation
+      }, 0)
+      document.body.style.overflow = "hidden" // Prevent scrolling
     } else {
-      document.body.style.overflow = "auto";
+      setShouldSlideIn(false) // Start slide-out animation
+      // Wait for animation to complete before removing from DOM
+      const timer = setTimeout(() => {
+        setIsVisible(false)
+        document.body.style.overflow = "auto" // Re-enable scrolling
+      }, 300) // Match transition duration
+      return () => clearTimeout(timer)
     }
-
-    return () => {
-      document.body.style.overflow = "auto";
-    };
   }, [showSidebar]);
+
+  // Clean up overflow style when component unmounts - ADDED from UserInfoSidebar
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = "auto"
+    }
+  }, []);
 
   const handleVerifyAccount = (accountId: string) => {
     setBankAccounts(accounts => 
@@ -122,19 +138,21 @@ export default function MerchantInfoSidebar({
     );
   };
 
-  if (!showSidebar) return null;
+  if (!isVisible && !showSidebar) return null;
 
   return (
     <div className="fixed inset-0 z-100 overflow-hidden">
-      {/* Overlay */}
+      {/* Overlay with fade animation - UPDATED to match UserInfoSidebar */}
       <div
-        className="absolute inset-0 bg-black/50 transition-opacity"
+        className={`absolute inset-0 bg-black/50 transition-opacity duration-300 ${shouldSlideIn ? 'opacity-100' : 'opacity-0'}`}
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Sidebar */}
-      <div className="absolute inset-y-0 right-0 w-full max-w-md bg-white shadow-xl">
+      {/* Sidebar with slide animation - UPDATED to match UserInfoSidebar */}
+      <div
+        className={`absolute inset-y-0 right-0 w-full max-w-md bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${shouldSlideIn ? 'translate-x-0' : 'translate-x-full'}`}
+      >
         <div className="flex h-full flex-col overflow-y-auto">
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-5">

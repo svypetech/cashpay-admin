@@ -60,6 +60,12 @@ export function cal_USDT_Value({
 
 
 export const formatNumberToTwoDecimals = (value: number): string => {
+    if (isNaN(value)) {
+        return "0.00"; // Return default value for NaN
+    }
+    if (value === null || value === undefined) {
+        return "0.00"; // Return default value for null or undefined
+    }
   // Convert to string and split by decimal point
   const [whole, decimal] = value.toString().split('.');
   

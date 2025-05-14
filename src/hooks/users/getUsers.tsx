@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { User } from "@/src/Types/User";
 
-export default function useUser(currentPage: number,limit: number, sortBy?: string) {
+export default function useFetchUsers(currentPage: number,limit: number, sortBy?: string) {
   const [users, setUsers] = useState<User[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(true);

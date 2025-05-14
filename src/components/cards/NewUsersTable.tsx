@@ -1,4 +1,4 @@
-import useUser from "@/src/hooks/users/useUser";
+import useUser from "@/src/hooks/users/getUsers";
 import SkeletonTableLoader from "../skeletons/SkeletonTableLoader";
 
 export default function NewUsers() {

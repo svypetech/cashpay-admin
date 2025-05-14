@@ -79,7 +79,7 @@ export default function UserProfileSidebar({
                         <div className="mb-4 h-32 w-32 overflow-hidden rounded-full">
                             <Image
                                 src={user.selfieUrl || "/placeholder.svg?height=200&width=200"}
-                                alt={user.selfieUrl || "User Avatar"}
+                                alt={"User Avatar"}
                                 width={128}
                                 height={128}
                                 className="h-full w-full object-cover"

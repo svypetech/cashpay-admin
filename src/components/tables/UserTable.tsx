@@ -39,7 +39,7 @@ function formatDate(dateString: string): string {
 const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
     const [activeDropdown, setActiveDropdown] = useState<number | null>(null)
     const [showUserSidebar, setShowUserSidebar] = useState(false)
-    const [selectedUser, setSelectedUser] = useState<User | null>(null)
+    const [selectedUser, setSelectedUser] = useState<User>({} as User)
     const tableRef = useRef<HTMLDivElement>(null)
     const dropdownRefs = useRef<(HTMLDivElement | null)[]>([])
 
@@ -214,7 +214,7 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
                     showSidebar={showUserSidebar}
                     onClose={() => {
                         setShowUserSidebar(false)
-                        setSelectedUser(null)
+                        setSelectedUser({} as User)
                     }}
                     user={{
                         ...selectedUser,

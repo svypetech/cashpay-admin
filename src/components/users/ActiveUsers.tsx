@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Pagination from "../pagination/pagination";
 import ActiveUsersTable from "../tables/ActiveUsersTable";
-import useUser from "@/src/hooks/users/useUser";
+import useFetchUsers from "@/src/hooks/users/getUsers";
 import SkeletonTableLoader from "../skeletons/SkeletonTableLoader";
 
 const headings = [
@@ -16,7 +16,7 @@ const headings = [
 
 export default function ActiveUsers() {
   const [currentPage, setCurrentPage] = useState(1);
-  const { users, totalPages, isError, isLoading } = useUser(
+  const { users, totalPages, isError, isLoading } = useFetchUsers(
     currentPage,
     10,
     "userStatus"

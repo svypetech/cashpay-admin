@@ -11,7 +11,6 @@ import VerificationSteps from "../cards/VerificationForm";
 import handleBanUser from "@/src/hooks/users/banUser";
 import handleSuspendUser from "@/src/hooks/users/suspendUser";
 
-
 interface UserProfileSidebarProps {
     showSidebar: boolean;
     onClose: () => void;
@@ -25,8 +24,9 @@ export default function UserProfileSidebar({
     user,
     setData,
 }: UserProfileSidebarProps) {
+    // Renamed variables to match UserInfoSidebar
     const [isVisible, setIsVisible] = useState(false);
-    const [slideIn, setSlideIn] = useState(false);
+    const [shouldSlideIn, setShouldSlideIn] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [actionType, setActionType] = useState("");
     const [verificationStarted, setVerificationStarted] = useState(false);
@@ -76,101 +76,97 @@ export default function UserProfileSidebar({
         }
     };
 
-    // Prevent body scrolling when sidebar is open
+    // Handle animation and visibility states - UPDATED to match UserInfoSidebar
     useEffect(() => {
         if (showSidebar) {
-            document.body.style.overflow = "hidden";
-        } else {
-            document.body.style.overflow = "auto";
-        }
-        return () => {
-            document.body.style.overflow = "auto";
-        };
-    }, [showSidebar]);
-
-    useEffect(() => {
-        if (showSidebar) {
-            setIsVisible(true);
+            setIsVisible(true) // Render the sidebar
+            // Use a small timeout to ensure DOM is ready before starting animation
             setTimeout(() => {
-                setSlideIn(true);
-            }, 10);
+                setShouldSlideIn(true) // Trigger slide-in animation
+            }, 0)
+            document.body.style.overflow = "hidden" // Prevent scrolling
         } else {
-            setSlideIn(false);
+            setShouldSlideIn(false) // Start slide-out animation
+            // Wait for animation to complete before removing from DOM
             const timer = setTimeout(() => {
-                setIsVisible(false);
-            }, 300);
-            return () => clearTimeout(timer);
+                setIsVisible(false)
+                document.body.style.overflow = "auto" // Re-enable scrolling
+            }, 300) // Match transition duration
+            return () => clearTimeout(timer)
         }
-    }, [showSidebar]);
+    }, [showSidebar])
 
-    if (!showSidebar && !isVisible) return null;
+    // Clean up overflow style when component unmounts - ADDED from UserInfoSidebar
+    useEffect(() => {
+        return () => {
+            document.body.style.overflow = "auto"
+        }
+    }, [])
+
+    if (!isVisible && !showSidebar) return null;
 
     return (
         <div className="fixed inset-0 z-100 overflow-hidden">
-            {/* Backdrop */}
+            {/* Overlay with fade animation - UPDATED to match UserInfoSidebar */}
             <div
-                className={`fixed inset-0 bg-black/50 transition-opacity duration-300 ease-in-out ${slideIn ? "opacity-100" : "opacity-0"
-                    }`}
+                className={`absolute inset-0 bg-black/50 transition-opacity duration-300 ${shouldSlideIn ? 'opacity-100' : 'opacity-0'}`}
                 onClick={onClose}
                 aria-hidden="true"
             />
-            {/* Sidebar */}
+            
+            {/* Sidebar with slide animation - UPDATED to match UserInfoSidebar */}
             <div
-                className={`fixed inset-y-0 right-0 w-full sm:w-[520px] bg-white shadow-xl transform transition-transform duration-300 ease-in-out z-50 flex flex-col ${slideIn ? "translate-x-0" : "translate-x-full"
-                    }`}
+                className={`absolute inset-y-0 right-0 w-full max-w-md bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${shouldSlideIn ? 'translate-x-0' : 'translate-x-full'}`}
             >
-
                 {verificationStarted ? (
-                    <div className="flex flex-col h-full justify-between pb-5">
-                        <div className="flex h-full flex-col overflow-y-auto">
-                            <div className="flex items-center justify-between px-6 py-4 mt-5">
-                                <div></div>
-                                <button
-                                    onClick={() => {
-                                        onClose();
-                                        setVerificationStarted(false);
-                                    }}
-                                    className="rounded-full cursor-pointer p-1 hover:bg-gray-100"
-                                    aria-label="Close sidebar"
-                                >
-                                    <X className="h-6 w-6" />
-                                </button>
-                            </div>
-                            <div className="flex flex-col items-center px-6 py-8 font-[satoshi]">
-                                <div className="mb-4 flex w-full items-center justify-between gap-10 px-5">
-                                    <h4 className="text-2xl font-semibold text-center">
-                                        KYC Verification
-                                    </h4>
-                                    <span className="rounded-xl font-bold px-4 py-2 text-[#727272] bg-[#72727233]">
-                                        Pending
-                                    </span>
-                                </div>
-                                <VerificationAccordion
-                                    personalDetails={{
-                                        name: user.name ? user.name.firstName + " " + user.name.lastName : "N/A",
-                                        dob: user.DOB,
-                                        region: user.region,
-                                    }}
-                                    document={{
-                                        url: user.idDocUrl,
-                                        fileName:
-                                            user.name ? user.name.firstName +
-                                                " " +
-                                                user.name.lastName : "N/A" +
-                                            " ID.png",
-                                    }}
-                                    selfieDocument={{
-                                        url: user.selfieUrl,
-                                        fileName:
-                                            user.name ? user.name.firstName +
-                                                " " +
-                                                user.name.lastName : "N/A" +
-                                            " selfie.png",
-                                    }}
-                                />
-                            </div>
+                    <div className="flex h-full flex-col overflow-y-auto">
+                        <div className="flex items-center justify-between px-6 py-4 mt-5">
+                            <div></div>
+                            <button
+                                onClick={() => {
+                                    onClose();
+                                    setVerificationStarted(false);
+                                }}
+                                className="rounded-full cursor-pointer p-1 hover:bg-gray-100"
+                                aria-label="Close sidebar"
+                            >
+                                <X className="h-6 w-6" />
+                            </button>
                         </div>
-                        <div className="px-16">
+                        <div className="flex flex-col items-center px-6 py-8 font-[satoshi]">
+                            <div className="mb-4 flex w-full items-center justify-between gap-10 px-5">
+                                <h4 className="text-2xl font-semibold text-center">
+                                    KYC Verification
+                                </h4>
+                                <span className="rounded-xl font-bold px-4 py-2 text-[#727272] bg-[#72727233]">
+                                    Pending
+                                </span>
+                            </div>
+                            <VerificationAccordion
+                                personalDetails={{
+                                    name: user.name ? user.name.firstName + " " + user.name.lastName : "N/A",
+                                    dob: user.DOB,
+                                    region: user.region,
+                                }}
+                                document={{
+                                    url: user.idDocUrl,
+                                    fileName:
+                                        user.name ? user.name.firstName +
+                                            " " +
+                                            user.name.lastName : "N/A" +
+                                        " ID.png",
+                                }}
+                                selfieDocument={{
+                                    url: user.selfieUrl,
+                                    fileName:
+                                        user.name ? user.name.firstName +
+                                            " " +
+                                            user.name.lastName : "N/A" +
+                                        " selfie.png",
+                                }}
+                            />
+                        </div>
+                        <div className="mt-auto px-16 pb-5">
                             <button
                                 onClick={handleVerifyUser}
                                 disabled={isVerifying}

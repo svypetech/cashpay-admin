@@ -2,17 +2,9 @@
 
 import type React from "react"
 import { useState, useRef, useEffect } from "react"
-import TransactionManagementPopup from "../transaction/TransactionManagementPopup"
 import Image from "next/image";
-
-interface Listing {
-    listingID: string;
-    sellerID: string;
-    buyerID: string;
-    type: string;
-    currency: string;
-    status: string;
-}
+import ListingDetailsPopup from "../p2pTrading/ListingPopup";
+import { Listing } from "@/src/Types/P2PListing";
 
 interface Props {
     headings: string[]
@@ -22,9 +14,21 @@ interface Props {
 const ListingsTable: React.FC<Props> = ({ data, headings }) => {
     const [activeDropdown, setActiveDropdown] = useState<number | null>(null)
     const [showPopup, setShowPopup] = useState(false)
-    const [selectedListing, setSelectedListing] = useState<Listing | null>(null)
+    const [selectedListing, setSelectedListing] = useState<Listing >({} as Listing)
     const tableRef = useRef<HTMLDivElement>(null)
     const dropdownRefs = useRef<(HTMLDivElement | null)[]>([])
+
+    const getColumnWidthClass = (index: number): string => {
+    switch (index) {
+      case 0: return "w-[15%]"; // User ID
+      case 1: return "w-[20%]"; // Username
+      case 2: return "w-[15%]"; // Card User
+      case 3: return "w-[20%]"; // Crypto Holdings
+      case 4: return "w-[20%]"; // Total Balance
+      case 5: return "w-[10%]"; // Actions
+      default: return "w-[16.67%]"; // Equal distribution
+    }
+  };
 
     useEffect(() => {
         // Close dropdown when clicking outside
@@ -88,11 +92,11 @@ const ListingsTable: React.FC<Props> = ({ data, headings }) => {
         <div className="flex-1 rounded-lg w-full py-5">
             {/* Table */}
             <div className="rounded-lg overflow-x-auto w-full" ref={tableRef}>
-                <table className="w-full text-left table-auto overflow-x-auto    min-w-[600px]">
+                <table className="w-full text-left table-auto overflow-x-auto    min-w-[1100px]">
                     <thead className="bg-secondary/10">
                         <tr className="whitespace-nowrap text-[12px] md:text-[16px] py-3 md:py-4 px-2 md:px-4">
                             {headings.map((heading, index) => (
-                                <th key={index} className="px-2 md:px-4 py-3 md:py-4 text-left">
+                                <th key={index} className={`px-2 md:px-4 py-3 md:py-4 text-left ${getColumnWidthClass(index)}`}>
                                     {heading}
                                 </th>
                             ))}
@@ -101,22 +105,22 @@ const ListingsTable: React.FC<Props> = ({ data, headings }) => {
                     <tbody>
                         {Array.isArray(data) &&
                             data.map((listing, index) => (
-                                <tr key={index} className="border-b text-[12px] md:text-[16px] font-[satoshi]">
-                                    <td className="px-2 md:px-4 py-3 md:py-4 whitespace-nowrap font-bold text-primary min-w-[100px] break-words">{listing.listingID}</td>
+                                <tr key={listing.id} className="border-b border-gray-200 text-[12px] md:text-[16px] font-[satoshi]">
+                                    <td className="px-2 md:px-4 py-3 md:py-4 whitespace-nowrap font-bold text-primary min-w-[100px] break-words">{listing.id}</td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 whitespace-nowrap min-w-[120px] break-words">
-                                        {listing.sellerID}
+                                        {listing.createdBy}
                                     </td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 whitespace-nowrap min-w-[150px] break-words">{listing.buyerID}</td>
+                                    
                                     <td className="px-2 md:px-4 py-3 md:py-4 whitespace-nowrap min-w-[150px] break-words">{listing.type}</td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 whitespace-nowrap min-w-[150px] break-words">{listing.currency}</td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 whitespace-nowrap min-w-[120px]">
-                                        {listing.status === "active" && (
-                                            <span className="text-left bg-[#71FB5533] text-[#20C000] px-4 py-2 rounded-xl text-xs md:text-base font-semibold whitespace-nowrap">
+                                        {listing.addVisibility === true && (
+                                            <span className="text-left bg-[#71FB5533] text-[#20C000] px-2 py-2 rounded-xl text-xs md:text-base font-semibold whitespace-nowrap flex justify-center items-center w-[100px]">
                                                 Active
                                             </span>
                                         )}
-                                        {listing.status === "inactive" && (
-                                            <span className="text-[#FF0000] bg-[#FF000033] px-4 py-2 rounded-xl text-xs md:text-base font-semibold whitespace-nowrap">
+                                        {listing.addVisibility === false && (
+                                            <span className="text-[#FF0000] bg-[#FF000033] px-2 py-2 rounded-xl text-xs md:text-base font-semibold whitespace-nowrap flex justify-center items-center w-[100px]">
                                                 Inactive
                                             </span>
                                         )}
@@ -132,7 +136,7 @@ const ListingsTable: React.FC<Props> = ({ data, headings }) => {
                                                     alt="Options"
                                                     width={24}
                                                     height={24}
-                                                    className="w-4 h-4"
+                                                    className="w-4 h-4 relative sm:left-0 left-[-50px]"
                                                 />
                                             </button>
 
@@ -171,6 +175,7 @@ const ListingsTable: React.FC<Props> = ({ data, headings }) => {
 
             {/* @ts-ignore Transaction Details Popup */}
             {/* <TransactionManagementPopup showPopup={showPopup} onClose={() => setShowPopup(false)} transaction={selectedListing} /> */}
+            <ListingDetailsPopup showPopup={showPopup} onClose={() => setShowPopup(false)} listing={selectedListing} /> 
         </div>
     )
 }

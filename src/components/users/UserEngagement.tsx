@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Pagination from "../pagination/pagination";
-import useFetchUsers from "@/src/hooks/users/useUser";
+import useFetchUsers from "@/src/hooks/users/getUsers";
 import UserEngagementTable from "../tables/UserEngagementTable";
 import SkeletonTableLoader from "../skeletons/SkeletonTableLoader";
 
