@@ -60,11 +60,10 @@ export default function P2PListings() {
             <button
               key={index}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 text-black ${
-                activeTab === tab.id
-                  ? "border-b-2 border-primary font-semibold"
-                  : "hover:text-gray-700 cursor-pointer"
-              }`}
+              className={`px-4 py-2 text-black ${activeTab === tab.id
+                ? "border-b-2 border-primary font-semibold"
+                : "hover:text-gray-700 cursor-pointer"
+                }`}
             >
               {tab.title}
             </button>
@@ -109,13 +108,15 @@ export default function P2PListings() {
       {isLoading ? (
         <SkeletonTableLoader rowCount={10} headings={headings} />
       ) : (
-        <ListingsTable headings={headings} data={listings} />
+        <>
+          <ListingsTable headings={headings} data={listings} />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </>
       )}
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
     </div>
   );
 }

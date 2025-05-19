@@ -6,8 +6,6 @@ import { useEffect, useState, useRef } from "react"
 import WalletSidebar from "../transaction/WalletSidebar";
 import {Wallet} from "@/src/Types/Wallet"
 import { formatNumberToTwoDecimals } from "@/src/lib/functions";
-import handleSuspendUser from "@/src/hooks/users/suspendUser";
-import handleBanUser from "@/src/hooks/users/banUser";
 
 interface Props {
     headings: string[]
@@ -97,16 +95,16 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
                         {Array.isArray(data) &&
                             data.map((wallet, index) => (
                                 <tr key={index} className="border-b border-gray-200 text-[12px] md:text-[16px]">
-                                    <td className="p-2 md:p-4 font-satoshi min-w-[100px] break-words">{wallet.userId}</td>
+                                    <td className="p-2 md:p-4 font-satoshi min-w-[100px] break-words">{wallet.data.userId}</td>
                                     <td className="p-2 md:p-4 font-satoshi font-bold text-primary min-w-[120px] break-words">
-                                        {wallet.userName ? (wallet.userName.firstName + " " + wallet.userName.lastName) : "N/A"}
+                                        {wallet.data.userName ? `${wallet.data.userName.firstName} ${wallet.data.userName.lastName}` : "N/A"}
                                     </td>
-                                    <td className="p-2 md:p-4 font-satoshi min-w-[150px] break-words">{wallet.cardUser ? "True" : "False"}</td>
+                                    <td className="p-2 md:p-4 font-satoshi min-w-[150px] break-words">{"-"}</td>
                                     <td className="p-2 md:p-4 font-satoshi min-w-[120px]">
-                                        <span className="relative left-[30px]">{wallet.cryptoHoldings}</span>
+                                        <span className="relative left-[30px]">{wallet.data.cryptoHoldings}</span>
                                         
                                     </td>
-                                    <td className="p-2 md:p-4 font-satoshi min-w-[100px]">{formatNumberToTwoDecimals(wallet.totalBalanceUSD)}</td>
+                                    <td className="p-2 md:p-4 font-satoshi min-w-[100px]">{formatNumberToTwoDecimals(wallet.data.totalBalanceUSD)}</td>
                                     <td className="relative p-2 md:p-4 font-satoshi min-w-[60px] text-center">
                                         <div className="dropdown-container relative">
                                             <button
@@ -168,7 +166,7 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
             </div>
 
             {/* Wallet Details Sidebar */}
-            {selectedWallet && selectedWallet.balances.items && (
+            {selectedWallet && selectedWallet.data.balances.items && (
                 <WalletSidebar
                     showSidebar={showSidebar}
                     onClose={() => setShowSidebar(false)}

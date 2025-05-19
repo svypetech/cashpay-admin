@@ -21,14 +21,13 @@ const sortOptions = [
 
 export default function Admins() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(15); // Example total pages
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isPopupOpen, setIsPopupOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
   const [sortBy, setSortBy] = useState("") // Default sort option
-  const { admins, isLoading: loadingAdmins, error } = useGetAdmins(currentPage, 10, sortBy)
+  const { admins, isLoading: loadingAdmins, error, totalPages } = useGetAdmins(currentPage, 10, sortBy)
   const [filteredData, setFilteredData] = useState(admins)
   const [roles, setRoles] = useState([
     { id: "0", title: "All", description: "All admins" },

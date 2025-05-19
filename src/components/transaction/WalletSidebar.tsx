@@ -83,8 +83,8 @@ export default function WalletSidebar({
             {/* Profile Image */}
             <div className="mb-4 h-32 w-32 overflow-hidden rounded-full">
               <Image
-                src={wallet?.image ? wallet?.image : "/images/user-avatar.png"}
-                alt={wallet?.image || "User Avatar"}
+                src={wallet.data.image}
+                alt={"User Avatar"}
                 width={128}
                 height={128}
                 className="h-full w-full object-cover"
@@ -93,19 +93,19 @@ export default function WalletSidebar({
 
             {/* User Info */}
             <h3 className="mb-1 text-xl font-semibold">
-              {wallet?.userName
-                ? wallet.userName.firstName + " " + wallet.userName.lastName
+              {wallet.data.userName
+                ? wallet.data.userName.firstName + " " + wallet.data.userName.lastName
                 : "N/A"}
             </h3>
             <p className="mb-6 text-xs text-gray-500">
-              User ID: {wallet?.userId}
+              User ID: {wallet.data.userId || "N/A"}
             </p>
 
             {/* Total Balance in center and bold and flex col */}
             <div className="flex flex-col mt-4">
               <p className="text-lg font-semibold">Total Balance</p>
               <p className="text-2xl font-bold text-primary">
-                USD {formatNumberToTwoDecimals(wallet?.totalBalanceUSD)}
+                USD {formatNumberToTwoDecimals(wallet.data.totalBalanceUSD)}
               </p>
             </div>
           </div>
@@ -114,12 +114,12 @@ export default function WalletSidebar({
           <div className="flex flex-col items-center mx-10 py-8 font-[satoshi] border-b border-gray-300">
             <div className="flex flex-col w-full">
               {wallet &&
-                wallet.balances.items.map((item, index) => (
+                wallet.data.balances.items.map((item, index) => (
                   <CryptoCard
                     key={index}
                     symbol={item.contract_ticker_symbol}
                     amount={item.balance}
-                    usdValue={cal_USDT_Value({balance: item.balance, contract_decimals: item.contract_decimals, quote_rate: item.quote_rate})}
+                    usdValue={cal_USDT_Value({balance: item.balance, contract_decimals: item.contract_decimals, quote_rate: item.quote_rate || 0})}
                     iconUrl={item.logo_url || "/placeholder.svg"}
                   />
                 ))}

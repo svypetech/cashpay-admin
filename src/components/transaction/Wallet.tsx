@@ -6,15 +6,14 @@ import Image from "next/image";
 import WalletTable from "@/src/components/tables/WalletTable";
 import useWallet from "@/src/hooks/Transactions/useWallet";
 import SkeletonTableLoader from "../skeletons/SkeletonTableLoader";
+import { Wallet } from "@/src/Types/Wallet";
 
 const headings = ["User ID", "Name", "Card User", "Crypto Holdings", "Total Balance (USDT)", "Actions"];
 
-export default function Wallet() {
+export default function WalletComponent() {
   const [currentPage, setCurrentPage] = useState(1);
-
-  const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredData, setFilteredData] = useState([]);
+  const [filteredData, setFilteredData] = useState<Wallet []>([]);
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
@@ -27,8 +26,6 @@ export default function Wallet() {
     searchQuery,
   });
   useEffect(() => {
-    if (loading) return;
-
     setFilteredData(wallets);
   }, [searchQuery, wallets]);
 
@@ -63,10 +60,6 @@ export default function Wallet() {
       ) : isError ? (
         <div className="flex items-center justify-center h-full">
           <p className="text-red-500">Error loading wallets</p>
-        </div>
-      ) : filteredData.length === 0 ? (
-        <div className="flex items-center justify-center h-full">
-          <p className="text-gray-500">No wallets found</p>
         </div>
       ) : (
         <>

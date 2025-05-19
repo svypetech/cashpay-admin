@@ -11,17 +11,19 @@ const SkeletonTableLoader: React.FC<SkeletonTableLoaderProps> = ({
 }) => {
   return (
     <div className="flex-1 rounded-lg w-full py-5 animate-pulse">
-      {/* Table */}
+      {/* Table with overflow container */}
       <div className="rounded-lg overflow-x-auto w-full min-h-[200px]">
-        <table className="w-full text-left table-fixed min-w-[600px]">
-          <thead className="bg-secondary/10">
-            <tr className="font-satoshi text-[12px] sm:text-[16px] py-3 sm:py-4 px-2 sm:px-4">
+        <table className="w-full text-left table-auto min-w-[600px]">
+          <thead className="bg-secondary/10 sticky top-0">
+            <tr className="font-satoshi text-[12px] md:text-[14px] lg:text-[16px]">
               {headings.map((heading, index) => (
                 <th
                   key={index}
-                  className="px-2 sm:px-4 py-3 sm:py-4 text-left"
+                  className="px-2 md:px-3 lg:px-4 py-3 md:py-4 text-left whitespace-nowrap"
                 >
-                  {heading}
+                  <div className="truncate max-w-[150px] md:max-w-none">
+                    {heading}
+                  </div>
                 </th>
               ))}
             </tr>
@@ -32,14 +34,14 @@ const SkeletonTableLoader: React.FC<SkeletonTableLoaderProps> = ({
               .map((_, rowIndex) => (
                 <tr
                   key={rowIndex}
-                  className="border-b border-gray-200 text-[12px] sm:text-[16px]"
+                  className="border-b border-gray-200 text-[12px] md:text-[14px] lg:text-[16px]"
                 >
                   {Array(headings.length)
                     .fill(0)
                     .map((_, colIndex) => (
                       <td
                         key={colIndex}
-                        className="px-2 sm:px-4 py-3 sm:py-4 font-satoshi"
+                        className="px-2 md:px-3 lg:px-4 py-3 md:py-4 font-satoshi"
                       >
                         {/* Different widths for skeleton items to make them look more natural */}
                         <div

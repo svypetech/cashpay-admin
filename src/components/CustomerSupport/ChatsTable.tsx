@@ -1,36 +1,26 @@
 "use client"
 
+import { formatJoiningDate, shortenAddress } from "@/src/lib/functions";
+import { SupportRequest } from "@/src/Types/SupportRequests";
 import Image from "next/image";
 import type React from "react"
 import { useEffect, useState, useRef } from "react"
 
-
-interface Chat {
-    ChatID: string;
-    UserID: string;
-    AgentID: string;
-    IssueType: string;
-    Status: string;
-    LastUpdated: string;
-    Chat: string;
-}
-
 interface Props {
     headings: string[]
-    data: Chat[]
+    chats: SupportRequest[]
 }
 
-const ChatsTable: React.FC<Props> = ({ data, headings }) => {
+const ChatsTable: React.FC<Props> = ({ chats, headings }) => {
     const [activeDropdown, setActiveDropdown] = useState<number | null>(null)
     const [showPopup, setShowPopup] = useState(false)
-    const [selectedChat, setSelectedChat] = useState<Chat | null>(null)
+    const [selectedChat, setSelectedChat] = useState<SupportRequest | null>(null)
     const tableRef = useRef<HTMLDivElement>(null)
     const dropdownRefs = useRef<(HTMLDivElement | null)[]>([])
-    const [chats, setChats] = useState<Chat[]>(data)
 
     useEffect(() => {
-        setChats(data)
-    }, [data])
+        console.log("Chats: ", chats)
+    },[])
 
     useEffect(() => {
         // Close dropdown when clicking outside
@@ -62,7 +52,7 @@ const ChatsTable: React.FC<Props> = ({ data, headings }) => {
                 const dropdownHeight = dropdownRect.height
 
                 // Always open dropdown downwards for the first row or single row
-                if (activeDropdown === 0 || data.length === 1) {
+                if (activeDropdown === 0 || chats.length === 1) {
                     dropdownRefs.current[activeDropdown]!.style.top = "100%"
                     dropdownRefs.current[activeDropdown]!.style.bottom = "auto"
                     dropdownRefs.current[activeDropdown]!.style.marginTop = "8px"
@@ -84,7 +74,7 @@ const ChatsTable: React.FC<Props> = ({ data, headings }) => {
                 }
             }
         }
-    }, [activeDropdown, data.length])
+    }, [activeDropdown, chats.length])
 
     const toggleDropdown = (index: number) => {
         setActiveDropdown(activeDropdown === index ? null : index)
@@ -108,17 +98,19 @@ const ChatsTable: React.FC<Props> = ({ data, headings }) => {
                         {Array.isArray(chats) &&
                             chats.map((chat, index) => (
                                 <tr key={index} className="border-b text-[12px] md:text-[16px]">
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] whitespace-nowrap">{chat.ChatID}</td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] whitespace-nowrap">{chat.UserID}</td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] whitespace-nowrap">{chat.AgentID}</td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] whitespace-nowrap">{chat.IssueType}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] whitespace-nowrap">{shortenAddress(chat._id)}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] whitespace-nowrap">{shortenAddress(chat.userId)}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] whitespace-nowrap">{shortenAddress(chat.assignedTo || "-")}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] whitespace-nowrap">{chat.issueType}</td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[100px]">
-                                        <span className={`text-[12px] md:text-[16px] px-4 py-2 rounded-xl text-xs md:text-base font-semibold ${chat.Status === "Unresolved" ? "bg-[#EFE40833] text-[#B0A700]" : "bg-[#71FB5533] text-[#20C000]"}`}>
-                                            {chat.Status}
+                                        <span className={`text-[12px] md:text-[16px] px-4 py-2 rounded-xl text-xs md:text-base font-semibold ${chat.status === "Unresolved" ? "bg-[#EFE40833] text-[#B0A700]" : "bg-[#71FB5533] text-[#20C000]"}`}>
+                                            {chat.status}
                                         </span>
                                     </td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] whitespace-nowrap">{chat.LastUpdated}</td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] whitespace-nowrap underline text-primary cursor-pointer">{chat.Chat}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] whitespace-nowrap">{formatJoiningDate(chat.updateDate)}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] whitespace-nowrap underline text-primary cursor-pointer">
+                                        {`chat.cashpay/${chat._id}`}
+                                    </td>
                                 </tr>
                             ))}
                     </tbody>

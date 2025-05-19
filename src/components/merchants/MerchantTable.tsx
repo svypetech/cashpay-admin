@@ -3,35 +3,22 @@
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import ColourfulBlock from "../ui/ColourfulBlock";
-// Add import for the sidebar
 import MerchantInfoSidebar from "./MerchantInfoSidebar";
-
-interface Merchant {
-  userId: string;
-  name: string;
-  email: string;
-  tradesCompleted: number;
-  successRate: string;
-  status: string;
-  viewsRate?: number;
-  successRateChange?: number;
-  pendingBankVerification?: boolean; // Add this property to show the orange dot
-}
+import Merchant from "@/src/Types/Merchant";
+import handleSuspendUser from "@/src/hooks/users/suspendUser";
+import handleBanUser from "@/src/hooks/users/banUser";
+import { formatNumberToTwoDecimals } from "@/src/lib/functions";
 
 interface MerchantsTableProps {
   headings: string[];
   merchants: Merchant[];
   onViewUser: (userId: string) => void;
-  onSuspendUser: (userId: string) => void;
-  onBanUser: (userId: string) => void;
 }
 
 export default function MerchantsTable({
   headings,
   merchants,
   onViewUser,
-  onSuspendUser,
-  onBanUser,
 }: MerchantsTableProps) {
   const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
   const [showSidebar, setShowSidebar] = useState(false);
@@ -58,39 +45,43 @@ export default function MerchantsTable({
     };
   }, [activeDropdown]);
 
+
   useEffect(() => {
-    // Adjust dropdown position for the last few rows
-    if (
-      activeDropdown !== null &&
-      tableRef.current &&
-      dropdownRefs.current[activeDropdown]
-    ) {
-      const tableRect = tableRef.current.getBoundingClientRect();
-      const dropdownRect =
-        dropdownRefs.current[activeDropdown]!.getBoundingClientRect();
-      const rowElement = dropdownRefs.current[activeDropdown]!.closest("tr");
-      const rowRect = rowElement?.getBoundingClientRect();
+    // Adjust dropdown position
+    if (activeDropdown !== null && tableRef.current && dropdownRefs.current[activeDropdown]) {
+      const tableRect = tableRef.current.getBoundingClientRect()
+      const dropdownRect = dropdownRefs.current[activeDropdown]!.getBoundingClientRect()
+      const rowElement = dropdownRefs.current[activeDropdown]!.closest("tr")
+      const rowRect = rowElement?.getBoundingClientRect()
 
       if (rowRect && dropdownRect) {
-        const spaceBelow = tableRect.bottom - rowRect.bottom;
-        const dropdownHeight = dropdownRect.height;
+        const spaceBelow = tableRect.bottom - rowRect.bottom
+        const dropdownHeight = dropdownRect.height
 
-        // If there's not enough space below, open the dropdown upwards
-        if (spaceBelow < dropdownHeight) {
-          dropdownRefs.current[activeDropdown]!.style.bottom = "100%";
-          dropdownRefs.current[activeDropdown]!.style.top = "auto";
-          dropdownRefs.current[activeDropdown]!.style.marginBottom = "8px";
-          dropdownRefs.current[activeDropdown]!.style.marginTop = "0";
+        // Always open dropdown downwards for the first row or single row
+        if (activeDropdown === 0 || activeDropdown === 1 || activeDropdown === 2 || merchants.length === 1 || merchants.length === 2) {
+          dropdownRefs.current[activeDropdown]!.style.top = "100%"
+          dropdownRefs.current[activeDropdown]!.style.bottom = "auto"
+          dropdownRefs.current[activeDropdown]!.style.marginTop = "8px"
+          dropdownRefs.current[activeDropdown]!.style.marginBottom = "0"
         } else {
-          // Otherwise, open downwards (default)
-          dropdownRefs.current[activeDropdown]!.style.top = "100%";
-          dropdownRefs.current[activeDropdown]!.style.bottom = "auto";
-          dropdownRefs.current[activeDropdown]!.style.marginTop = "8px";
-          dropdownRefs.current[activeDropdown]!.style.marginBottom = "0";
+          // For other rows with multiple rows, open upwards if not enough space below
+          if (spaceBelow < dropdownHeight) {
+            dropdownRefs.current[activeDropdown]!.style.bottom = "100%"
+            dropdownRefs.current[activeDropdown]!.style.top = "auto"
+            dropdownRefs.current[activeDropdown]!.style.marginBottom = "8px"
+            dropdownRefs.current[activeDropdown]!.style.marginTop = "0"
+          } else {
+            // Open downwards
+            dropdownRefs.current[activeDropdown]!.style.top = "100%"
+            dropdownRefs.current[activeDropdown]!.style.bottom = "auto"
+            dropdownRefs.current[activeDropdown]!.style.marginTop = "8px"
+            dropdownRefs.current[activeDropdown]!.style.marginBottom = "0"
+          }
         }
       }
     }
-  }, [activeDropdown]);
+  }, [activeDropdown, merchants.length])
 
   const toggleDropdown = (index: number) => {
     setActiveDropdown(activeDropdown === index ? null : index);
@@ -143,25 +134,24 @@ export default function MerchantsTable({
                     {merchant.userId}
                   </td>
                   <td className="p-2 sm:p-6 font-satoshi font-bold text-primary min-w-[120px] break-words whitespace-nowrap">
-                    {merchant.name}
+                    {merchant.name.firstName ? (`${merchant.name.firstName} ${merchant.name.lastName}`) : "N/A"}
                   </td>
                   <td className="p-2 sm:p-6 font-satoshi min-w-[150px] break-words whitespace-nowrap">
                     {merchant.email}
                   </td>
                   <td className="p-2 sm:p-6 font-satoshi min-w-[100px] whitespace-nowrap">
-                    {merchant.tradesCompleted}
+                    <p className="text-center" >{merchant.completedTrades}</p>
                   </td>
                   <td className="p-2 sm:p-6 font-satoshi min-w-[120px] whitespace-nowrap">
-                    {merchant.successRate}
+                    <p className="text-center" >{formatNumberToTwoDecimals(merchant.successRate)}%</p>
                   </td>
                   <td className="p-2 sm:p-6 font-satoshi min-w-[120px] py-[20px]">
                     <ColourfulBlock
-                      text={merchant.status}
-                      className={`text-left px-4 py-2 rounded-xl md:text-md font-semibold whitespace-nowrap ${
-                        merchant.status === "Verified"
+                      text={merchant.verified ? "Verified" : "Pending"}
+                      className={`text-left px-4 py-2 rounded-xl md:text-md font-semibold whitespace-nowrap ${merchant.verified
                           ? "bg-[#71FB5533] text-[#20C000]"
                           : "text-[#727272] bg-[#72727233]"
-                      }`}
+                        }`}
                     />
                   </td>
                   <td className="relative p-2 sm:p-6 font-satoshi min-w-[60px] text-center">
@@ -198,7 +188,7 @@ export default function MerchantsTable({
                           <button
                             className="block w-full text-left px-4 py-2 text-sm font-[700] text-red-600 cursor-pointer hover:bg-gray-50  border-b border-gray-200"
                             onClick={() => {
-                              onSuspendUser(merchant.userId);
+                              handleSuspendUser(merchant._id);
                               setActiveDropdown(null);
                             }}
                           >
@@ -207,7 +197,7 @@ export default function MerchantsTable({
                           <button
                             className="block w-full text-left px-4 py-2 text-sm font-[700] text-red-600 cursor-pointer hover:bg-gray-50"
                             onClick={() => {
-                              onBanUser(merchant.userId);
+                              handleBanUser(merchant._id);
                               setActiveDropdown(null);
                             }}
                           >
@@ -227,14 +217,9 @@ export default function MerchantsTable({
         <MerchantInfoSidebar
           showSidebar={showSidebar}
           onClose={() => setShowSidebar(false)}
-          merchant={{
-            ...selectedMerchant,
-            viewsRate: 2.5,
-            successRateChange: 2.45,
-            pendingBankVerification: true,
-          }}
-          onSuspend={onSuspendUser}
-          onBan={onBanUser}
+          merchant={selectedMerchant}
+          onSuspend={() => handleSuspendUser(selectedMerchant._id)}
+          onBan={() => handleBanUser(selectedMerchant._id)}
         />
       )}
     </div>

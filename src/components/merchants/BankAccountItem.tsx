@@ -1,21 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import BankAccountDetails from "./BankAccountDetails";
-
-interface BankAccount {
-  id: string;
-  bankName: string;
-  accountHolder: string;
-  accountNumber: string;
-  iban: string;
-  isVerified: boolean;
-  isPending: boolean;
-}
+import { MerchantBankAccount } from "@/src/Types/Merchant";
 
 interface BankAccountItemProps {
-  account: BankAccount;
+  action: {
+    isLoading: boolean;
+    type: string;
+  };
+  account: MerchantBankAccount;
   onVerify: (accountId: string) => void;
   onDenyVerification: (accountId: string) => void;
   isExpanded: boolean; // Add this prop to manage the expanded state
@@ -23,6 +17,7 @@ interface BankAccountItemProps {
 }
 
 export default function BankAccountItem({
+  action,
   account,
   onVerify,
   onDenyVerification,
@@ -53,15 +48,13 @@ export default function BankAccountItem({
               width={24}
               height={24}
             />
-          ) : account.isPending ? (
+          ) :  (
             <Image
               src="/icons/pending bank.svg"
               alt="Pending Verification"
               width={24}
               height={24}
             />
-          ) : (
-            <span className="w-6 h-6"></span> // Empty placeholder for alignment
           )}
         </div>
 
@@ -69,6 +62,7 @@ export default function BankAccountItem({
       </div>
       {isExpanded && (
         <BankAccountDetails
+          action={action}
           account={account}
           onVerify={onVerify}
           onDenyVerification={onDenyVerification}

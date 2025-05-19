@@ -3,31 +3,22 @@
 import Image from "next/image";
 import type React from "react"
 import { useEffect, useState, useRef } from "react"
-import AssignRequestTable from "../CustomerSupport/AssignRequestTable";
 import AssignRequestDialog from "../CustomerSupport/AssignRequestDialog";
-
-
-interface Request {
-    TicketID: string;
-    UserID: string;
-    AgentID: string;
-    RequestDate: string;
-    Subject: string;
-    Status: string;
-}
+import { SupportRequest } from "@/src/Types/SupportRequests";
+import { formatJoiningDate, shortenAddress } from "@/src/lib/functions";
 
 interface Props {
     headings: string[]
-    data: Request[]
+    data: SupportRequest[]
 }
 
 const CustomerSupportTable: React.FC<Props> = ({ data, headings }) => {
     const [activeDropdown, setActiveDropdown] = useState<number | null>(null)
     const [showPopup, setShowPopup] = useState(false)
-    const [selectedRequest, setSelectedRequest] = useState<Request | null>(null)
+    const [selectedRequest, setSelectedRequest] = useState<SupportRequest | null>(null)
     const tableRef = useRef<HTMLDivElement>(null)
     const dropdownRefs = useRef<(HTMLDivElement | null)[]>([])
-    const [customerRequests, setCustomerRequests] = useState<Request[]>(data)
+    const [customerRequests, setCustomerRequests] = useState<SupportRequest[]>(data)
 
     useEffect(() => {
         setCustomerRequests(data)
@@ -109,14 +100,14 @@ const CustomerSupportTable: React.FC<Props> = ({ data, headings }) => {
                         {Array.isArray(customerRequests) &&
                             customerRequests.map((request, index) => (
                                 <tr key={index} className="border-b text-[12px] md:text-[16px]">
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{request.TicketID}</td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{request.UserID}</td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{request.AgentID}</td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{request.RequestDate}</td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[200px] break-words text-center">{request.Subject}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{shortenAddress(request._id)}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{shortenAddress(request.userId)}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words"> - </td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{formatJoiningDate(request.updateDate)}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[200px] break-words text-center">{request.issueType}</td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[100px]">
-                                        <span className={`text-[12px] md:text-[16px] px-4 py-2 rounded-xl text-xs md:text-base font-semibold ${request.Status === "Unassigned" ? "bg-[#EFE40833] text-[#B0A700]" : "bg-[#71FB5533] text-[#20C000]"}`}>
-                                            {request.Status}
+                                        <span className={`text-[12px] md:text-[16px] px-4 py-2 rounded-xl text-xs md:text-base font-semibold ${request.status === "Assigned" ? "bg-[#71FB5533] text-[#20C000]" : "bg-[#EFE40833] text-[#B0A700]"}`}>
+                                            {request.status === "Assigned" ? "Assigned" : "Unassigned"}
                                         </span>
                                     </td>
                                     <td className="relative px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[60px] text-center">
@@ -166,11 +157,18 @@ const CustomerSupportTable: React.FC<Props> = ({ data, headings }) => {
                 <AssignRequestDialog
                     isOpen={showPopup}
                     onCancel={() => setShowPopup(false)}
-                    handleAssign={(agentID) => {
+                    requestId={selectedRequest?._id} 
+                    handleAssign={(agentId) => {
+                        // Update the local state to show the request as assigned
                         setCustomerRequests((prevRequests) =>
-                            prevRequests.map((req) => (req.UserID === agentID ? { ...req, Status: "Assigned" } : req))
-                        )
-                        
+                            prevRequests.map((req) =>
+                                req._id === selectedRequest?._id
+                                    ? { ...req, status: "assigned" }
+                                    : req
+                            )
+                        );
+                        setShowPopup(false);
+                        setSelectedRequest(null);
                     }}
                 />
             )}

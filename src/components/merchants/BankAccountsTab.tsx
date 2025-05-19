@@ -2,24 +2,20 @@
 
 import { useState } from "react";
 import BankAccountItem from "./BankAccountItem";
-
-interface BankAccount {
-  id: string;
-  bankName: string;
-  accountHolder: string;
-  accountNumber: string;
-  iban: string;
-  isVerified: boolean;
-  isPending: boolean;
-}
+import { MerchantBankAccount } from "@/src/Types/Merchant";
 
 interface BankAccountsTabProps {
-  accounts: BankAccount[];
+  action: {
+    isLoading: boolean;
+    type: string;
+  }
+  accounts: MerchantBankAccount[];
   onVerifyAccount: (accountId: string) => void;
   onDenyVerification: (accountId: string) => void;
 }
 
 export default function BankAccountsTab({
+  action,
   accounts,
   onVerifyAccount,
   onDenyVerification,
@@ -37,6 +33,7 @@ export default function BankAccountsTab({
       <div className="space-y-3">
         {accounts.map((account) => (
           <BankAccountItem 
+            action={action}
             key={account.id}
             account={account}
             onVerify={onVerifyAccount}

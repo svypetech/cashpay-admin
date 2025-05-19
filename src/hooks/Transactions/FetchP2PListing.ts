@@ -14,7 +14,7 @@ export default function useFetchP2PListing({
   sortBy?: string;
 }) {
   const [listings, setListings] = useState<any[]>([]);
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
@@ -50,8 +50,9 @@ export default function useFetchP2PListing({
           },
         });
 
-        setListings(response.data.data);
-        setTotalPages(response.data.totalPages);
+        setListings(response.data.add.data);
+        setTotalPages(response.data.add.totalPages);
+        console.log("Total pages:", response.data.add.totalPages);
       } catch (error) {
         setIsError(true);
         setListings([]);

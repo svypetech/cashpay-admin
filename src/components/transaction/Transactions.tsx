@@ -21,50 +21,53 @@ export default function Transactions() {
   const [currentPage, setCurrentPage] = useState(1);
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const { transactions, totalPages, loading, error } = useFetchTransactions({ page:currentPage, limit:10, searchQuery: searchQuery });
-  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>(transactions);
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+  
+  // Pass the debounced search query to the hook
+  const { transactions, totalPages, loading, error } = useFetchTransactions({ 
+    page: currentPage, 
+    limit: 10, 
+    searchQuery: debouncedSearchQuery 
+  });
+  
+  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
 
+  // Debounce search query to avoid excessive API calls
   useEffect(() => {
-    if (transactions) {
-      setFilteredTransactions(transactions);
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Apply filters whenever transactions or active tab changes
+  useEffect(() => {
+    if (!transactions || transactions.length === 0) {
+      setFilteredTransactions([]);
+      return;
     }
-  }, [transactions]);
+
+    let filtered = [...transactions];
+    
+    // Filter by tab
+    if (activeTab !== "all") {
+      filtered = filtered.filter((transaction) => 
+        transaction.status === activeTab
+      );
+    }
+    
+    // No need to filter by search here since we're using the API for search
+    
+    setFilteredTransactions(filtered);
+  }, [transactions, activeTab]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
 
-  // filter based on active tab
-  useEffect(() => {
-    if (activeTab === "all") {
-      setFilteredTransactions(transactions);
-    } else if (activeTab === "completed") {
-      setFilteredTransactions(transactions.filter((transaction) => transaction.status === "completed"));
-    } else if (activeTab === "pending") {
-      setFilteredTransactions(transactions.filter((transaction) => transaction.status === "pending"));
-    } else if (activeTab === "failed") {
-      setFilteredTransactions(transactions.filter((transaction) => transaction.status === "failed"));
-    }
-  }, [activeTab]);
-
-  useEffect(() => {
-    const filtered = transactions.filter((transaction) => {
-      const transactionFrom = transaction.userId.toLowerCase();
-      const transactionTo = transaction.to.toLowerCase();
-      const transactionID = transaction.id.toLowerCase();
-      const query = searchQuery.toLowerCase();
-      return (
-        transactionFrom.includes(query) ||
-        transactionTo.includes(query) ||
-        transactionID.includes(query)
-      );
-    });
-    setFilteredTransactions(filtered);
-  }, [searchQuery]);
-
   return (
     <div>
-
       {/* Navigation Tabs */}
       <div className="w-full flex items-center mb-4">
         <div className="flex w-fit">
@@ -89,12 +92,17 @@ export default function Transactions() {
           <div className="relative">
             <input
               onChange={(e) => setSearchQuery(e.target.value)}
+              value={searchQuery}
               type="text"
               placeholder="Search..."
               className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:gray-700 focus:border-transparent"
             />
             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <Image src="/icons/search.svg" alt="Arrow right" width={24} height={24} />
+              {debouncedSearchQuery !== searchQuery ? (
+                <div className="animate-spin h-5 w-5 border-2 border-gray-500 rounded-full border-t-transparent"></div>
+              ) : (
+                <Image src="/icons/search.svg" alt="Search" width={24} height={24} />
+              )}
             </div>
           </div>
         </div>
@@ -105,13 +113,13 @@ export default function Transactions() {
             <Image src="/icons/dropdownIcon.svg" alt="Arrow right" width={24} height={24} />
           </button>
         </div>
-
       </div>
+
       {loading ? (
         <SkeletonTableLoader headings={headings} rowCount={10} />
-      ) : error ?  (
+      ) : error ? (
         <div className="flex justify-center items-center py-10">{error}</div>
-      ) : filteredTransactions && filteredTransactions.length === 0 ? (
+      ) : filteredTransactions.length === 0 ? (
         <div className="flex justify-center items-center py-10">No transactions found</div>
       ) : (
         <div>
@@ -123,7 +131,6 @@ export default function Transactions() {
           />
         </div>
       )}
-
     </div>
   );
 }

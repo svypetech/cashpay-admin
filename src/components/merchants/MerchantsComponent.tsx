@@ -6,6 +6,8 @@ import Tabs from "../ui/Tabs";
 import Search from "../ui/Search";
 import Sort from "../ui/Sort";
 import MerchantsTable from "./MerchantTable";
+import useFetchMerchants from "@/src/hooks/merchants/getMerchants";
+import SkeletonTableLoader from "../skeletons/SkeletonTableLoader";
 
 // Table headings
 const headings = [
@@ -13,61 +15,16 @@ const headings = [
   "Name",
   "E-mail",
   "Trades Completed",
-  "Success Rate", 
+  "Success Rate",
   "Status",
   "Actions",
 ];
 
 // Sort options
 const sortOptions = [
-  { label: "Date (Newest)", value: "date_desc" },
-  { label: "Date (Oldest)", value: "date_asc" },
-  { label: "Success Rate (High-Low)", value: "success_desc" },
-  { label: "Success Rate (Low-High)", value: "success_asc" },
-];
-
-// Mock data based on the image
-const mockMerchants = [
-  {
-    userId: "IDCP-0023",
-    name: "John Doe",
-    email: "johndoe@gmail.com",
-    tradesCompleted: 200,
-    successRate: "92%",
-    status: "Verified"
-  },
-  {
-    userId: "IDCP-0023",
-    name: "John Doe",
-    email: "johndoe@gmail.com",
-    tradesCompleted: 200,
-    successRate: "92%",
-    status: "Verified"
-  },
-  {
-    userId: "IDCP-0023",
-    name: "John Doe",
-    email: "johndoe@gmail.com",
-    tradesCompleted: 200,
-    successRate: "92%",
-    status: "Pending"
-  },
-  {
-    userId: "IDCP-0023",
-    name: "John Doe",
-    email: "johndoe@gmail.com",
-    tradesCompleted: 200,
-    successRate: "92%",
-    status: "Verified"
-  },
-  {
-    userId: "IDCP-0023",
-    name: "John Doe",
-    email: "johndoe@gmail.com",
-    tradesCompleted: 200,
-    successRate: "92%",
-    status: "Verified"
-  }
+  { label: "Status", value: "userStatus" },
+  { label: "Date", value: "date" },
+  { label: "Title", value: "title" },
 ];
 
 export default function MerchantsComponent() {
@@ -76,15 +33,13 @@ export default function MerchantsComponent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("");
-  
-  // Mock total pages
-  const totalPages = 13; // From the screenshot showing page numbers
-  
-  
+  const { merchants, isLoading, error, totalPages } = useFetchMerchants(currentPage, 10, sortBy);
+
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
-  
+
   // Handle search
   const handleSearch = (value: string) => {
     setSearchTerm(value);
@@ -112,89 +67,74 @@ export default function MerchantsComponent() {
   // Filter and sort merchants based on activeTab, searchTerm, and sortBy
   const filteredMerchants = useMemo(() => {
     // First filter by tab
-    let filtered = [...mockMerchants];
-    
+    let filtered = [...merchants];
+
     if (activeTab === "Verified") {
-      filtered = mockMerchants.filter(merchant => merchant.status === "Verified");
+      filtered = merchants.filter(merchant => merchant.verified);
     } else if (activeTab === "Pending Verifications") {
-      filtered = mockMerchants.filter(merchant => merchant.status === "Pending");
+      filtered = merchants.filter(merchant => !merchant.verified);
     }
-    
+
     // Then apply search filter if searchTerm exists
     if (searchTerm.trim()) {
-      const search = searchTerm.toLowerCase();
-      filtered = filtered.filter(merchant => 
-        merchant.name.toLowerCase().includes(search) || 
-        merchant.email.toLowerCase().includes(search) ||
-        merchant.userId.toLowerCase().includes(search)
-      );
+      
     }
-    
+
     // Apply sorting
     if (sortBy) {
-      filtered = [...filtered].sort((a, b) => {
-        switch (sortBy) {
-          case "date_desc":
-            return b.userId.localeCompare(a.userId);
-          case "date_asc":
-            return a.userId.localeCompare(b.userId);
-          case "success_desc":
-            return parseInt(b.successRate) - parseInt(a.successRate);
-          case "success_asc":
-            return parseInt(a.successRate) - parseInt(b.successRate);
-          default:
-            return 0;
-        }
-      });
-    }
-    
-    return filtered;
-  }, [mockMerchants, activeTab, searchTerm, sortBy]);
 
-  return (
-    <>
-      {/* Navigation Tabs */}
-      <Tabs 
-        tabs={["All", "Verified", "Pending Verifications"]}
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab}
-        size="normal"
+    }
+
+return filtered;
+  }, [merchants, activeTab, searchTerm, sortBy]);
+
+return (
+  <>
+    {/* Navigation Tabs */}
+    <Tabs
+      tabs={["All", "Verified", "Pending Verifications"]}
+      activeTab={activeTab}
+      setActiveTab={setActiveTab}
+      size="normal"
+    />
+
+    {/* Search and Actions */}
+    <div className="flex flex-col md:grid md:grid-cols-4 justify-between items-center mb-2 gap-4 mt-4">
+      <Search
+        className="w-full md:col-span-3"
+        onSearch={handleSearch}
       />
 
-      {/* Search and Actions */}
-      <div className="flex flex-col md:grid md:grid-cols-4 justify-between items-center mb-2 gap-4 mt-4">
-        <Search 
-          className="w-full md:col-span-3" 
-          onSearch={handleSearch} 
-        />
-        
-        <Sort 
-          className="w-full" 
-          title="Sort by" 
-          options={sortOptions}
-          onSort={handleSort}
-        />
-      </div>
+      <Sort
+        className="w-full"
+        title="Sort by"
+        options={sortOptions}
+        onSort={handleSort}
+      />
+    </div>
 
-      {/* Content area with separated table component */}
+    {/* Content area with separated table component */}
+    {isLoading ? (
+        <SkeletonTableLoader  headings={headings} rowCount={10}/>
+      ) : error ? (
+        <div className="text-red-500 py-10 text-center">Error loading users</div>
+      ) : 
+    <div className="mt-4">
+      <MerchantsTable
+        headings={headings}
+        merchants={filteredMerchants}
+        onViewUser={handleViewUser}
+      />
+
+      {/* Pagination */}
       <div className="mt-4">
-        <MerchantsTable
-          headings={headings}
-          merchants={filteredMerchants}
-          onViewUser={handleViewUser}
-          onSuspendUser={handleSuspendUser}
-          onBanUser={handleBanUser}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
         />
-        
-        {/* Pagination */}
-        <div className="mt-4">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
-        </div>
       </div>
-    </>
-  );
+    </div>}
+  </>
+);
 }

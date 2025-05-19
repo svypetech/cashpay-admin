@@ -32,8 +32,8 @@ interface Web3Transaction {
 
 export default interface Transaction {
     id: string;
-    userId: string;
-    to: string;
+    userId?: string;
+    to?: string;
     token: string;
     tokenName: string;
     amount: string;
@@ -42,5 +42,5 @@ export default interface Transaction {
     wallet: Wallet;
     date: string; // ISO string format
     status: string;
-    web3Data: Web3Data;
+    web3Data?: Web3Data;
 }

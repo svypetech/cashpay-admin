@@ -55,8 +55,8 @@ export default function TransactionsTableDashboard() {
                       </div>
                     </td>
                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] text-sm whitespace-nowrap">
-                      {shortenAddress(transaction.web3Data.transaction.from)} →{" "}
-                      {shortenAddress(transaction.web3Data.transaction.to)}
+                      {transaction.web3Data ? shortenAddress(transaction.web3Data.transaction.from) : "N/A"} →{" "}
+                      {transaction.web3Data ? shortenAddress(transaction.web3Data.transaction.to): "N/A"}
                     </td>
                     <td className="p-3">
                       {transaction.status === "completed" ||
@@ -73,7 +73,7 @@ export default function TransactionsTableDashboard() {
                     </td>
                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] whitespace-nowrap font-medium">
                       {shortenAddress(
-                        transaction.web3Data.transaction.blockHash
+                        transaction.web3Data ? transaction.web3Data.transaction.blockHash : "N/A"
                       )}
                     </td>
                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] whitespace-nowrap">

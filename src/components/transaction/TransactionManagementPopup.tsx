@@ -75,10 +75,10 @@ export default function TransactionManagementPopup({
             <div className="mb-6 text-center">
               <div className="flex items-center justify-center gap-2">
                 <p className="text-sm font-semibold max-w-[280px] truncate">
-                  {shortenAddress(transaction.web3Data.transaction.hash, 10)}
+                  {transaction.web3Data ? shortenAddress(transaction.web3Data.transaction.hash, 10): "N/A"}
                 </p>
                 <button 
-                  onClick={() => copyToClipboard(transaction.web3Data.transaction.hash, 'hash')}
+                  onClick={() => copyToClipboard(transaction.web3Data ? transaction.web3Data.transaction.hash : "", 'hash')}
                   className="text-gray-500 hover:text-gray-700"
                 >
                   {copiedField === 'hash' ? (
@@ -99,10 +99,10 @@ export default function TransactionManagementPopup({
                 <span className="w-28 text-sm font-bold bg-[#27AAE11A] px-4 py-1 rounded-md">To</span>
                 <div className="flex items-center gap-2 flex-1 overflow-hidden">
                   <span className="text-sm text-gray-800 truncate">
-                    {shortenAddress(transaction.web3Data.transaction.to, 8)}
+                    {transaction.web3Data ? shortenAddress(transaction.web3Data.transaction.to, 8) : "N/A"}
                   </span>
                   <button 
-                    onClick={() => copyToClipboard(transaction.web3Data.transaction.to, 'to')}
+                    onClick={() => copyToClipboard(transaction.web3Data ? transaction.web3Data.transaction.to : "", 'to')}
                     className="text-gray-500 hover:text-gray-700 flex-shrink-0"
                   >
                     {copiedField === 'to' ? (
@@ -119,10 +119,10 @@ export default function TransactionManagementPopup({
                 <span className="w-28 text-sm font-bold bg-[#27AAE11A] px-4 py-1 rounded-md">From</span>
                 <div className="flex items-center gap-2 flex-1 overflow-hidden">
                   <span className="text-sm text-gray-800 truncate">
-                    {shortenAddress(transaction.web3Data.transaction.from, 8)}
+                    {transaction.web3Data ? shortenAddress(transaction.web3Data.transaction.from, 8) : "N/A"}
                   </span>
                   <button 
-                    onClick={() => copyToClipboard(transaction.web3Data.transaction.from, 'from')}
+                    onClick={() => copyToClipboard(transaction.web3Data ? transaction.web3Data.transaction.from : "", 'from')}
                     className="text-gray-500 hover:text-gray-700 flex-shrink-0"
                   >
                     {copiedField === 'from' ? (
@@ -147,7 +147,7 @@ export default function TransactionManagementPopup({
                 <span className="w-28 text-sm font-bold bg-[#27AAE11A] px-4 py-1 rounded-md">Block</span>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-800">
-                    {transaction.web3Data.transaction.blockNumber}
+                    {transaction.web3Data ? transaction.web3Data.transaction.blockNumber || "N/A" : "N/A"}
                   </span>
                 </div>
               </div>

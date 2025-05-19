@@ -1,20 +1,17 @@
 'use client';
+
+import { shortenAddress } from '@/src/lib/functions';
+import { Agent } from '@/src/Types/Agent';
 import React from 'react';
-interface Request {
-    agentID: string;
-    name: string;
-    email: string;
-    availableTickets: number;
-}
 
 interface Props {
     headings: string[];
-    requests: Request[];
+    agents: Agent[];
     handleAssignRequest: (userId: string) => void;
+    selectedAgentId: string;
 }
 
-const AssignRequestTable: React.FC<Props> = ({ headings, requests, handleAssignRequest}) => {
-
+const AssignRequestTable: React.FC<Props> = ({ headings, agents, handleAssignRequest, selectedAgentId }) => {
     return (
         <div className={`flex-1 rounded-lg w-full sm:px-10 py-5`}>
             <div className="rounded-lg w-full">
@@ -32,8 +29,8 @@ const AssignRequestTable: React.FC<Props> = ({ headings, requests, handleAssignR
                         </tr>
                     </thead>
                     <tbody>
-                        {Array.isArray(requests) &&
-                            requests.map((request, index) => (
+                        {Array.isArray(agents) &&
+                            agents.map((agent, index) => (
                                 <tr
                                     key={index} 
                                     className="border-b text-[12px] sm:text-[16px]"
@@ -41,31 +38,35 @@ const AssignRequestTable: React.FC<Props> = ({ headings, requests, handleAssignR
                                     <td
                                         className={`whitespace-nowrap p-2 sm:p-4 font-satoshi w-[100px]`}
                                     >
-                                        {request.agentID}
+                                        {shortenAddress(agent._id)}
                                     </td>
                                     <td
                                         className={`whitespace-nowrap p-2 sm:p-4 font-satoshi font-bold text-primary w-[200px]`}
                                     >
-                                        {request.name}
+                                        {agent.title}
                                     </td>
                                     <td
                                         className="p-2 sm:p-4 font-satoshi w-[100px]"
                                     >
-                                        {request.email}
+                                        {agent.email}
                                     </td>
                                     <td
                                         className="p-2 sm:p-4 font-satoshi w-[40px] text-center"
                                     >
-                                        {request.availableTickets}
+                                        {agent.count}
                                     </td>
                                     <td
                                         className="p-2 sm:p-4 font-satoshi w-[100px]"
                                     >
                                         <button
-                                            onClick={() => handleAssignRequest(request.agentID)}
-                                            className=" cursor-pointer border border-primary text-primary rounded-xl px-4 py-2 text-sm font-bold hover:bg-blue-50"
+                                            onClick={() => handleAssignRequest(agent._id)}
+                                            className={`cursor-pointer border rounded-xl px-4 py-2 text-sm font-bold ${
+                                                selectedAgentId === agent._id
+                                                  ? "bg-primary text-white border-primary"
+                                                  : "border-primary text-primary hover:bg-blue-50"
+                                            }`}
                                         >
-                                            Assign
+                                            {selectedAgentId === agent._id ? 'Selected' : 'Assign'}
                                         </button>
                                     </td>
                                 </tr>

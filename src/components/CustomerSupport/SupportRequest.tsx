@@ -4,54 +4,15 @@ import { useEffect, useState } from "react";
 import Pagination from "@/src/components/pagination/pagination";
 import Image from "next/image";
 import CustomerSupportTable from "@/src/components/tables/CustomerSupportTable";
+import useFetchSupportRequests from "@/src/hooks/support/getSupportRequests";
+import SkeletonTableLoader from "../skeletons/SkeletonTableLoader";
+import Sort from "../ui/Sort";
 
 const headings = ["TicketID", "UserID", "AgentID", "RequestDate", "Subject", "Status", "Actions"];
-
-const customerSupportTable = [
-    {
-      TicketID: "ID#TC-1001",
-      UserID: "ID#CP-9000",
-      AgentID: "-",
-      RequestDate: "2025-03-10 14:30",
-      Subject: "Unable to access my account",
-      Status: "Unassigned"
-    },
-    {
-      TicketID: "ID#TC-1001",
-      UserID: "ID#CP-9000",
-      AgentID: "-",
-      RequestDate: "2025-03-10 14:30",
-      Subject: "Unable to access my account",
-      Status: "Unassigned"
-    },
-    {
-      TicketID: "ID#TC-1001",
-      UserID: "ID#CP-9000",
-      AgentID: "-",
-      RequestDate: "2025-03-10 14:30",
-      Subject: "Unable to access my account",
-      Status: "Assigned"
-    },
-    {
-      TicketID: "ID#TC-1001",
-      UserID: "ID#CP-9000",
-      AgentID: "-",
-      RequestDate: "2025-03-10 14:30",
-      Subject: "Unable to access my account",
-      Status: "Unassigned"
-    },
-    {
-      TicketID: "ID#TC-1001",
-      UserID: "ID#CP-9000",
-      AgentID: "-",
-      RequestDate: "2025-03-10 14:30",
-      Subject: "Unable to access my account",
-      Status: "Unassigned"
-    }
-  ]
-  
-
-
+const sortOptions = [
+    { label: "Date", value: "date" },
+    { label: "Status", value: "status" },
+];
 const navigationTabs = [
     { id: "all", title: "All" },
     { id: "unassigned", title: "Unassigned" },
@@ -60,38 +21,46 @@ const navigationTabs = [
 
 export default function SupportRequests() {
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(15); // Example total pages
     const [activeTab, setActiveTab] = useState("all");
     const [searchQuery, setSearchQuery] = useState("");
-    const [data, setData] = useState(customerSupportTable);
-    const [filteredData, setFilteredData] = useState(data);
+    const [sortBy, setSortBy] = useState("");
+    const { requests, totalPages, isLoading, error } = useFetchSupportRequests(currentPage, 10, sortBy, activeTab);
+    const [filteredData, setFilteredData] = useState(requests);
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
     };
 
+    useEffect(() => {
+        setFilteredData(requests);
+    }, [requests]);
+
     // filter based on active tab
     useEffect(() => {
-        const filtered = data.filter((request) => {
+        const filtered = requests.filter((request) => {
 
             if (activeTab === "all") {
-                return true; 
+                return true;
             } else if (activeTab === "unassigned") {
-                return request.Status === "Unassigned";
+                return request.status !== "assigned";
             } else if (activeTab === "assigned") {
-                return request.Status === "Assigned";
+                return request.status === "assigned";
             }
         });
         setFilteredData(filtered);
     }, [activeTab]);
 
     useEffect(() => {
-        const filtered = data.filter((request) => {
+        const filtered = requests.filter((request) => {
             return (
-                request.TicketID.toLowerCase().includes(searchQuery.toLowerCase())
+                request._id.toLowerCase().includes(searchQuery.toLowerCase())
             );
         });
         setFilteredData(filtered);
     }, [searchQuery]);
+    
+    const handleSort = (option: string) => {
+        setSortBy(option);
+    };
 
     return (
         <div className="px-2">
@@ -130,21 +99,30 @@ export default function SupportRequests() {
                     </div>
                 </div>
 
-                <div className={`flex items-center gap-4 w-full font-[satoshi] md:col-span-1`}>
-                    <button className="w-full flex justify-between items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50">
-                        <span>Sort by</span>
-                        <Image src="/icons/dropdownIcon.svg" alt="Arrow right" width={24} height={24} />
-                    </button>
-                </div>
+                <Sort
+                    className="w-full font-[satoshi] md:col-span-1"
+                    title="Sort by"
+                    options={sortOptions}
+                    onSort={handleSort}
+                />
 
             </div>
-
-            <CustomerSupportTable headings={headings} data={filteredData} />
-            <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-            />
+            {isLoading ? (
+                <SkeletonTableLoader rowCount={10} headings={headings} />
+            ) : error ? (
+                <div className="text-red-500 text-center">
+                    <p>{error}</p>
+                </div>
+            ) : (
+                <div className="overflow-x-auto">
+                    <CustomerSupportTable headings={headings} data={filteredData} />
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={handlePageChange}
+                    />
+                </div>
+            )}
         </div>
     );
 }

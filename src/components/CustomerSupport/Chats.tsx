@@ -4,88 +4,44 @@ import { useEffect, useState } from "react";
 import Pagination from "@/src/components/pagination/pagination";
 import Image from "next/image";
 import ChatsTable from "./ChatsTable";
+import useFetchChats from "@/src/hooks/support/getChats";
+import SkeletonTableLoader from "../skeletons/SkeletonTableLoader";
 
 const headings = ["ChatID", "UserID", "AgentID", "IssueType", "Status", "LastUpdated", "Chat"]
 
-const chatsData = [
-    {
-      ChatID: "CH-1001",
-      UserID: "CP-9000",
-      AgentID: "CP-9004",
-      IssueType: "Crypto Release Issue",
-      Status: "Resolved",
-      LastUpdated: "2025-03-10 14:30",
-      Chat: "chat.cashpay/89342998d..."
-    },
-    {
-      ChatID: "CH-1001",
-      UserID: "CP-9000",
-      AgentID: "CP-9004",
-      IssueType: "Crypto Release Issue",
-      Status: "Resolved",
-      LastUpdated: "2025-03-10 14:30",
-      Chat: "chat.cashpay/89342998d..."
-    },
-    {
-      ChatID: "CH-1001",
-      UserID: "CP-9000",
-      AgentID: "CP-9004",
-      IssueType: "Crypto Release Issue",
-      Status: "Resolved",
-      LastUpdated: "2025-03-10 14:30",
-      Chat: "chat.cashpay/89342998d..."
-    },
-    {
-      ChatID: "CH-1001",
-      UserID: "CP-9000",
-      AgentID: "CP-9004",
-      IssueType: "Crypto Release Issue",
-      Status: "Resolved",
-      LastUpdated: "2025-03-10 14:30",
-      Chat: "chat.cashpay/89342998d..."
-    },
-    {
-      ChatID: "CH-1001",
-      UserID: "CP-9000",
-      AgentID: "CP-9004",
-      IssueType: "Crypto Release Issue",
-      Status: "Resolved",
-      LastUpdated: "2025-03-10 14:30",
-      Chat: "chat.cashpay/89342998d..."
-    }
-  ]
-  
-
 const navigationTabs = [
     { id: "all", title: "All" },
-    { id: "ongoing", title: "Ongoing" },
     { id: "pending", title: "Pending" },
     { id: "resolved", title: "Resolved" },
 ];
 
 export default function Chats() {
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(15); // Example total pages
     const [activeTab, setActiveTab] = useState("all");
     const [searchQuery, setSearchQuery] = useState("");
+    const { requests: chatsData, isLoading, error, totalPages } = useFetchChats(currentPage, 10, activeTab);
     const [data, setData] = useState(chatsData);
     const [filteredData, setFilteredData] = useState(data);
+    
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
     };
+
+    useEffect(() => {
+        setData(chatsData);
+        setFilteredData(chatsData);
+    }, [chatsData]);
 
     // filter based on active tab
     useEffect(() => {
         const filtered = data.filter((request) => {
 
             if (activeTab === "all") {
-                return true; 
+                return true;
             } else if (activeTab === "pending") {
-                return request.Status === "Pending";
-            } else if (activeTab === "ongoing") {
-                return request.Status === "Ongoing";
+                return request.status !== "Resolved";
             } else if (activeTab === "resolved") {
-                return request.Status === "Resolved";
+                return request.status === "Resolved";
             }
         });
         setFilteredData(filtered);
@@ -94,7 +50,7 @@ export default function Chats() {
     useEffect(() => {
         const filtered = data.filter((chat) => {
             return (
-                chat.ChatID.toLowerCase().includes(searchQuery.toLowerCase())
+                chat._id.toLowerCase().includes(searchQuery.toLowerCase())
             );
         });
         setFilteredData(filtered);
@@ -145,13 +101,23 @@ export default function Chats() {
                 </div>
 
             </div>
+            {isLoading ? (
+                <SkeletonTableLoader rowCount={10} headings={headings} />
+            ) : error ? (
+                <div className="text-red-500 text-center">
+                    <p>{error}</p>
+                </div>
+            ) : (
+                <div className="overflow-x-auto">
+                    <ChatsTable headings={headings} chats={filteredData} />
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={handlePageChange}
+                    />
+                </div>
+            )}
 
-            <ChatsTable headings={headings} data={filteredData} />
-            <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-            />
         </div>
     );
 }

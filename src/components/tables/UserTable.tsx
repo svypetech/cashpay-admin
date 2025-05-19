@@ -142,7 +142,7 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
 
 
                                         <ColourfulBlock
-                                            text={user.verificationStatus}
+                                            text={user.verificationStatus === "Approved" ? "Approved" : "Pending"}
                                             className={`text-left rounded-xl  md:text-md font-semibold whitespace-nowrap ${user.verificationStatus === "Approved" ? "bg-[#71FB5533] text-[#20C000]" : "text-[#727272] bg-[#72727233]"
                                                 }`}
 

@@ -1,57 +1,20 @@
 'use client';
 import Image from 'next/image';
 import { useState } from 'react';
+import axios from 'axios';
 import AssignRequestTable from './AssignRequestTable';
-import ConfirmDialog from '../cards/ConfirmDialog';
-
-const data = [
-    {
-        agentID: "AG-001",
-        name: "John Doe",
-        email: "johndoe@gmail.com",
-        availableTickets: 20,
-    },
-    {
-        agentID: "AG-002",
-        name: "Jane Smith",
-        email: "janesmith@gmail.com",
-        availableTickets: 15,
-    },
-    {
-        agentID: "AG-003",
-        name: "Robert Johnson",
-        email: "rjohnson@gmail.com",
-        availableTickets: 12,
-    },
-    {
-        agentID: "AG-004",
-        name: "Sarah Williams",
-        email: "swilliams@gmail.com",
-        availableTickets: 25,
-    },
-    {
-        agentID: "AG-005",
-        name: "Michael Brown",
-        email: "mbrown@gmail.com",
-        availableTickets: 8,
-    },
-];
+import useFetchAgents from '@/src/hooks/support/getAgents';
+import SkeletonTableLoader from '../skeletons/SkeletonTableLoader';
+import { Loader2 } from 'lucide-react';
 
 const TableHeadings = ["Agent ID", "Name", "Email", "Available Tickets", "Actions"];
-
-interface Request {
-    agentID: string;
-    name: string;
-    email: string;
-    availableTickets: number;
-}
 
 interface AssignRequestDialogProps {
     isOpen: boolean;
     onCancel: () => void;
     handleAssign: (agentId: string) => void;
     isLoading?: boolean;
-    requests?: Request[];
+    requestId?: string; // Add support request ID
 }
 
 export default function AssignRequestDialog({
@@ -59,22 +22,55 @@ export default function AssignRequestDialog({
     handleAssign,
     onCancel,
     isLoading = false,
-    requests = data,
+    requestId = "",
 }: AssignRequestDialogProps) {
     const [selectedAgentId, setSelectedAgentId] = useState<string>("");
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { agents, isLoading: agentsLoading, error: agentsError, totalPages } = useFetchAgents(1, 10);
 
     if (!isOpen) return null;
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!selectedAgentId || selectedAgentId === "") {
             setError('Please select an agent');
             return;
         }
-        console.log(`Request assigned to agent ${selectedAgentId}`);
         
+        if (!requestId) {
+            setError('Invalid request ID');
+            return;
+        }
+        
+        setIsSubmitting(true);
         setError('');
+        
+        try {
+            const response = await axios.put(
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/help/support-request/updateRequest`,
+                {
+                    id: requestId,
+                    assignedTo: selectedAgentId
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('token')}`
+                    }
+                }
+            );
+            
+            if (response.data.success) {
+                handleAssign(selectedAgentId);
+                onCancel(); // Close the dialog
+            } else {
+                setError(response.data.message || 'Failed to assign request');
+            }
+        } catch (err) {
+            console.error('Error assigning request:', err);
+            setError('An error occurred while assigning the request');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -95,6 +91,7 @@ export default function AssignRequestDialog({
                         onClick={onCancel}
                         className="cursor-pointer"
                         aria-label="Close dialog"
+                        disabled={isSubmitting}
                     >
                         <Image
                             src="/icons/close.svg"
@@ -107,11 +104,22 @@ export default function AssignRequestDialog({
                 </div>
 
                 <div className="flex-1 overflow-y-auto pr-2">
-                    <AssignRequestTable 
-                        headings={TableHeadings} 
-                        requests={requests} 
-                        handleAssignRequest={handleAssign} 
-                    />
+                    {agentsLoading ? (
+                        <SkeletonTableLoader rowCount={5} headings={TableHeadings} />
+                    ) : agentsError ? (
+                        <div className="text-red-500 text-center">
+                            <p>{agentsError}</p>
+                        </div>
+                    ) : (
+                        <AssignRequestTable
+                            headings={TableHeadings}
+                            agents={agents}
+                            selectedAgentId={selectedAgentId}
+                            handleAssignRequest={(agentId: string) => {
+                                setSelectedAgentId(agentId);
+                            }}
+                        />
+                    )}
                 </div>
 
                 {error && (
@@ -121,14 +129,21 @@ export default function AssignRequestDialog({
                 <div className="flex justify-center mt-auto w-full gap-4 px-5">
                     <button
                         onClick={handleSubmit}
-                        disabled={!selectedAgentId || selectedAgentId === "" || isLoading}
+                        disabled={!selectedAgentId || selectedAgentId === "" || isSubmitting}
                         className={`rounded-md w-[50%] px-6 py-2 text-white font-bold bg-primary hover:bg-blue-900 ${
-                            !selectedAgentId || selectedAgentId === "" || isLoading
-                            ? 'cursor-not-allowed'
-                            : 'cursor-pointer'
+                            !selectedAgentId || selectedAgentId === "" || isSubmitting
+                                ? 'cursor-not-allowed opacity-70'
+                                : 'cursor-pointer'
                         }`}
                     >
-                        {isSubmitting ? 'Processing...' : 'Done'}
+                        {isSubmitting ? (
+                            <span className="flex items-center justify-center">
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Processing...
+                            </span>
+                        ) : (
+                            'Done'
+                        )}
                     </button>
                 </div>
             </div>

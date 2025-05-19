@@ -1,3 +1,4 @@
+import { Wallet } from "@/src/Types/Wallet";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -12,7 +13,7 @@ export default function useWallet({
   sortBy: string,
   searchQuery: string
 }) {
-  const [wallets, setWallets] = useState([]);
+  const [wallets, setWallets] = useState<Wallet []>([]);
   const [loading, setLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const [totalPages, setTotalPages] = useState(0);
@@ -46,9 +47,8 @@ export default function useWallet({
           throw new Error("Failed to fetch wallets");
         }
         
-        const data = response.data;
-        setWallets(data);
-        setTotalPages(5);
+        setWallets(response.data.walletsWithUser);
+        setTotalPages(response.data.totalPages);
       } catch (error) {
         setIsError(true);
       } finally {

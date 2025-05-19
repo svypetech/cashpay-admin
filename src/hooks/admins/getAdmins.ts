@@ -7,6 +7,7 @@ export default function useGetAdmins(page: number, limit: number, sortBy?: strin
     const [admins, setAdmins] = useState<Admin []>([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<null| string>(null)
+    const [totalPages, setTotalPages] = useState(0)
 
 
   useEffect(() => {
@@ -24,9 +25,10 @@ export default function useGetAdmins(page: number, limit: number, sortBy?: strin
         // filter the admin such that the current admin is not included in the list
         const user = localStorage.getItem("user")
         const currentAdmin = JSON.parse(user || "{}")
-        const filteredAdmins = response.data.data.filter((admin: any) => admin._id !== currentAdmin._id)
+        const filteredAdmins = response.data.data.users.filter((admin: any) => admin ? admin._id !== currentAdmin._id : [])
         setAdmins(filteredAdmins)
-
+        
+        setTotalPages(Math.ceil(response.data.data.totalCount/ limit))
       } catch (error) {
         setError("Failed to fetch admins")
         console.error("Error fetching admins:", error)
@@ -38,5 +40,5 @@ export default function useGetAdmins(page: number, limit: number, sortBy?: strin
     fetchAdmins() 
   }, [page, limit, sortBy]) // Re-run the effect when page, limit, or sortBy changes
 
-  return { admins, isLoading, error }
+  return { admins, isLoading, error, totalPages }
 }

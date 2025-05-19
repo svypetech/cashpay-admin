@@ -1,14 +1,26 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useDarkMode } from "../app/context/DarkModeContext"; // Import context hook
 import { Bell, Menu } from "lucide-react"
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const { darkMode } = useDarkMode() // Get dark mode state from context
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [image, setImage] = useState("");
+  const router = useRouter();
+
+
+  useEffect(() => {
+    const userInfo = localStorage.getItem("user")
+    if (userInfo) {
+      const parsedUserInfo = JSON.parse(userInfo)
+      setImage(parsedUserInfo.image)
+    }
+  }, [])
 
   return (
     <nav className="w-full bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between">
@@ -30,7 +42,7 @@ export default function Navbar() {
         <div className="flex items-center gap-2">
           <div className="relative h-8 w-8 rounded-full overflow-hidden">
             <Image
-              src="/images/user-avatar.png"
+              src={image ? image : "/images/user-avatar.png"}
               alt="Profile picture"
               width={32}
               height={32}
@@ -66,7 +78,7 @@ export default function Navbar() {
             <div className="flex items-center gap-2">
               <div className="relative h-8 w-8 rounded-full overflow-hidden">
                 <Image
-                  src="/images/user-avatar.png"
+                  src={image ? image : "/images/user-avatar.png"}
                   alt="Profile picture"
                   width={32}
                   height={32}
@@ -97,12 +109,13 @@ export default function Navbar() {
                   <Link onClick={() => setIsMenuOpen(!isMenuOpen)} href="/settings" className="block text-sm text-secondary font-bold curpsor-pointer">
                     Forgot Password
                   </Link>
-                  <Link onClick={() => {
+                  <button onClick={() => {
                     setIsMenuOpen(!isMenuOpen)
                     localStorage.removeItem("userInfo")
-                    }} href="/signin" className="block text-sm text-[#DF1D1D] font-bold curpsor-pointer">
+                    router.push("/signin")
+                    }} className="block text-sm text-[#DF1D1D] font-bold curpsor-pointer">
                     Logout
-                  </Link>
+                  </button>
                 </div>
               </div>
             )}
@@ -116,12 +129,13 @@ export default function Navbar() {
               <Link onClick={() => setIsMenuOpen(!isMenuOpen)} href="/settings" className="block text-sm text-secondary font-bold cursor-pointer">
                 Forgot Password
               </Link>
-              <Link onClick={() => {
+              <button onClick={() => {
                 setIsMenuOpen(!isMenuOpen)
                 localStorage.removeItem("userInfo")
-              }} href="/signin" className="block text-sm text-[#DF1D1D] font-bold cursor-pointer">
+                router.push("/signin")
+              }} className="block text-sm text-[#DF1D1D] font-bold cursor-pointer">
                 Logout
-              </Link>
+              </button>
             </div>
           </div>
         )}

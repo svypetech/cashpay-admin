@@ -31,7 +31,7 @@ const TransactionTable: React.FC<Props> = ({ data, headings }) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {data[0].web3Data && Array.isArray(data) &&
+                        {Array.isArray(data) &&
                             data.map((transaction, index) => (
                                 <tr key={index} onClick={() => {
                                     setSelectedTransaction(transaction)
@@ -41,10 +41,10 @@ const TransactionTable: React.FC<Props> = ({ data, headings }) => {
                                         {transaction.id ? shortenAddress(transaction.id) : "N/A"}
                                     </td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">
-                                        {transaction.web3Data.transaction.from ? shortenAddress(transaction.web3Data.transaction.from) : "N/A"}
+                                        {transaction.web3Data ? shortenAddress(transaction.web3Data.transaction.from) : "N/A"}
                                     </td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[150px] break-words">
-                                        {transaction.web3Data.transaction.to ? shortenAddress(transaction.web3Data.transaction.to) : "N/A"}
+                                        {transaction.web3Data ? shortenAddress(transaction.web3Data.transaction.to) : "N/A"}
                                     </td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[150px] break-words">
                                         {transaction.amount ? (transaction.amount + " " + transaction.tokenName) : "N/A"}
@@ -67,7 +67,7 @@ const TransactionTable: React.FC<Props> = ({ data, headings }) => {
                                         )}
                                     </td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[100px] font-medium">
-                                        {transaction.web3Data.transaction.blockNumber ? (transaction.web3Data.transaction.blockNumber) : "N/A"}
+                                        {transaction.web3Data ? (transaction.web3Data.transaction.blockNumber) : "N/A"}
                                     </td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[60px] text-center whitespace-nowrap">{timeAgo(transaction.date)}</td>
                                 </tr>
