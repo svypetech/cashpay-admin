@@ -35,7 +35,7 @@ const useFetchTransactions = ({page, limit, searchQuery} : {page: number, limit:
     }
 
     fetchData();
-  }, [page]);
+  }, [page, limit, searchQuery]);
 
   return { transactions, totalPages, loading, error };
 };

@@ -56,14 +56,6 @@ export default function MerchantsComponent() {
     console.log(`View user ${userId}`);
   };
 
-  const handleSuspendUser = (userId: string) => {
-    console.log(`Suspend user ${userId}`);
-  };
-
-  const handleBanUser = (userId: string) => {
-    console.log(`Ban user ${userId}`);
-  };
-
   // Filter and sort merchants based on activeTab, searchTerm, and sortBy
   const filteredMerchants = useMemo(() => {
     // First filter by tab

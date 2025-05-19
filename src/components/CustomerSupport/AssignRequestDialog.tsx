@@ -6,6 +6,7 @@ import AssignRequestTable from './AssignRequestTable';
 import useFetchAgents from '@/src/hooks/support/getAgents';
 import SkeletonTableLoader from '../skeletons/SkeletonTableLoader';
 import { Loader2 } from 'lucide-react';
+import Pagination from '../pagination/pagination';
 
 const TableHeadings = ["Agent ID", "Name", "Email", "Available Tickets", "Actions"];
 
@@ -27,7 +28,12 @@ export default function AssignRequestDialog({
     const [selectedAgentId, setSelectedAgentId] = useState<string>("");
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { agents, isLoading: agentsLoading, error: agentsError, totalPages } = useFetchAgents(1, 10);
+    const [currentPage, setCurrentPage] = useState(1);
+    const { agents, isLoading: agentsLoading, error: agentsError, totalPages } = useFetchAgents(currentPage, 10);   
+    
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
 
     if (!isOpen) return null;
 
@@ -36,15 +42,15 @@ export default function AssignRequestDialog({
             setError('Please select an agent');
             return;
         }
-        
+
         if (!requestId) {
             setError('Invalid request ID');
             return;
         }
-        
+
         setIsSubmitting(true);
         setError('');
-        
+
         try {
             const response = await axios.put(
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/help/support-request/updateRequest`,
@@ -58,7 +64,7 @@ export default function AssignRequestDialog({
                     }
                 }
             );
-            
+
             if (response.data.success) {
                 handleAssign(selectedAgentId);
                 onCancel(); // Close the dialog
@@ -76,7 +82,7 @@ export default function AssignRequestDialog({
     return (
         <div className="fixed inset-0 bg-black/30 bg-opacity-50 flex items-center justify-center z-100 p-4">
             <div
-                className="bg-white rounded-lg max-w-[900px] w-full max-h-[90vh] flex flex-col p-6"
+                className="bg-white rounded-lg md:max-w-[900px] w-full max-h-[90vh] flex flex-col p-6 overflow-y-auto"
                 role="dialog"
                 aria-labelledby="assign-request-title"
             >
@@ -111,14 +117,21 @@ export default function AssignRequestDialog({
                             <p>{agentsError}</p>
                         </div>
                     ) : (
-                        <AssignRequestTable
-                            headings={TableHeadings}
-                            agents={agents}
-                            selectedAgentId={selectedAgentId}
-                            handleAssignRequest={(agentId: string) => {
-                                setSelectedAgentId(agentId);
-                            }}
-                        />
+                        <>
+                            <AssignRequestTable
+                                headings={TableHeadings}
+                                agents={agents}
+                                selectedAgentId={selectedAgentId}
+                                handleAssignRequest={(agentId: string) => {
+                                    setSelectedAgentId(agentId);
+                                }}
+                            />
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                onPageChange={handlePageChange}
+                            />
+                        </>
                     )}
                 </div>
 
@@ -130,11 +143,10 @@ export default function AssignRequestDialog({
                     <button
                         onClick={handleSubmit}
                         disabled={!selectedAgentId || selectedAgentId === "" || isSubmitting}
-                        className={`rounded-md w-[50%] px-6 py-2 text-white font-bold bg-primary hover:bg-blue-900 ${
-                            !selectedAgentId || selectedAgentId === "" || isSubmitting
+                        className={`rounded-md w-[50%] px-6 py-2 text-white font-bold bg-primary hover:bg-blue-900 ${!selectedAgentId || selectedAgentId === "" || isSubmitting
                                 ? 'cursor-not-allowed opacity-70'
                                 : 'cursor-pointer'
-                        }`}
+                            }`}
                     >
                         {isSubmitting ? (
                             <span className="flex items-center justify-center">

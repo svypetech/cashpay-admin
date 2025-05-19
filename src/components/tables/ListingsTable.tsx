@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from "react"
 import Image from "next/image";
 import ListingDetailsPopup from "../p2pTrading/ListingPopup";
 import { Listing } from "@/src/Types/P2PListing";
+import axios from "axios";
 
 interface Props {
     headings: string[]
@@ -14,21 +15,22 @@ interface Props {
 const ListingsTable: React.FC<Props> = ({ data, headings }) => {
     const [activeDropdown, setActiveDropdown] = useState<number | null>(null)
     const [showPopup, setShowPopup] = useState(false)
-    const [selectedListing, setSelectedListing] = useState<Listing >({} as Listing)
+    const [selectedListing, setSelectedListing] = useState<Listing>({} as Listing)
     const tableRef = useRef<HTMLDivElement>(null)
     const dropdownRefs = useRef<(HTMLDivElement | null)[]>([])
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     const getColumnWidthClass = (index: number): string => {
-    switch (index) {
-      case 0: return "w-[15%]"; // User ID
-      case 1: return "w-[20%]"; // Username
-      case 2: return "w-[15%]"; // Card User
-      case 3: return "w-[20%]"; // Crypto Holdings
-      case 4: return "w-[20%]"; // Total Balance
-      case 5: return "w-[10%]"; // Actions
-      default: return "w-[16.67%]"; // Equal distribution
-    }
-  };
+        switch (index) {
+            case 0: return "w-[15%]"; // User ID
+            case 1: return "w-[20%]"; // Username
+            case 2: return "w-[15%]"; // Card User
+            case 3: return "w-[20%]"; // Crypto Holdings
+            case 4: return "w-[20%]"; // Total Balance
+            case 5: return "w-[10%]"; // Actions
+            default: return "w-[16.67%]"; // Equal distribution
+        }
+    };
 
     useEffect(() => {
         // Close dropdown when clicking outside
@@ -88,6 +90,28 @@ const ListingsTable: React.FC<Props> = ({ data, headings }) => {
         setActiveDropdown(activeDropdown === index ? null : index)
     }
 
+    const handleDeleteListing = async (listingId: string) => {
+        try {
+            setIsSubmitting(true)
+            const response = await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/transaction/add/${listingId}`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                }
+            })
+            console.log("Response:", response.data)
+            if (response.data.success) {
+                alert("listing deleted successfully")
+            }
+            else {
+                alert("Failed to delete listing")
+            }
+        } catch (error) {
+            console.error("Error deleting:", error)
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
     return (
         <div className="flex-1 rounded-lg w-full py-5">
             {/* Table */}
@@ -110,7 +134,7 @@ const ListingsTable: React.FC<Props> = ({ data, headings }) => {
                                     <td className="px-2 md:px-4 py-3 md:py-4 whitespace-nowrap min-w-[120px] break-words">
                                         {listing.createdBy}
                                     </td>
-                                    
+
                                     <td className="px-2 md:px-4 py-3 md:py-4 whitespace-nowrap min-w-[150px] break-words">{listing.type}</td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 whitespace-nowrap min-w-[150px] break-words">{listing.currency}</td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 whitespace-nowrap min-w-[120px]">
@@ -159,9 +183,12 @@ const ListingsTable: React.FC<Props> = ({ data, headings }) => {
                                                     <div className="border-t border-gray-100"></div>
                                                     <button
                                                         className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
-                                                        onClick={() => { }}
+                                                        onClick={() => { 
+                                                            handleDeleteListing(listing.id)
+                                                            setActiveDropdown(null)
+                                                        }}
                                                     >
-                                                        Delete Listing
+                                                        {isSubmitting ? "Deleting..." : "Delete Listing"}
                                                     </button>
                                                 </div>
                                             )}
@@ -175,7 +202,7 @@ const ListingsTable: React.FC<Props> = ({ data, headings }) => {
 
             {/* @ts-ignore Transaction Details Popup */}
             {/* <TransactionManagementPopup showPopup={showPopup} onClose={() => setShowPopup(false)} transaction={selectedListing} /> */}
-            <ListingDetailsPopup showPopup={showPopup} onClose={() => setShowPopup(false)} listing={selectedListing} /> 
+            <ListingDetailsPopup showPopup={showPopup} onClose={() => setShowPopup(false)} listing={selectedListing} />
         </div>
     )
 }

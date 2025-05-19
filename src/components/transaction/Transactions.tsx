@@ -23,15 +23,16 @@ export default function Transactions() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   
-  // Pass the debounced search query to the hook
+  // Pass both tab and search query to the hook
   const { transactions, totalPages, loading, error } = useFetchTransactions({ 
     page: currentPage, 
     limit: 10, 
-    searchQuery: debouncedSearchQuery 
+    searchQuery: debouncedSearchQuery,
   });
   
-  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
-
+  // No need for filtered transactions state anymore
+  // We'll just use what comes from the API directly
+  
   // Debounce search query to avoid excessive API calls
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -41,29 +42,19 @@ export default function Transactions() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Apply filters whenever transactions or active tab changes
+  // Reset to page 1 when search query or tab changes
   useEffect(() => {
-    if (!transactions || transactions.length === 0) {
-      setFilteredTransactions([]);
-      return;
-    }
-
-    let filtered = [...transactions];
-    
-    // Filter by tab
-    if (activeTab !== "all") {
-      filtered = filtered.filter((transaction) => 
-        transaction.status === activeTab
-      );
-    }
-    
-    // No need to filter by search here since we're using the API for search
-    
-    setFilteredTransactions(filtered);
-  }, [transactions, activeTab]);
+    setCurrentPage(1);
+  }, [debouncedSearchQuery, activeTab]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+  };
+
+  // Clear search input function
+  const clearSearch = () => {
+    setSearchQuery("");
+    setDebouncedSearchQuery("");
   };
 
   return (
@@ -97,11 +88,22 @@ export default function Transactions() {
               placeholder="Search..."
               className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:gray-700 focus:border-transparent"
             />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
               {debouncedSearchQuery !== searchQuery ? (
                 <div className="animate-spin h-5 w-5 border-2 border-gray-500 rounded-full border-t-transparent"></div>
+              ) : searchQuery ? (
+                <button 
+                  onClick={clearSearch} 
+                  className="cursor-pointer"
+                  aria-label="Clear search"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
               ) : (
-                <Image src="/icons/search.svg" alt="Search" width={24} height={24} />
+                <Image src="/icons/search.svg" alt="Search" width={24} height={24} className="pointer-events-none" />
               )}
             </div>
           </div>
@@ -119,11 +121,25 @@ export default function Transactions() {
         <SkeletonTableLoader headings={headings} rowCount={10} />
       ) : error ? (
         <div className="flex justify-center items-center py-10">{error}</div>
-      ) : filteredTransactions.length === 0 ? (
-        <div className="flex justify-center items-center py-10">No transactions found</div>
+      ) : !transactions || transactions.length === 0 ? (
+        <div className="flex flex-col justify-center items-center py-10">
+          <Image src="/icons/no-data.svg" alt="No data" width={120} height={120} className="mb-4 opacity-70" />
+          <p className="text-gray-500">No transactions found</p>
+          {(searchQuery || activeTab !== "all") && (
+            <button 
+              onClick={() => {
+                clearSearch();
+                setActiveTab("all");
+              }}
+              className="mt-4 text-primary hover:underline"
+            >
+              Clear filters
+            </button>
+          )}
+        </div>
       ) : (
         <div>
-          <TransactionTable headings={headings} data={filteredTransactions} />
+          <TransactionTable headings={headings} data={transactions} />
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}

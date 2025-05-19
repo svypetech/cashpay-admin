@@ -4,79 +4,11 @@ import { useState } from 'react';
 import TransferOwnershipTable from '../tables/TransferOwnershipTable';
 import ConfirmDialog from './ConfirmDialog';
 import useGetAdmins from '@/src/hooks/admins/getAdmins';
-import axios from 'axios';
+import Pagination from '../pagination/pagination';
+import SkeletonTableLoader from '../skeletons/SkeletonTableLoader';
 
 
 const headings = ['Agent ID', 'Name', 'Email', 'Type', 'Actions'];
-const users = [
-    {
-        id: 'ID#CP-9203',
-        name: 'John Doe',
-        email: 'johndoe@gmail.com',
-        type: 'Financial Manager',
-    },
-    {
-        id: 'ID#CP-9204',
-        name: 'Jane Smith',
-        email: 'janesmith@gmail.com',
-        type: 'Financial Manager',
-    },
-    {
-        id: 'ID#CP-9205',
-        name: 'John Doe',
-        email: 'johndoe@gmail.com',
-        type: 'Financial Manager',
-    },
-    {
-        id: 'ID#CP-9206',
-        name: 'John Doe',
-        email: 'johndoe@gmail.com',
-        type: 'Financial Manager',
-    },
-    {
-        id: 'ID#CP-9207',
-        name: 'John Doe',
-        email: 'johndoe@gmail.com',
-        type: 'Financial Manager',
-    },
-    {
-        id: 'ID#CP-9208',
-        name: 'John Doe',
-        email: 'johndoe@gmail.com',
-        type: 'Financial Manager',
-    },
-    {
-        id: 'ID#CP-9209',
-        name: 'John Doe',
-        email: 'johndoe@gmail.com',
-        type: 'Financial Manager',
-    },
-    {
-        id: 'ID#CP-9210',
-        name: 'John Doe',
-        email: 'johndoe@gmail.com',
-        type: 'Financial Manager',
-    },
-    {
-        id: 'ID#CP-9211',
-        name: 'John Doe',
-        email: 'johndoe@gmail.com',
-        type: 'Financial Manager',
-    },
-    {
-        id: 'ID#CP-9212',
-        name: 'John Doe',
-        email: 'johndoe@gmail.com',
-        type: 'Financial Manager',
-    },
-];
-
-interface User {
-    id: string;
-    name: string;
-    email: string;
-    type: string;
-}
 
 interface TransferOwnershipDialogProps {
     isOpen: boolean;
@@ -95,7 +27,12 @@ export default function TransferOwnershipDialog({
     const [error, setError] = useState('');
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { admins, isLoading: isLoadingAdmins, error: fetchError } = useGetAdmins(1, 10); 
+    const [currentPage, setCurrentPage] = useState(1);
+    const { admins, isLoading: isLoadingAdmins, error: fetchError, totalPages } = useGetAdmins(currentPage, 10);
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
 
     if (!isOpen) return null;
 
@@ -115,17 +52,10 @@ export default function TransferOwnershipDialog({
     const handleConfirmChange = async () => {
         setIsSubmitting(true);
         setShowConfirmDialog(false);
-        
+
         onConfirm(selectedUserId); // Call the onConfirm prop with the selected user ID
         setIsSubmitting(false);
     };
-
-    if (isOpen && isLoadingAdmins) {
-        return <div className="fixed inset-0 bg-black/30 bg-opacity-50 flex items-center justify-center z-50 p-4">Loading...</div>;
-    }
-    if (isOpen && fetchError) {
-        return <p>Error fetching admins: {fetchError}</p>;
-    }
 
     return (
         <div className="fixed inset-0 bg-black/30 bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -155,14 +85,25 @@ export default function TransferOwnershipDialog({
                         />
                     </button>
                 </div>
+                {isLoadingAdmins ? (
+                    <SkeletonTableLoader rowCount={5} headings={headings} />
+                ) : fetchError ? (
+                    <div className="text-red-500 text-center">
+                        <p>{fetchError}</p>
+                    </div>
+                ) : (
+                    <div className="flex-1 overflow-y-auto pr-2">
+                        <TransferOwnershipTable admins={admins} headings={headings} selectedUserId={selectedUserId} handleSelectUser={handleSelectUser} />
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={handlePageChange}
+                        />
 
-                <div className="flex-1 overflow-y-auto pr-2">
-                    <TransferOwnershipTable admins={admins} headings={headings} selectedUserId={selectedUserId} handleSelectUser={handleSelectUser} />
-                </div>
-
-                {error && (
-                    <p className="text-red-500 text-sm mt-2">{error}</p>
+                    </div>
                 )}
+
+                {error && <p className="text-red-500 text-center">{error}</p>}
 
                 <div className="flex justify-between mt-2 w-full gap-4 px-5">
                     <button

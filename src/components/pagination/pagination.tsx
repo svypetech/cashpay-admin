@@ -54,7 +54,7 @@ export default function Pagination({
 
   return (
     <section className="sm:px-8" >
-      <div className="grid grid-cols-2 gap-x-10 sm:gap-x-20 md:gap-x-0 md:flex items-center justify-between px-6 py-4">
+      <div className="grid grid-cols-2 gap-x-10 sm:gap-x-20 md:gap-x-0 md:flex items-center justify-between md:px-6 py-4">
         <button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage <= 1}

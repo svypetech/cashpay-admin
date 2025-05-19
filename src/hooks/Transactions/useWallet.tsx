@@ -13,7 +13,7 @@ export default function useWallet({
   sortBy: string,
   searchQuery: string
 }) {
-  const [wallets, setWallets] = useState<Wallet []>([]);
+  const [wallets, setWallets] = useState<Wallet[]>([]);
   const [loading, setLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const [totalPages, setTotalPages] = useState(0);
@@ -33,9 +33,19 @@ export default function useWallet({
     const fetchWallets = async () => {
       try {
         setLoading(true);
-        const url = debouncedSearchQuery !== ""
-          ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/transaction/wallets/all?limit=${limit}&page=${currentPage}&search=${debouncedSearchQuery}&sortBy=${sortBy}`
-          : `${process.env.NEXT_PUBLIC_BACKEND_URL}/transaction/wallets/all?limit=${limit}&page=${currentPage}&sortBy=${sortBy}`;
+        
+        // Start with base URL and required parameters
+        let url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/transaction/wallets/all?limit=${limit}&page=${currentPage}`;
+        
+        // Only add search parameter if it exists and isn't empty
+        if (debouncedSearchQuery && debouncedSearchQuery.trim() !== "") {
+          url += `&search=${encodeURIComponent(debouncedSearchQuery.trim())}`;
+        }
+        
+        // Only add sort parameter if it exists and isn't empty
+        if (sortBy && sortBy.trim() !== "") {
+          url += `&sortBy=${encodeURIComponent(sortBy.trim())}`;
+        }
           
         const response = await axios.get(url, {
           headers: {
@@ -50,6 +60,7 @@ export default function useWallet({
         setWallets(response.data.walletsWithUser);
         setTotalPages(response.data.totalPages);
       } catch (error) {
+        console.error("Error fetching wallets:", error);
         setIsError(true);
       } finally {
         setLoading(false);

@@ -6,6 +6,7 @@ import { useEffect, useState, useRef } from "react"
 import WalletSidebar from "../transaction/WalletSidebar";
 import {Wallet} from "@/src/Types/Wallet"
 import { formatNumberToTwoDecimals } from "@/src/lib/functions";
+import handleBanUser from "@/src/hooks/users/banUser";
 
 interface Props {
     headings: string[]
