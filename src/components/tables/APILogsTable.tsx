@@ -97,7 +97,7 @@ const APILogsTable: React.FC<Props> = ({ data, headings, onChatClick }) => {
                   {/* Status */}
                   <td className="py-4 px-4">
                     <ColourfulBlock 
-                      className={`${getStatusColors(apiLog.status)}  rounded-[12px] px-[16px] py-[8px] text-center relative left-[-5px] `} 
+                      className={`${getStatusColors(apiLog.status)}  rounded-[12px] px-4 py-2 text-center relative left-[-5px] `} 
                       text={apiLog.status} 
                     />
                   </td>

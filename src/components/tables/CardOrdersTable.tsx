@@ -112,7 +112,7 @@ const CardOrdersTable: React.FC<Props> = ({ data, headings }) => {
                     <tbody>
                         {Array.isArray(filteredOrders) &&
                             filteredOrders.map((order, index) => (
-                                <tr key={index} className="border-b text-[12px] md:text-[16px]">
+                                <tr key={index} className="border-b border-gray-200 text-[12px] md:text-[16px]">
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{order.orderID}</td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{order.userID}</td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{order.cardType}</td>

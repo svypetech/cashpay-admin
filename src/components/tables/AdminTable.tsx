@@ -155,7 +155,7 @@ const AdminTable: React.FC<Props> = ({ data, headings }) => {
                     <tbody>
                         {Array.isArray(data) &&
                             data.map((admin, index) => (
-                                <tr key={index} className="border-b text-[12px] md:text-[16px]">
+                                <tr key={index} className="border-b border-gray-200 text-[12px] md:text-[16px]">
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[100px] break-words">{admin.id}</td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi font-bold text-primary min-w-[120px] break-words">
                                         {admin.name}

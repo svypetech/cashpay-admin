@@ -1,3 +1,4 @@
+
 "use client"
 
 import type React from "react"
@@ -25,23 +26,33 @@ export default function Footer() {
   ]
 
   return (
-    <footer className="fixed bottom-0 left-0 right-0 flex justify-center items-center w-full p-2 pb-8 ">
-      <div className="z-10 flex justify-between items-center bg-white rounded-2xl border-[1px] border-[#0000001A] w-full max-w-[600px] p-5 shadow-lg">
-        {navigation.map((item) => {
-            const isActive = pathname === item.href
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`flex flex-col items-center justify-center px-2 py-1 ${
-                isActive ? "text-blue-600" : "text-gray-600"
-              }`}
-            >
-              <Image src={isActive ? item.activeIcon : item.icon} alt={item.name} width={60} height={60} />
-            </Link>
-          )
-        })}
-      </div>
-    </footer>
+    <>
+      {/* Spacer to prevent content from hiding behind footer */}
+      <div className="h-24 w-full"></div>
+      
+      <footer className="fixed bottom-0 flex justify-center items-center w-full p-2 pb-8 z-10 pointer-events-none">
+        <div className="flex justify-center items-center bg-white rounded-2xl border-[1px] border-[#0000001A] max-w-[600px] py-5 px-16 shadow-lg pointer-events-auto">
+          {navigation.map((item) => {
+            const isActive = pathname.startsWith(item.href)
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`flex flex-col items-center justify-center px-3 py-1`}
+              >
+                <Image 
+                  src={isActive ? item.activeIcon : item.icon} 
+                  alt={item.name} 
+                  width={60} 
+                  height={60} 
+                  
+                />
+                {/* <span className="text-xs mt-1">{item.name}</span> */}
+              </Link>
+            )
+          })}
+        </div>
+      </footer>
+    </>
   )
 }

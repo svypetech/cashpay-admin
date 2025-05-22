@@ -20,7 +20,7 @@ export default function Page() {
         if (role === "super admin") {
           router.push("/dashboard");
         } else {
-          router.push("/settings");
+          router.push("/signin");
         }
       }
     }
