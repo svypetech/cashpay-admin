@@ -1,4 +1,3 @@
-
 "use client"
 
 import type React from "react"
@@ -31,21 +30,22 @@ export default function Footer() {
       <div className="h-24 w-full"></div>
       
       <footer className="fixed bottom-0 flex justify-center items-center w-full p-2 pb-8 z-10 pointer-events-none">
-        <div className="flex justify-center items-center bg-white rounded-2xl border-[1px] border-[#0000001A] max-w-[600px] py-5 px-16 shadow-lg pointer-events-auto">
+        <div className="flex justify-between items-center bg-white rounded-2xl border-[1px] border-[#0000001A] w-[95%] sm:max-w-[600px] py-3 sm:py-5 px-3 sm:px-16 shadow-lg pointer-events-auto">
           {navigation.map((item) => {
             const isActive = pathname.startsWith(item.href)
             return (
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex flex-col items-center justify-center px-3 py-1`}
+                className={`flex flex-col items-center justify-center py-1`}
               >
                 <Image 
                   src={isActive ? item.activeIcon : item.icon} 
                   alt={item.name} 
-                  width={60} 
-                  height={60} 
-                  
+                  width={0}
+                  height={0}
+                  sizes="(max-width: 640px) 30px, 60px"
+                  className="w-[40px] h-[40px] sm:w-[60px] sm:h-[60px]" 
                 />
                 {/* <span className="text-xs mt-1">{item.name}</span> */}
               </Link>

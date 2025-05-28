@@ -35,11 +35,17 @@ export default function MerchantInfoSidebar({
     type: "",
   });
 
+  // Reset active tab when sidebar is closed
+  const handleClose = () => {
+    setActiveTab("Overview");
+    onClose();
+  };
+
   useEffect(() => {
     setAccounts(bankAccounts);
   }, [bankAccounts]);
 
-  // Handle animation and visibility states - UPDATED to match UserInfoSidebar
+  // Handle animation and visibility states
   useEffect(() => {
     if (showSidebar) {
       setIsVisible(true) // Render the sidebar
@@ -50,6 +56,8 @@ export default function MerchantInfoSidebar({
       document.body.style.overflow = "hidden" // Prevent scrolling
     } else {
       setShouldSlideIn(false) // Start slide-out animation
+      // Reset active tab when sidebar is closed
+      setActiveTab("Overview");
       // Wait for animation to complete before removing from DOM
       const timer = setTimeout(() => {
         setIsVisible(false)
@@ -129,7 +137,7 @@ export default function MerchantInfoSidebar({
       {/* Overlay with fade animation - UPDATED to match UserInfoSidebar */}
       <div
         className={`absolute inset-0 bg-black/50 transition-opacity duration-300 ${shouldSlideIn ? 'opacity-100' : 'opacity-0'}`}
-        onClick={onClose}
+        onClick={handleClose}
         aria-hidden="true"
       />
 
@@ -142,7 +150,7 @@ export default function MerchantInfoSidebar({
           <div className="flex items-center justify-between px-6 py-5">
             <h2 className="text-2xl font-bold">User Profile</h2>
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="rounded-full cursor-pointer p-1 hover:bg-gray-100"
               aria-label="Close sidebar"
             >
@@ -297,6 +305,8 @@ export default function MerchantInfoSidebar({
             : (
               <div className="px-6 py-8">
                 <BankAccountsTab
+                  isLoading={isLoading}
+                  isError={error}
                   action={action}
                   accounts={accounts}
                   onVerifyAccount={handleVerifyAccount}
