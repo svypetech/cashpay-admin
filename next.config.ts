@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
       // Include your existing domains here
       'storage.googleapis.com',
       'logos.covalenthq.com',
+      'coin-images.coingecko.com',
     ],
   }
 };

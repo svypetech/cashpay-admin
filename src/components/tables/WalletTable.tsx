@@ -56,7 +56,7 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
                                 <tr key={index} className="border-b border-gray-200 text-[12px] md:text-[16px]">
                                     <td className="p-2 md:p-4 font-satoshi min-w-[100px] break-words">{wallet.data.userId}</td>
                                     <td className="p-2 md:p-4 font-satoshi font-bold text-primary min-w-[120px] break-words">
-                                        {wallet.data.userName ? `${wallet.data.userName.firstName} ${wallet.data.userName.lastName}` : "N/A"}
+                                        {wallet.data.userName.firstName ? `${wallet.data.userName.firstName} ${wallet.data.userName.lastName}` : "N/A"}
                                     </td>
                                     <td className="p-2 md:p-4 font-satoshi min-w-[150px] break-words">{"-"}</td>
                                     <td className="p-2 md:p-4 font-satoshi min-w-[120px]">
@@ -120,7 +120,7 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
             </div>
 
             {/* Wallet Details Sidebar */}
-            {selectedWallet && selectedWallet.data.balances.items && (
+            {selectedWallet && selectedWallet.data.balances.tokens && (
                 <WalletSidebar
                     showSidebar={showSidebar}
                     onClose={() => setShowSidebar(false)}

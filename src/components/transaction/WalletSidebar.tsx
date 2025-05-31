@@ -82,8 +82,8 @@ export default function WalletSidebar({
           <div className="flex flex-col items-center mx-10 py-8 font-[satoshi] border-b border-gray-300">
             {/* Profile Image */}
             <div className="mb-4 h-32 w-32 overflow-hidden rounded-full">
-              <Image
-                src={wallet.data.image}
+              <img
+                src={wallet.data.image === "" ? "/placeholder.svg" : wallet.data.image}
                 alt={"User Avatar"}
                 width={128}
                 height={128}
@@ -114,13 +114,13 @@ export default function WalletSidebar({
           <div className="flex flex-col items-center mx-10 py-8 font-[satoshi] border-b border-gray-300">
             <div className="flex flex-col w-full">
               {wallet &&
-                wallet.data.balances.items.map((item, index) => (
+                wallet.data.balances.tokens.map((item, index) => (
                   <CryptoCard
                     key={index}
-                    symbol={item.contract_ticker_symbol}
+                    symbol={item.symbol}
                     amount={item.balance}
-                    usdValue={cal_USDT_Value({balance: item.balance, contract_decimals: item.contract_decimals, quote_rate: item.quote_rate || 0})}
-                    iconUrl={item.logo_url || "/placeholder.svg"}
+                    usdValue={cal_USDT_Value({balance: item.balance, contract_decimals: Number(item.contractAddress), quote_rate: Number(item.quote) || 0})}  
+                    iconUrl={item.logo || "/placeholder.svg"}
                   />
                 ))}
             </div>
@@ -144,7 +144,7 @@ function CryptoCard({ symbol, amount, usdValue, iconUrl }: CryptoCardProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <div className="mr-4 h-12 w-12 overflow-hidden rounded-full">
-            <Image
+            <img
               src={iconUrl || "/placeholder.svg"}
               alt={`logo`}
               width={48}
