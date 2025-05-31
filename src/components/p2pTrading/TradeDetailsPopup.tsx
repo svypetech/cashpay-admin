@@ -3,20 +3,12 @@
 import { useEffect } from "react"
 import Image from "next/image"
 import { X } from "lucide-react"
+import Trade from "@/src/Types/Trades"
 
 interface TradeDetailsPopupProps {
     showPopup: boolean
     onClose: () => void
-    trade: {
-        hash: string
-        tradeId: string
-        sellerId: string
-        buyerId: string
-        amount: number
-        currency: string
-        payment: string
-        status: string
-    }
+    trade: Trade
 }
 
 export default function TradeDetailsPopup({
@@ -88,7 +80,7 @@ export default function TradeDetailsPopup({
                             </div>
                             <div className="flex gap-8">
                                 <span className="w-28 text-sm font-bold bg-[#27AAE11A] px-4 py-1">Amount</span>
-                                <span className="text-sm text-gray-800">{trade.amount}</span>
+                                <span className="text-sm text-gray-800">{trade.amountt}</span>
                             </div>
                             <div className="flex gap-8">
                                 <span className="w-28 text-sm font-bold bg-[#27AAE11A] px-4 py-1">Status</span>
@@ -96,7 +88,7 @@ export default function TradeDetailsPopup({
                             </div>
                             <div className="flex gap-8">
                                 <span className="w-28 text-sm font-bold bg-[#27AAE11A] px-4 py-1">Payment</span>
-                                <span className={`text-sm text-red-500 font-bold`}>
+                                <span className={`text-sm text-success font-bold`}>
                                     {trade.payment}
                                 </span>
                             </div>

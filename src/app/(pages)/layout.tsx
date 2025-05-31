@@ -26,7 +26,6 @@ const Layout = ({ children }: { children: ReactNode }) => {
             const decodedToken = JSON.parse(atob(token.split(".")[1]));
             const role = decodedToken.role;
             if (role === "super admin") {
-              router.push("/dashboard");
               setLoading(false);
             } else {
               setTimeout(() => {

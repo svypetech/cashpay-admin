@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useDarkMode } from "../app/context/DarkModeContext"; // Import context hook
-import { Bell, Menu } from "lucide-react"
+import { Menu } from "lucide-react"
 import { useRouter } from "next/navigation";
 
 export default function Navbar() {
@@ -35,9 +35,6 @@ export default function Navbar() {
       </Link>
 
       <div className="flex items-center gap-4 md:hidden">
-        <button aria-label="Notifications" className="relative p-1 rounded-full hover:bg-gray-100">
-          <Bell className="h-5 w-5 text-gray-500" />
-        </button>
 
         <div className="flex items-center gap-2">
           <div className="relative h-8 w-8 rounded-full overflow-hidden">
@@ -70,9 +67,6 @@ export default function Navbar() {
 
         {/* Desktop navigation */}
         <div className="hidden md:flex items-center gap-2 sm:gap-6">
-          <button aria-label="Notifications" className="relative p-1 rounded-full hover:bg-gray-100">
-            <Bell className="h-5 w-5 text-gray-500" />
-          </button>
 
           <div className="relative bg-gray-100 rounded-xl py-2 px-4 flex items-center gap-2">
             <div className="flex items-center gap-2">
@@ -107,7 +101,7 @@ export default function Navbar() {
               <div className="absolute top-10 right-0 w-44 bg-white rounded-md shadow-lg py-3 px-4 z-10 border border-gray-100 font-[satoshi]">
                 <div className="space-y-3">
                   <Link onClick={() => setIsMenuOpen(!isMenuOpen)} href="/settings" className="block text-sm text-secondary font-bold curpsor-pointer">
-                    Forgot Password
+                    Settings
                   </Link>
                   <button onClick={() => {
                     setIsMenuOpen(!isMenuOpen)
@@ -127,7 +121,7 @@ export default function Navbar() {
           <div className="absolute top-14 right-4 w-40 bg-white rounded-md shadow-lg py-3 px-4 z-10 border border-gray-100 md:hidden">
             <div className="space-y-3 font-[satoshi]">
               <Link onClick={() => setIsMenuOpen(!isMenuOpen)} href="/settings" className="block text-sm text-secondary font-bold cursor-pointer">
-                Forgot Password
+                Settings
               </Link>
               <button onClick={() => {
                 setIsMenuOpen(!isMenuOpen)

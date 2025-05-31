@@ -3,7 +3,7 @@ import axios from 'axios';
 import Transaction from '@/src/Types/TransactionManagement';
   
 
-const useFetchTransactions = ({page, limit, searchQuery} : {page: number, limit: number, searchQuery?:string})  => {
+const useFetchTransactions = ({page, limit, searchQuery, status} : {page: number, limit: number, searchQuery?:string, status?: string})  => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [totalPages, setTotalPages] = useState<number>(0);
@@ -13,7 +13,16 @@ const useFetchTransactions = ({page, limit, searchQuery} : {page: number, limit:
     async function fetchData() {
       setLoading(true);
       try {
-        const url = searchQuery?.trim() ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/transaction/transaction/?limit=${limit}&page=${page}&search=${searchQuery}` : `${process.env.NEXT_PUBLIC_BACKEND_URL}/transaction/transaction/?limit=${limit}&page=${page}`
+        // Build base URL with search query if provided
+        let url = searchQuery?.trim() 
+          ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/transaction/transaction/?limit=${limit}&page=${page}&search=${searchQuery}` 
+          : `${process.env.NEXT_PUBLIC_BACKEND_URL}/transaction/transaction/?limit=${limit}&page=${page}`;
+        
+        // Append status if provided
+        if (status) {
+          url += `&status=${status}`;
+        }
+
         const response = await axios.get(url, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -35,7 +44,7 @@ const useFetchTransactions = ({page, limit, searchQuery} : {page: number, limit:
     }
 
     fetchData();
-  }, [page, limit, searchQuery]);
+  }, [page, limit, searchQuery, status]);
 
   return { transactions, totalPages, loading, error };
 };

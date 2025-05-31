@@ -2,11 +2,10 @@
 
 import Image from "next/image";
 import type React from "react"
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState } from "react"
 import WalletSidebar from "../transaction/WalletSidebar";
 import {Wallet} from "@/src/Types/Wallet"
 import { formatNumberToTwoDecimals } from "@/src/lib/functions";
-import handleBanUser from "@/src/hooks/users/banUser";
 
 interface Props {
     headings: string[]
@@ -17,11 +16,8 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
     const [activeDropdown, setActiveDropdown] = useState<number | null>(null)
     const [showSidebar, setShowSidebar] = useState(false)
     const [selectedWallet, setSelectedWallet] = useState<Wallet | null>(null)
-    const tableRef = useRef<HTMLDivElement>(null)
-    const dropdownRefs = useRef<(HTMLDivElement | null)[]>([])
 
     useEffect(() => {
-        // Close dropdown when clicking outside
         const handleClickOutside = (event: MouseEvent) => {
             if (activeDropdown !== null) {
                 const target = event.target as HTMLElement
@@ -37,52 +33,14 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
         }
     }, [activeDropdown])
 
-    useEffect(() => {
-        // Adjust dropdown position
-        if (activeDropdown !== null && tableRef.current && dropdownRefs.current[activeDropdown]) {
-            const tableRect = tableRef.current.getBoundingClientRect()
-            const dropdownRect = dropdownRefs.current[activeDropdown]!.getBoundingClientRect()
-            const rowElement = dropdownRefs.current[activeDropdown]!.closest("tr")
-            const rowRect = rowElement?.getBoundingClientRect()
-
-            if (rowRect && dropdownRect) {
-                const spaceBelow = tableRect.bottom - rowRect.bottom
-                const dropdownHeight = dropdownRect.height
-
-                // Always open dropdown downwards for the first row or single row
-                if (activeDropdown === 0 || data.length === 1) {
-                    dropdownRefs.current[activeDropdown]!.style.top = "100%"
-                    dropdownRefs.current[activeDropdown]!.style.bottom = "auto"
-                    dropdownRefs.current[activeDropdown]!.style.marginTop = "8px"
-                    dropdownRefs.current[activeDropdown]!.style.marginBottom = "0"
-                } else {
-                    // For other rows with multiple rows, open upwards if not enough space below
-                    if (spaceBelow < dropdownHeight) {
-                        dropdownRefs.current[activeDropdown]!.style.bottom = "100%"
-                        dropdownRefs.current[activeDropdown]!.style.top = "auto"
-                        dropdownRefs.current[activeDropdown]!.style.marginBottom = "8px"
-                        dropdownRefs.current[activeDropdown]!.style.marginTop = "0"
-                    } else {
-                        // Open downwards
-                        dropdownRefs.current[activeDropdown]!.style.top = "100%"
-                        dropdownRefs.current[activeDropdown]!.style.bottom = "auto"
-                        dropdownRefs.current[activeDropdown]!.style.marginTop = "8px"
-                        dropdownRefs.current[activeDropdown]!.style.marginBottom = "0"
-                    }
-                }
-            }
-        }
-    }, [activeDropdown, data.length])
-
     const toggleDropdown = (index: number) => {
         setActiveDropdown(activeDropdown === index ? null : index)
     }
 
     return (
         <div className="flex-1 rounded-lg w-full py-5">
-            {/* Table */}
-            <div className="rounded-lg overflow-x-auto w-full min-h-[200px]" ref={tableRef}>
-                <table className="w-full text-left table-auto min-w-[600px]">
+            <div className="rounded-lg overflow-x-auto w-full pb-32">
+                <table className="w-full text-left table-auto">
                     <thead className="bg-secondary/10">
                         <tr className="font-satoshi text-[12px] md:text-[16px] p-2 md:p-4">
                             {headings.map((heading, index) => (
@@ -103,13 +61,12 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
                                     <td className="p-2 md:p-4 font-satoshi min-w-[150px] break-words">{"-"}</td>
                                     <td className="p-2 md:p-4 font-satoshi min-w-[120px]">
                                         <span className="relative left-[30px]">{wallet.data.cryptoHoldings}</span>
-                                        
                                     </td>
                                     <td className="p-2 md:p-4 font-satoshi min-w-[100px]">{formatNumberToTwoDecimals(wallet.data.totalBalanceUSD)}</td>
                                     <td className="relative p-2 md:p-4 font-satoshi min-w-[60px] text-center">
-                                        <div className="dropdown-container relative">
+                                        <div className="dropdown-container relative inline-block">
                                             <button
-                                                className="z-70 absolute right-0 md:relative md:right-auto cursor-pointer"
+                                                className="relative cursor-pointer"
                                                 onClick={() => toggleDropdown(index)}
                                             >
                                                 <Image
@@ -122,17 +79,13 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
                                             </button>
 
                                             {activeDropdown === index && (
-                                                <div
-                                                    className="absolute z-80 right-0 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-100"
-                                                    ref={(el) => {
-                                                        dropdownRefs.current[index] = el;
-                                                    }}
-                                                >
+                                                <div className="absolute z-10 right-0 top-full mt-2 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-100">
                                                     <button
                                                         className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
                                                         onClick={() => {
                                                             setSelectedWallet(wallet)
                                                             setShowSidebar(true)
+                                                            setActiveDropdown(null)
                                                         }}
                                                     >
                                                         View Wallet

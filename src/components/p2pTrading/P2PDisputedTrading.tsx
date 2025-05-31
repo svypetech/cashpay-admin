@@ -1,57 +1,69 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Image from "next/image";
+import { useState } from "react";
 import Pagination from "@/src/components/pagination/pagination";
+import Search from "../ui/Search";
+import Sort from "../ui/Sort";
+import SkeletonTableLoader from "../skeletons/SkeletonTableLoader";
+import Error from "../ui/Error";
 import P2PTableDisputed from "./P2PTableDisputed";
-import { disputedData, disputedHeadings } from "./data";
+import useFetchInactiveTrades from "@/src/hooks/p2p/useFetchInactiveTrades";
+
+const disputedHeadings = ["Trade ID", "Seller ID", "Buyer ID", "Reason", "Status", "Chat", "Actions"];
+
+const sortOptions = [
+  { label: "None", value: "" },
+  { label: "Merchant ID", value: "merchantId" },
+  { label: "Requested By", value: "requestedBy" },
+  { label: "ID", value: "id" },
+];
 
 export default function P2PDisputedTrading() {
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(15);
     const [searchQuery, setSearchQuery] = useState("");
-    const [filteredData, setFilteredData] = useState(disputedData);
+    const [sortBy, setSortBy] = useState("");
+
+    const { inactiveTrades: disputedTrades, totalPages, isLoading, isError,setTrades } = useFetchInactiveTrades({
+        currentPage,
+        limit: 10,
+        searchQuery,
+        sortBy,
+        status: "disputed",
+    });
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
     };
 
-    // Filter data based on search query
-    useEffect(() => {
-        const filtered = disputedData.filter((trade) => {
-            return trade.tradeId.toLowerCase().includes(searchQuery.toLowerCase());
-        });
-        setFilteredData(filtered);
-    }, [searchQuery]);
+    const handleSearch = (value: string) => {
+        setSearchQuery(value);
+        // Reset to page 1 when search changes
+        setCurrentPage(1);
+    };
 
     return (
         <div>
             {/* Search and Actions */}
-            <div className="flex flex-col md:grid md:grid-cols-4 justify-between items-center mb-2 gap-4">
-                <div className="relative w-full md:w-auto md:col-span-3">
-                    <div className="relative">
-                        <input
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            type="text"
-                            placeholder="Search..."
-                            className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:gray-700 focus:border-transparent"
-                        />
-                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                            <Image src="/icons/search.svg" alt="Search" width={24} height={24} />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flex items-center gap-4 w-full font-[satoshi] md:col-span-1">
-                    <button className="w-full flex justify-between items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50">
-                        <span>Sort by</span>
-                        <Image src="/icons/dropdownIcon.svg" alt="Dropdown" width={24} height={24} />
-                    </button>
-                </div>
+            <div className="flex flex-col gap-4 sm:gap-[28px] sm:flex-row">
+                <Search className="sm:w-[80%] w-full" onSearch={handleSearch} />
+                <Sort
+                    className="sm:w-[20%] w-full"
+                    title="Sort"
+                    options={sortOptions}
+                    onSort={setSortBy}
+                />
             </div>
 
-            {/* Table */}
-            <P2PTableDisputed headings={disputedHeadings} data={filteredData} />
+            {/* Table with loading, error, and empty states */}
+            {isLoading ? (
+                <SkeletonTableLoader headings={disputedHeadings} rowCount={10} />
+            ) : isError ? (
+                <Error text="Something went wrong" />
+            ) : disputedTrades.length === 0 ? (
+                <Error text="No data found" />
+            ) : (
+                <P2PTableDisputed headings={disputedHeadings} data={disputedTrades} setData={setTrades} />
+            )}
 
             {/* Pagination */}
             <Pagination

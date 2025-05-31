@@ -2,10 +2,8 @@
 
 import Image from "next/image";
 import type React from "react"
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState } from "react"
 import OrderDetailsSidebar from "../cards/OrderDetailsSidebar";
-import { set } from "date-fns";
-
 
 interface CardOrder {
     orderID: string;
@@ -29,16 +27,14 @@ const CardOrdersTable: React.FC<Props> = ({ data, headings }) => {
     const [activeDropdown, setActiveDropdown] = useState<number | null>(null)
     const [showSidebar, setShowSidebar] = useState(false)
     const [selectedOrder, setSelectedOrder] = useState<CardOrder | null>(null)
-    const tableRef = useRef<HTMLDivElement>(null)
-    const dropdownRefs = useRef<(HTMLDivElement | null)[]>([])
     const [filteredOrders, setFilteredOrders] = useState<CardOrder[]>(data)
 
     useEffect(() => {
         setFilteredOrders(data)
     }, [data])
 
+    // Simple dropdown logic: close on outside click
     useEffect(() => {
-        // Close dropdown when clicking outside
         const handleClickOutside = (event: MouseEvent) => {
             if (activeDropdown !== null) {
                 const target = event.target as HTMLElement
@@ -54,52 +50,15 @@ const CardOrdersTable: React.FC<Props> = ({ data, headings }) => {
         }
     }, [activeDropdown])
 
-    useEffect(() => {
-        // Adjust dropdown position
-        if (activeDropdown !== null && tableRef.current && dropdownRefs.current[activeDropdown]) {
-            const tableRect = tableRef.current.getBoundingClientRect()
-            const dropdownRect = dropdownRefs.current[activeDropdown]!.getBoundingClientRect()
-            const rowElement = dropdownRefs.current[activeDropdown]!.closest("tr")
-            const rowRect = rowElement?.getBoundingClientRect()
-
-            if (rowRect && dropdownRect) {
-                const spaceBelow = tableRect.bottom - rowRect.bottom
-                const dropdownHeight = dropdownRect.height
-
-                // Always open dropdown downwards for the first row or single row
-                if (activeDropdown === 0 || data.length === 1) {
-                    dropdownRefs.current[activeDropdown]!.style.top = "100%"
-                    dropdownRefs.current[activeDropdown]!.style.bottom = "auto"
-                    dropdownRefs.current[activeDropdown]!.style.marginTop = "8px"
-                    dropdownRefs.current[activeDropdown]!.style.marginBottom = "0"
-                } else {
-                    // For other rows with multiple rows, open upwards if not enough space below
-                    if (spaceBelow < dropdownHeight) {
-                        dropdownRefs.current[activeDropdown]!.style.bottom = "100%"
-                        dropdownRefs.current[activeDropdown]!.style.top = "auto"
-                        dropdownRefs.current[activeDropdown]!.style.marginBottom = "8px"
-                        dropdownRefs.current[activeDropdown]!.style.marginTop = "0"
-                    } else {
-                        // Open downwards
-                        dropdownRefs.current[activeDropdown]!.style.top = "100%"
-                        dropdownRefs.current[activeDropdown]!.style.bottom = "auto"
-                        dropdownRefs.current[activeDropdown]!.style.marginTop = "8px"
-                        dropdownRefs.current[activeDropdown]!.style.marginBottom = "0"
-                    }
-                }
-            }
-        }
-    }, [activeDropdown, data.length])
-
     const toggleDropdown = (index: number) => {
         setActiveDropdown(activeDropdown === index ? null : index)
     }
 
     return (
         <div className="flex-1 rounded-lg w-full py-5">
-            {/* Table */}
-            <div className="rounded-lg overflow-x-auto w-full min-h-[150px]" ref={tableRef}>
-                <table className="w-full text-left table-auto min-w-[600px] font-[satoshi]">
+            {/* Table - Add padding bottom for dropdown space */}
+            <div className="rounded-lg overflow-x-auto w-full pb-32">
+                <table className="w-full text-left table-auto font-[satoshi]">
                     <thead className="bg-secondary/10">
                         <tr className="font-satoshi text-[12px] md:text-[16px] py-3 md:py-4 px-2 md:px-4">
                             {headings.map((heading, index) => (
@@ -130,9 +89,9 @@ const CardOrdersTable: React.FC<Props> = ({ data, headings }) => {
                                     </td>
 
                                     <td className="relative px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[60px] text-center">
-                                        <div className="dropdown-container relative">
+                                        <div className="dropdown-container relative inline-block">
                                             <button
-                                                className="z-70 absolute right-0 md:relative md:right-auto cursor-pointer"
+                                                className="relative cursor-pointer"
                                                 onClick={() => toggleDropdown(index)}
                                             >
                                                 <Image
@@ -145,36 +104,24 @@ const CardOrdersTable: React.FC<Props> = ({ data, headings }) => {
                                             </button>
 
                                             {activeDropdown === index && (
-                                                <div
-                                                    className="absolute z-80 right-0 w-56 bg-white rounded-md shadow-lg"
-                                                    ref={(el) => {
-                                                        dropdownRefs.current[index] = el;
-                                                    }}
-                                                >
+                                                <div className="absolute z-10 right-0 top-full mt-2 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-100">
                                                     <button
                                                         className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
                                                         onClick={() => {
-                                                            setActiveDropdown(null)
-                                                            order = { ...order, userID: "User123", userEmail: "johndoe@gmail.com", userName: "John Doe", userJoiningDate: "2023-01-01" } // Example data
-                                                            setSelectedOrder(order)
+                                                            const orderWithExtraData = { 
+                                                                ...order, 
+                                                                userID: "User123", 
+                                                                userEmail: "johndoe@gmail.com", 
+                                                                userName: "John Doe", 
+                                                                userJoiningDate: "2023-01-01" 
+                                                            }
+                                                            setSelectedOrder(orderWithExtraData)
                                                             setShowSidebar(true)
+                                                            setActiveDropdown(null)
                                                         }}
                                                     >
-                                                        {"View Details"}
+                                                        View Details
                                                     </button>
-                                                    <div className="border-t border-gray-100"></div>
-                                                    {/* <button
-                                                        className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
-                                                        onClick={() => {}}
-                                                    >
-                                                        Release Escrow
-                                                    </button>
-                                                    <button
-                                                        className="block w-full text-left px-4 py-2 text-sm text-[#DF1D1D] font-bold cursor-pointer hover:bg-gray-50"
-                                                        onClick={() => {}}
-                                                    >
-                                                        Cancel Transaction
-                                                    </button> */}
                                                 </div>
                                             )}
                                         </div>
@@ -185,7 +132,7 @@ const CardOrdersTable: React.FC<Props> = ({ data, headings }) => {
                 </table>
             </div>
 
-            {/* order Details Popup */}
+            {/* Order Details Sidebar */}
             {showSidebar && (
                 <OrderDetailsSidebar // @ts-ignore
                     order={selectedOrder}

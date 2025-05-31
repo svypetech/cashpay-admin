@@ -16,8 +16,6 @@ const ListingsTable: React.FC<Props> = ({ data, headings }) => {
     const [activeDropdown, setActiveDropdown] = useState<number | null>(null)
     const [showPopup, setShowPopup] = useState(false)
     const [selectedListing, setSelectedListing] = useState<Listing>({} as Listing)
-    const tableRef = useRef<HTMLDivElement>(null)
-    const dropdownRefs = useRef<(HTMLDivElement | null)[]>([])
     const [isSubmitting, setIsSubmitting] = useState(false)
 
     const getColumnWidthClass = (index: number): string => {
@@ -32,8 +30,8 @@ const ListingsTable: React.FC<Props> = ({ data, headings }) => {
         }
     };
 
+    // Simple dropdown logic: close on outside click
     useEffect(() => {
-        // Close dropdown when clicking outside
         const handleClickOutside = (event: MouseEvent) => {
             if (activeDropdown !== null) {
                 const target = event.target as HTMLElement
@@ -48,43 +46,6 @@ const ListingsTable: React.FC<Props> = ({ data, headings }) => {
             document.removeEventListener("mousedown", handleClickOutside)
         }
     }, [activeDropdown])
-
-    useEffect(() => {
-        // Adjust dropdown position
-        if (activeDropdown !== null && tableRef.current && dropdownRefs.current[activeDropdown]) {
-            const tableRect = tableRef.current.getBoundingClientRect()
-            const dropdownRect = dropdownRefs.current[activeDropdown]!.getBoundingClientRect()
-            const rowElement = dropdownRefs.current[activeDropdown]!.closest("tr")
-            const rowRect = rowElement?.getBoundingClientRect()
-
-            if (rowRect && dropdownRect) {
-                const spaceBelow = tableRect.bottom - rowRect.bottom
-                const dropdownHeight = dropdownRect.height
-
-                // Always open dropdown downwards for the first row or single row
-                if (activeDropdown === 0 || data.length === 1) {
-                    dropdownRefs.current[activeDropdown]!.style.top = "100%"
-                    dropdownRefs.current[activeDropdown]!.style.bottom = "auto"
-                    dropdownRefs.current[activeDropdown]!.style.marginTop = "8px"
-                    dropdownRefs.current[activeDropdown]!.style.marginBottom = "0"
-                } else {
-                    // For other rows with multiple rows, open upwards if not enough space below
-                    if (spaceBelow < dropdownHeight) {
-                        dropdownRefs.current[activeDropdown]!.style.bottom = "100%"
-                        dropdownRefs.current[activeDropdown]!.style.top = "auto"
-                        dropdownRefs.current[activeDropdown]!.style.marginBottom = "8px"
-                        dropdownRefs.current[activeDropdown]!.style.marginTop = "0"
-                    } else {
-                        // Open downwards
-                        dropdownRefs.current[activeDropdown]!.style.top = "100%"
-                        dropdownRefs.current[activeDropdown]!.style.bottom = "auto"
-                        dropdownRefs.current[activeDropdown]!.style.marginTop = "8px"
-                        dropdownRefs.current[activeDropdown]!.style.marginBottom = "0"
-                    }
-                }
-            }
-        }
-    }, [activeDropdown, data.length])
 
     const toggleDropdown = (index: number) => {
         setActiveDropdown(activeDropdown === index ? null : index)
@@ -114,9 +75,9 @@ const ListingsTable: React.FC<Props> = ({ data, headings }) => {
 
     return (
         <div className="flex-1 rounded-lg w-full py-5">
-            {/* Table */}
-            <div className="rounded-lg overflow-x-auto w-full" ref={tableRef}>
-                <table className="w-full text-left table-auto overflow-x-auto    min-w-[1100px]">
+            {/* Table - Add padding bottom for dropdown space */}
+            <div className="rounded-lg overflow-x-auto w-full pb-32">
+                <table className="w-full text-left table-auto">
                     <thead className="bg-secondary/10">
                         <tr className="whitespace-nowrap text-[12px] md:text-[16px] py-3 md:py-4 px-2 md:px-4">
                             {headings.map((heading, index) => (
@@ -134,7 +95,6 @@ const ListingsTable: React.FC<Props> = ({ data, headings }) => {
                                     <td className="px-2 md:px-4 py-3 md:py-4 whitespace-nowrap min-w-[120px] break-words">
                                         {listing.createdBy}
                                     </td>
-
                                     <td className="px-2 md:px-4 py-3 md:py-4 whitespace-nowrap min-w-[150px] break-words">{listing.type}</td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 whitespace-nowrap min-w-[150px] break-words">{listing.currency}</td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 whitespace-nowrap min-w-[120px]">
@@ -150,9 +110,9 @@ const ListingsTable: React.FC<Props> = ({ data, headings }) => {
                                         )}
                                     </td>
                                     <td className="relative p-2 md:p-4 font-satoshi min-w-[60px] text-center">
-                                        <div className="dropdown-container relative">
+                                        <div className="dropdown-container relative inline-block">
                                             <button
-                                                className="absolute right-0 md:relative md:right-auto cursor-pointer"
+                                                className="relative cursor-pointer"
                                                 onClick={() => toggleDropdown(index)}
                                             >
                                                 <Image
@@ -160,22 +120,18 @@ const ListingsTable: React.FC<Props> = ({ data, headings }) => {
                                                     alt="Options"
                                                     width={24}
                                                     height={24}
-                                                    className="w-4 h-4 relative sm:left-0 left-[-50px]"
+                                                    className="w-4 h-4"
                                                 />
                                             </button>
 
                                             {activeDropdown === index && (
-                                                <div
-                                                    className="absolute z-10 right-0 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-100"
-                                                    ref={(el) => {
-                                                        dropdownRefs.current[index] = el;
-                                                    }}
-                                                >
+                                                <div className="absolute z-10 right-0 top-full mt-2 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-100">
                                                     <button
                                                         className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
                                                         onClick={() => {
                                                             setSelectedListing(listing)
                                                             setShowPopup(true)
+                                                            setActiveDropdown(null)
                                                         }}
                                                     >
                                                         View Details
@@ -200,8 +156,6 @@ const ListingsTable: React.FC<Props> = ({ data, headings }) => {
                 </table>
             </div>
 
-            {/* @ts-ignore Transaction Details Popup */}
-            {/* <TransactionManagementPopup showPopup={showPopup} onClose={() => setShowPopup(false)} transaction={selectedListing} /> */}
             <ListingDetailsPopup showPopup={showPopup} onClose={() => setShowPopup(false)} listing={selectedListing} />
         </div>
     )
