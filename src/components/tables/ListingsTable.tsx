@@ -17,6 +17,7 @@ const ListingsTable: React.FC<Props> = ({ data, headings }) => {
     const [showPopup, setShowPopup] = useState(false)
     const [selectedListing, setSelectedListing] = useState<Listing>({} as Listing)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [selectedIndex, setSelectedIndex] = useState<number>(0)
 
     const getColumnWidthClass = (index: number): string => {
         switch (index) {
@@ -48,6 +49,7 @@ const ListingsTable: React.FC<Props> = ({ data, headings }) => {
     }, [activeDropdown])
 
     const toggleDropdown = (index: number) => {
+        setSelectedIndex(index) // Set selected index first
         setActiveDropdown(activeDropdown === index ? null : index)
     }
 
@@ -70,13 +72,20 @@ const ListingsTable: React.FC<Props> = ({ data, headings }) => {
             console.error("Error deleting:", error)
         } finally {
             setIsSubmitting(false)
+            setActiveDropdown(null)
         }
     }
 
+    // Calculate if we need padding based on current state
+    const needsPadding = activeDropdown !== null && (
+        selectedIndex >= (data.length - 1) || // Last two rows
+        data.length <= 1 // If there are 2 or fewer rows, always add padding
+    );
+
     return (
         <div className="flex-1 rounded-lg w-full py-5">
-            {/* Table - Add padding bottom for dropdown space */}
-            <div className="rounded-lg overflow-x-auto w-full pb-32">
+            {/* Table - Add dynamic padding for dropdown space */}
+            <div className={`rounded-lg overflow-x-auto w-full ${needsPadding ? "pb-20" : ""}`}>
                 <table className="w-full text-left table-auto">
                     <thead className="bg-secondary/10">
                         <tr className="whitespace-nowrap text-[12px] md:text-[16px] py-3 md:py-4 px-2 md:px-4">

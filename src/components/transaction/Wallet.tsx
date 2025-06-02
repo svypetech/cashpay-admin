@@ -8,8 +8,16 @@ import SkeletonTableLoader from "../skeletons/SkeletonTableLoader";
 import { Wallet } from "@/src/Types/Wallet";
 import Sort from "../ui/Sort";
 import Search from "../ui/Search";
+import Error from "../ui/Error";
 
-const headings = ["User ID", "Name", "Card User", "Crypto Holdings", "Total Balance (USDT)", "Actions"];
+const headings = [
+  "User ID",
+  "Name",
+  "Card User",
+  "Crypto Holdings",
+  "Total Balance (USDT)",
+  "Actions",
+];
 const sortOptions = [
   { label: "ID", value: "id" },
   { label: "Name", value: "name" },
@@ -48,11 +56,10 @@ export default function WalletComponent() {
   return (
     <div>
       {/* Search and Actions */}
-      <div className={`flex flex-col md:grid md:grid-cols-4 justify-between items-center mb-2 gap-4`}>
-        <Search
-          className="w-full md:col-span-3"
-          onSearch={handleSearch}
-        />
+      <div
+        className={`flex flex-col md:grid md:grid-cols-4 justify-between items-center mb-2 gap-4`}
+      >
+        <Search className="w-full md:col-span-3" onSearch={handleSearch} />
 
         <Sort
           className="w-full"
@@ -60,15 +67,13 @@ export default function WalletComponent() {
           options={sortOptions}
           onSort={handleSort}
         />
-
-
       </div>
       {loading ? (
         <SkeletonTableLoader headings={headings} rowCount={10} />
       ) : isError ? (
-        <div className="flex items-center justify-center h-full">
-          <p className="text-red-500">Error loading wallets</p>
-        </div>
+        <Error text="Something went wrong" />
+      ) : filteredData.length === 0 ? (
+        <Error text="No data found" />
       ) : (
         <>
           <WalletTable headings={headings} data={filteredData} />
@@ -79,7 +84,6 @@ export default function WalletComponent() {
           />
         </>
       )}
-
     </div>
   );
 }

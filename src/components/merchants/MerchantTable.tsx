@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import ColourfulBlock from "../ui/ColourfulBlock";
 import MerchantInfoSidebar from "./MerchantInfoSidebar";
@@ -22,14 +22,11 @@ export default function MerchantsTable({
 }: MerchantsTableProps) {
   const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
   const [showSidebar, setShowSidebar] = useState(false);
-  const [selectedMerchant, setSelectedMerchant] = useState<Merchant | null>(
-    null
-  );
-  const tableRef = useRef<HTMLDivElement>(null);
-  const dropdownRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [selectedMerchant, setSelectedMerchant] = useState<Merchant | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
+  // Simple dropdown logic: close on outside click
   useEffect(() => {
-    // Close dropdown when clicking outside
     const handleClickOutside = (event: MouseEvent) => {
       if (activeDropdown !== null) {
         const target = event.target as HTMLElement;
@@ -45,45 +42,8 @@ export default function MerchantsTable({
     };
   }, [activeDropdown]);
 
-
-  useEffect(() => {
-    // Adjust dropdown position
-    if (activeDropdown !== null && tableRef.current && dropdownRefs.current[activeDropdown]) {
-      const tableRect = tableRef.current.getBoundingClientRect()
-      const dropdownRect = dropdownRefs.current[activeDropdown]!.getBoundingClientRect()
-      const rowElement = dropdownRefs.current[activeDropdown]!.closest("tr")
-      const rowRect = rowElement?.getBoundingClientRect()
-
-      if (rowRect && dropdownRect) {
-        const spaceBelow = tableRect.bottom - rowRect.bottom
-        const dropdownHeight = dropdownRect.height
-
-        // Always open dropdown downwards for the first row or single row
-        if (activeDropdown === 0 || activeDropdown === 1 || activeDropdown === 2 || merchants.length === 1 || merchants.length === 2) {
-          dropdownRefs.current[activeDropdown]!.style.top = "100%"
-          dropdownRefs.current[activeDropdown]!.style.bottom = "auto"
-          dropdownRefs.current[activeDropdown]!.style.marginTop = "8px"
-          dropdownRefs.current[activeDropdown]!.style.marginBottom = "0"
-        } else {
-          // For other rows with multiple rows, open upwards if not enough space below
-          if (spaceBelow < dropdownHeight) {
-            dropdownRefs.current[activeDropdown]!.style.bottom = "100%"
-            dropdownRefs.current[activeDropdown]!.style.top = "auto"
-            dropdownRefs.current[activeDropdown]!.style.marginBottom = "8px"
-            dropdownRefs.current[activeDropdown]!.style.marginTop = "0"
-          } else {
-            // Open downwards
-            dropdownRefs.current[activeDropdown]!.style.top = "100%"
-            dropdownRefs.current[activeDropdown]!.style.bottom = "auto"
-            dropdownRefs.current[activeDropdown]!.style.marginTop = "8px"
-            dropdownRefs.current[activeDropdown]!.style.marginBottom = "0"
-          }
-        }
-      }
-    }
-  }, [activeDropdown, merchants.length])
-
   const toggleDropdown = (index: number) => {
+    setSelectedIndex(index); // Set selected index first
     setActiveDropdown(activeDropdown === index ? null : index);
   };
 
@@ -94,9 +54,16 @@ export default function MerchantsTable({
     setActiveDropdown(null);
   };
 
+  // Calculate if we need padding based on current state
+  const needsPadding = activeDropdown !== null && (
+    selectedIndex >= (merchants.length - 2) || // Last two rows
+    merchants.length <= 2 // If there are 2 or fewer rows, always add padding
+  );
+
   return (
     <div className="flex-1 rounded-lg w-full py-5">
-      <div className="rounded-lg overflow-x-auto w-full" ref={tableRef}>
+      {/* Table - Add dynamic padding for dropdown space */}
+      <div className={`rounded-lg overflow-x-auto w-full ${needsPadding ? "pb-24" : ""}`}>
         <table className="w-full text-left table-auto min-w-[700px]">
           <thead className="bg-secondary/10">
             <tr className="font-satoshi text-[12px] sm:text-[16px] whitespace-nowrap">
@@ -140,10 +107,10 @@ export default function MerchantsTable({
                     {merchant.email}
                   </td>
                   <td className="p-2 sm:p-6 font-satoshi min-w-[100px] whitespace-nowrap">
-                    <p className="text-center" >{merchant.completedTrades}</p>
+                    <p className="text-center">{merchant.completedTrades}</p>
                   </td>
                   <td className="p-2 sm:p-6 font-satoshi min-w-[120px] whitespace-nowrap">
-                    <p className="text-center" >{formatNumberToTwoDecimals(merchant.successRate)}%</p>
+                    <p className="text-center">{formatNumberToTwoDecimals(merchant.successRate)}%</p>
                   </td>
                   <td className="p-2 sm:p-6 font-satoshi min-w-[120px] py-[20px]">
                     <ColourfulBlock
@@ -155,9 +122,9 @@ export default function MerchantsTable({
                     />
                   </td>
                   <td className="relative p-2 sm:p-6 font-satoshi min-w-[60px] text-center">
-                    <div className="dropdown-container relative">
+                    <div className="dropdown-container relative inline-block">
                       <button
-                        className="z-70 absolute right-0 md:relative md:right-auto cursor-pointer"
+                        className="relative cursor-pointer"
                         onClick={() => toggleDropdown(index)}
                       >
                         <Image
@@ -170,23 +137,16 @@ export default function MerchantsTable({
                       </button>
 
                       {activeDropdown === index && (
-                        <div
-                          className="absolute z-80 right-0 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-100"
-                          ref={(el) => {
-                            dropdownRefs.current[index] = el;
-                          }}
-                        >
+                        <div className="absolute z-10 right-0 top-full mt-2 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-100">
                           <button
-                            className="block w-full text-left px-4 py-2 text-sm text-primary font-[700] cursor-pointer hover:bg-gray-50 border-b border-gray-200"
-                            onClick={() => {
-                              handleViewMerchant(merchant);
-                              setActiveDropdown(null);
-                            }}
+                            className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
+                            onClick={() => handleViewMerchant(merchant)}
                           >
                             View
                           </button>
+                          <div className="border-t border-gray-100"></div>
                           <button
-                            className="block w-full text-left px-4 py-2 text-sm font-[700] text-red-600 cursor-pointer hover:bg-gray-50  border-b border-gray-200"
+                            className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
                             onClick={() => {
                               handleSuspendUser(merchant._id);
                               setActiveDropdown(null);
@@ -195,7 +155,7 @@ export default function MerchantsTable({
                             Suspend User
                           </button>
                           <button
-                            className="block w-full text-left px-4 py-2 text-sm font-[700] text-red-600 cursor-pointer hover:bg-gray-50"
+                            className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
                             onClick={() => {
                               handleBanUser(merchant._id);
                               setActiveDropdown(null);

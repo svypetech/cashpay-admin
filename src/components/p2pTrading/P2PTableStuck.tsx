@@ -24,6 +24,7 @@ const P2PTableStuck: React.FC<Props> = ({ data, headings, setData }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showResolvePopup, setShowResolvePopup] = useState(false);
   const [favor, setFavor] = useState<string>("");
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
   // Simple dropdown logic: close on outside click
   useEffect(() => {
@@ -43,6 +44,7 @@ const P2PTableStuck: React.FC<Props> = ({ data, headings, setData }) => {
   }, [activeDropdown]);
 
   const toggleDropdown = (index: number) => {
+    setSelectedIndex(index); // Set selected index first
     setActiveDropdown(activeDropdown === index ? null : index);
   };
 
@@ -83,10 +85,16 @@ const P2PTableStuck: React.FC<Props> = ({ data, headings, setData }) => {
     }
   };
 
+  // Calculate if we need padding based on current state
+  const needsPadding = activeDropdown !== null && (
+    selectedIndex >= (filteredTrades.length - 2) || // Last two rows
+    filteredTrades.length <= 2 // If there are 2 or fewer rows, always add padding
+  );
+
   return (
     <div className="flex-1 rounded-lg w-full py-5">
-      {/* Table - Add padding bottom for dropdown space */}
-      <div className="rounded-lg overflow-x-auto w-full pb-32">
+      {/* Table - Add dynamic padding for dropdown space */}
+      <div className={`rounded-lg overflow-x-auto w-full ${needsPadding ? "pb-28" : ""}`}>
         <table className="w-full text-left table-auto">
           <thead className="bg-secondary/10">
             <tr className="font-satoshi text-[12px] md:text-[16px] py-3 md:py-4 px-2 md:px-4">

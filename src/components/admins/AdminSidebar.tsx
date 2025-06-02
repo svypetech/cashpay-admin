@@ -69,23 +69,20 @@ export default function AdminSidebar({
     const handleAssignRole = async () => {
         setIsEditing(false)
         setShowDropdown(false)
-        const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin`, {
+        const res = await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/updateRole`, {
             role: selectedRole,
-            title: admin.title,
-            description: admin.description,
-            email: admin.email,
-            password: admin.password,
-            canViewTransactions: admin.canViewTransactions,
-            canApproveKyc: admin.canApproveKyc,
-            canResolveDispute: admin.canResolveDispute,
-            canAccessApiLogs: admin.canAccessApiLogs,
-            canAccessSystemSettings: admin.canAccessSystemSettings,
+            id: admin._id,
         }, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
             }
         })
         console.log("Assigned role:", selectedRole)
+        if (res.data.success) {
+            alert("Role updated successfully");
+        } else {
+            alert("Failed to update role");
+        }
     }
 
     if (!isVisible && !showSidebar) return null

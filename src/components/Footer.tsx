@@ -29,7 +29,7 @@ export default function Footer() {
       {/* Spacer to prevent content from hiding behind footer */}
       <div className="h-24 w-full"></div>
       
-      <footer className="fixed bottom-0 flex justify-center items-center w-full p-2 pb-8 z-10 pointer-events-none">
+      <footer className="fixed bottom-0 flex justify-center items-center w-full p-2 pb-8 z-20 pointer-events-none">
         <div className="flex justify-between items-center bg-white rounded-2xl border-[1px] border-[#0000001A] w-[95%] sm:max-w-[600px] py-3 sm:py-5 px-3 sm:px-16 shadow-lg pointer-events-auto">
           {navigation.map((item) => {
             const isActive = pathname.startsWith(item.href)

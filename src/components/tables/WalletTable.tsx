@@ -6,6 +6,8 @@ import { useEffect, useState } from "react"
 import WalletSidebar from "../transaction/WalletSidebar";
 import {Wallet} from "@/src/Types/Wallet"
 import { formatNumberToTwoDecimals } from "@/src/lib/functions";
+import handleBanUser from "@/src/hooks/users/banUser";
+import handleSuspendUser from "@/src/hooks/users/suspendUser";
 
 interface Props {
     headings: string[]
@@ -16,7 +18,9 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
     const [activeDropdown, setActiveDropdown] = useState<number | null>(null)
     const [showSidebar, setShowSidebar] = useState(false)
     const [selectedWallet, setSelectedWallet] = useState<Wallet | null>(null)
+    const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
+    // Simple dropdown logic: close on outside click
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (activeDropdown !== null) {
@@ -34,12 +38,20 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
     }, [activeDropdown])
 
     const toggleDropdown = (index: number) => {
+        setSelectedIndex(index) // Set selected index first
         setActiveDropdown(activeDropdown === index ? null : index)
     }
 
+    // Calculate if we need padding based on current state
+    const needsPadding = activeDropdown !== null && (
+        selectedIndex >= (data.length - 2) || // Last two rows
+        data.length <= 2 // If there are 2 or fewer rows, always add padding
+    );
+
     return (
         <div className="flex-1 rounded-lg w-full py-5">
-            <div className="rounded-lg overflow-x-auto w-full pb-32">
+            {/* Table - Add dynamic padding for dropdown space */}
+            <div className={`rounded-lg overflow-x-auto w-full ${needsPadding ? "pb-28" : ""}`}>
                 <table className="w-full text-left table-auto">
                     <thead className="bg-secondary/10">
                         <tr className="font-satoshi text-[12px] md:text-[16px] p-2 md:p-4">
@@ -56,7 +68,7 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
                                 <tr key={index} className="border-b border-gray-200 text-[12px] md:text-[16px]">
                                     <td className="p-2 md:p-4 font-satoshi min-w-[100px] break-words">{wallet.data.userId}</td>
                                     <td className="p-2 md:p-4 font-satoshi font-bold text-primary min-w-[120px] break-words">
-                                        {wallet.data.userName.firstName ? `${wallet.data.userName.firstName} ${wallet.data.userName.lastName}` : "N/A"}
+                                        {wallet.data.userName ? `${wallet.data.userName.firstName} ${wallet.data.userName.lastName}` : "N/A"}
                                     </td>
                                     <td className="p-2 md:p-4 font-satoshi min-w-[150px] break-words">{"-"}</td>
                                     <td className="p-2 md:p-4 font-satoshi min-w-[120px]">
@@ -95,19 +107,19 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
                                                         className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
                                                         onClick={() => {
                                                             setActiveDropdown(null)
-                                                            // handleBanUser(wallet.userId.toString())
+                                                            handleSuspendUser(wallet.data.userId.toString())
                                                         }}
                                                     >
-                                                        Ban User
+                                                        Suspend User
                                                     </button>
                                                     <button
                                                         className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
                                                         onClick={() => {
                                                             setActiveDropdown(null)
-                                                            // handleSuspendUser(wallet.userId.toString())
+                                                            handleBanUser(wallet.data.userId.toString())
                                                         }}
                                                     >
-                                                        Suspend User
+                                                        Ban User
                                                     </button>
                                                 </div>
                                             )}

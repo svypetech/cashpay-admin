@@ -31,14 +31,6 @@ export default function UsersPage() {
               {tab.title}
             </button>
           ))}
-          {/* <button className={`cursor-pointer px-6 py-2 rounded-xl ${activePage === "users" ? "bg-primary text-white" : ""}`}
-            onClick={() => setActivePage("users")}>
-            Users
-          </button>
-          <button className={`cursor-pointer px-6 py-2 rounded-xl ${activePage === "admins" ? "bg-primary text-white" : ""}`}
-            onClick={() => setActivePage("admins")}>
-            Admins
-          </button> */}
         </div>
       </div>
 

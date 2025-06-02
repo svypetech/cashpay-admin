@@ -2,13 +2,14 @@
 
 import Image from "next/image";
 import type React from "react";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import TradeDetailsPopup from "../p2pTrading/TradeDetailsPopup";
 import ColourfulBlock from "../ui/ColourfulBlock";
 import axios from "axios";
 import ConfirmModal from "../ui/ConfirmModal";
 import ExpandableId from "../ui/ExpandableId";
 import Trade from "@/src/Types/Trades";
+
 interface Props {
   headings: string[];
   data: Trade[];
@@ -19,15 +20,35 @@ const P2PTableActive: React.FC<Props> = ({ data, headings, setData }) => {
   const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
   const [showPopup, setShowPopup] = useState(false);
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
-  const tableRef = useRef<HTMLDivElement>(null);
-  const dropdownRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [showResolvePopup, setShowResolvePopup] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
+
+  // Simple dropdown logic: close on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (activeDropdown !== null) {
+        const target = event.target as HTMLElement;
+        if (!target.closest(".dropdown-container")) {
+          setActiveDropdown(null);
+        }
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [activeDropdown]);
+
+  const toggleDropdown = (index: number) => {
+    setSelectedIndex(index); // Set selected index first
+    setActiveDropdown(activeDropdown === index ? null : index);
+  };
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
 
-    // Simulate a network request
     try {
       let response = await axios.put(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/transaction/order/resolveDispute`,
@@ -59,77 +80,17 @@ const P2PTableActive: React.FC<Props> = ({ data, headings, setData }) => {
     }
   };
 
-  const toggleDropdown = (index: number) => {
-    setActiveDropdown(activeDropdown === index ? null : index);
-  };
-
-  useEffect(() => {
-    // Close dropdown when clicking outside
-    const handleClickOutside = (event: MouseEvent) => {
-      if (activeDropdown !== null) {
-        const target = event.target as HTMLElement;
-        if (!target.closest(".dropdown-container")) {
-          setActiveDropdown(null);
-        }
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [activeDropdown]);
-
-  useEffect(() => {
-    // Adjust dropdown position
-    if (
-      activeDropdown !== null &&
-      tableRef.current &&
-      dropdownRefs.current[activeDropdown]
-    ) {
-      const tableRect = tableRef.current.getBoundingClientRect();
-      const dropdownRect =
-        dropdownRefs.current[activeDropdown]!.getBoundingClientRect();
-      const rowElement = dropdownRefs.current[activeDropdown]!.closest("tr");
-      const rowRect = rowElement?.getBoundingClientRect();
-
-      if (rowRect && dropdownRect) {
-        const spaceBelow = tableRect.bottom - rowRect.bottom;
-        const dropdownHeight = dropdownRect.height;
-
-        // Always open dropdown downwards for the first row or single row
-        if (activeDropdown === 0 || data.length === 1) {
-          dropdownRefs.current[activeDropdown]!.style.top = "100%";
-          dropdownRefs.current[activeDropdown]!.style.bottom = "auto";
-          dropdownRefs.current[activeDropdown]!.style.marginTop = "8px";
-          dropdownRefs.current[activeDropdown]!.style.marginBottom = "0";
-        } else {
-          // For other rows with multiple rows, open upwards if not enough space below
-          if (spaceBelow < dropdownHeight) {
-            dropdownRefs.current[activeDropdown]!.style.bottom = "100%";
-            dropdownRefs.current[activeDropdown]!.style.top = "auto";
-            dropdownRefs.current[activeDropdown]!.style.marginBottom = "8px";
-            dropdownRefs.current[activeDropdown]!.style.marginTop = "0";
-          } else {
-            // Open downwards
-            dropdownRefs.current[activeDropdown]!.style.top = "100%";
-            dropdownRefs.current[activeDropdown]!.style.bottom = "auto";
-            dropdownRefs.current[activeDropdown]!.style.marginTop = "8px";
-            dropdownRefs.current[activeDropdown]!.style.marginBottom = "0";
-          }
-        }
-      }
-    }
-  }, [activeDropdown, data.length]);
+  // Calculate if we need padding based on current state
+  const needsPadding = activeDropdown !== null && (
+    selectedIndex >= (data.length - 1) || // Last two rows
+    data.length <= 1 // If there are 2 or fewer rows, always add padding
+  );
 
   return (
     <div className="flex-1 rounded-lg w-full py-5">
-      {/* Table */}
-      <div
-        className="rounded-lg overflow-x-auto w-full min-h-[200px] pb-[100px]"
-        ref={tableRef}
-      >
-        <table className="w-full text-left  min-w-[900px] ">
+      {/* Table - Add dynamic padding for dropdown space */}
+      <div className={`rounded-lg overflow-x-auto w-full ${needsPadding ? "pb-16" : ""}`}>
+        <table className="w-full text-left min-w-[900px]">
           <thead className="bg-secondary/10">
             <tr className="font-satoshi text-[12px] md:text-[16px] py-3 md:py-4 px-2 md:px-4">
               {headings.map((heading, index) => (
@@ -178,9 +139,9 @@ const P2PTableActive: React.FC<Props> = ({ data, headings, setData }) => {
                     />
                   </td>
                   <td className="relative px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[60px] text-center">
-                    <div className="dropdown-container relative">
+                    <div className="dropdown-container relative inline-block">
                       <button
-                        className="absolute relative right-auto cursor-pointer"
+                        className="relative cursor-pointer"
                         onClick={() => toggleDropdown(index)}
                       >
                         <Image
@@ -193,24 +154,20 @@ const P2PTableActive: React.FC<Props> = ({ data, headings, setData }) => {
                       </button>
 
                       {activeDropdown === index && (
-                        <div
-                          className="absolute z-10 right-0 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-100"
-                          ref={(el) => {
-                            dropdownRefs.current[index] = el;
-                          }}
-                        >
+                        <div className="absolute z-10 right-0 top-full mt-2 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-100">
                           <button
                             className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
                             onClick={() => {
                               setSelectedTrade(trade);
                               setShowPopup(true);
+                              setActiveDropdown(null);
                             }}
                           >
                             View Details
                           </button>
                           <div className="border-t border-gray-100"></div>
                           <button
-                            className={`block w-full text-left px-4 py-2 text-sm text-red-500 font-bold  hover:bg-gray-50 ${
+                            className={`block w-full text-left px-4 py-2 text-sm text-red-500 font-bold hover:bg-gray-50 ${
                               trade.status.toLowerCase() === "canceled"
                                 ? "opacity-50 cursor-not-allowed"
                                 : "cursor-pointer"
@@ -218,6 +175,7 @@ const P2PTableActive: React.FC<Props> = ({ data, headings, setData }) => {
                             onClick={() => {
                               setSelectedTrade(trade);
                               setShowResolvePopup(true);
+                              setActiveDropdown(null);
                             }}
                             disabled={trade.status.toLowerCase() === "canceled"}
                           >
@@ -243,7 +201,6 @@ const P2PTableActive: React.FC<Props> = ({ data, headings, setData }) => {
       )}
 
       {/* Show confirm modal from ui folder */}
-
       <ConfirmModal
         isOpen={showResolvePopup}
         isLoading={isSubmitting}

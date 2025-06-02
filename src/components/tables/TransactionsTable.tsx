@@ -78,7 +78,7 @@ const TransactionTable: React.FC<Props> = ({ data, headings }) => {
   return (
     <div className="flex-1 rounded-lg w-full py-5">
       {/* Table - Add padding bottom for dropdown space */}
-      <div className="rounded-lg overflow-x-auto w-full pb-32" ref={tableRef}>
+      <div className="rounded-lg overflow-x-auto w-full pb-10" ref={tableRef}>
         <table className="w-full text-left table-auto">
           <thead className="bg-secondary/10">
             <tr className="font-satoshi text-[12px] md:text-[16px] py-3 md:py-4 px-2 md:px-4">

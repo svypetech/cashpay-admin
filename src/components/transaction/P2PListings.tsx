@@ -7,6 +7,7 @@ import useFetchP2PListing from "@/src/hooks/Transactions/FetchP2PListing";
 import SkeletonTableLoader from "../skeletons/SkeletonTableLoader";
 import Sort from "../ui/Sort";
 import ListingsTable from "../tables/ListingsTable";
+import Error from "../ui/Error";
 
 const headings = [
   "Listing ID",
@@ -34,7 +35,7 @@ export default function P2PListings() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("");
 
-  const { listings, totalPages, isLoading } = useFetchP2PListing({
+  const { listings, totalPages, isLoading, isError } = useFetchP2PListing({
     currentPage,
     limit: 10,
     searchQuery,
@@ -60,10 +61,11 @@ export default function P2PListings() {
             <button
               key={index}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 text-black ${activeTab === tab.id
-                ? "border-b-2 border-primary font-semibold"
-                : "hover:text-gray-700 cursor-pointer"
-                }`}
+              className={`px-4 py-2 text-black ${
+                activeTab === tab.id
+                  ? "border-b-2 border-primary font-semibold"
+                  : "hover:text-gray-700 cursor-pointer"
+              }`}
             >
               {tab.title}
             </button>
@@ -107,6 +109,10 @@ export default function P2PListings() {
       </div>
       {isLoading ? (
         <SkeletonTableLoader rowCount={10} headings={headings} />
+      ) : isError ? (
+        <Error text="Something went wrong" />
+      ) : listings.length === 0 ? (
+        <Error text="No data found" />
       ) : (
         <>
           <ListingsTable headings={headings} data={listings} />

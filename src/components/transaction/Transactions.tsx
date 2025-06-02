@@ -9,7 +9,7 @@ import Sort from "../ui/Sort";
 import Search from "../ui/Search";
 import Tabs from "../ui/Tabs";
 import useFetchTransactions from "@/src/hooks/Transactions/transactionsManagement";
-const headings = ["ID", "From", "To", "Amount", "Status", "Block#","Date"];
+const headings = ["ID", "From", "To", "Amount", "Status", "Block#", "Date"];
 const navigationTabs = ["All", "Completed", "Pending", "Failed"];
 
 export default function Transactions() {
@@ -59,24 +59,18 @@ export default function Transactions() {
       {loading ? (
         <SkeletonTableLoader rowCount={10} headings={headings} />
       ) : error ? (
-        <>
           <Error text="Something went wrong" />
-        </>
+      ) : transactions.length === 0 ? (
+        <Error text="No data found" />
       ) : (
-        <>
-          {transactions.length === 0 ? (
-            <Error text="No data found" />
-          ) : (
-            <div className="mt-4">
-              <TransactionTable headings={headings} data={transactions} />
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-              />
-            </div>
-          )}
-        </>
+        <div className="mt-4">
+          <TransactionTable headings={headings} data={transactions} />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </div>
       )}
     </div>
   );
