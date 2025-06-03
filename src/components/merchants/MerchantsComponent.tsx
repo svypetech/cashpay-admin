@@ -34,10 +34,30 @@ export default function MerchantsComponent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("");
-  const { merchants, isLoading, error, totalPages } = useFetchMerchants(
+
+  // Map tab to status parameter
+  const getStatusFromTab = (tab: string) => {
+    switch (tab) {
+      case "Verified":
+        return "Approved";
+      case "Pending Verifications":
+        return "Pending";
+      default:
+        return undefined; // "All" case - no status filter
+    }
+  };
+
+  const { 
+    merchants, 
+    isLoading, 
+    error, 
+    totalPages, 
+    setMerchants 
+  } = useFetchMerchants(
     currentPage,
     10,
-    sortBy
+    sortBy,
+    getStatusFromTab(activeTab)
   );
 
   const handlePageChange = (page: number) => {
@@ -55,32 +75,39 @@ export default function MerchantsComponent() {
     setSortBy(value);
   };
 
+  // Handle tab change
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    setCurrentPage(1); // Reset to first page when changing tabs
+  };
+
   // User action handlers
   const handleViewUser = (userId: string) => {
     console.log(`View user ${userId}`);
   };
 
-  // Filter and sort merchants based on activeTab, searchTerm, and sortBy
+  // Filter merchants based on searchTerm (status filtering is now handled by the API)
   const filteredMerchants = useMemo(() => {
-    // First filter by tab
-    let filtered = [...merchants];
+    if (!merchants) return [];
 
-    if (activeTab === "Verified") {
-      filtered = merchants.filter((merchant) => merchant.verified);
-    } else if (activeTab === "Pending Verifications") {
-      filtered = merchants.filter((merchant) => !merchant.verified);
-    }
-
-    // Then apply search filter if searchTerm exists
+    // Apply search filter if searchTerm exists
     if (searchTerm.trim()) {
+      const search = searchTerm.toLowerCase();
+      return merchants.filter((merchant) => {
+        const name = merchant.name 
+          ? `${merchant.name.firstName} ${merchant.name.lastName}`.toLowerCase()
+          : "";
+        return (
+          name.includes(search) ||
+          merchant.email?.toLowerCase().includes(search) ||
+          merchant.userId?.toString().includes(search)
+        );
+      });
     }
 
-    // Apply sorting
-    if (sortBy) {
-    }
-
-    return filtered;
-  }, [merchants, activeTab, searchTerm, sortBy]);
+    // If no search term, return all merchants (filtering by status is handled by API)
+    return merchants;
+  }, [merchants, searchTerm]);
 
   return (
     <>
@@ -88,7 +115,7 @@ export default function MerchantsComponent() {
       <Tabs
         tabs={["All", "Verified", "Pending Verifications"]}
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={handleTabChange}
         size="normal"
       />
 

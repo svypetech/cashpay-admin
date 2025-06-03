@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { X, Mail, Lock, ChevronDown, ChevronUp } from "lucide-react"
 import Image from "next/image"
 
@@ -21,6 +21,7 @@ export default function AddAdminPopup({ isOpen, onClose, onSubmit, isLoading = f
     const [password, setPassword] = useState("")
     const [selectedRoleId, setSelectedRoleId] = useState("")
     const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false)
+    const [wasLoading, setWasLoading] = useState(false)
 
     const roles: Role[] = [
         { id: "super admin", name: "Super Admin" },
@@ -28,12 +29,25 @@ export default function AddAdminPopup({ isOpen, onClose, onSubmit, isLoading = f
         { id: "financial manager", name: "Financial Manager" },
     ]
 
+    // Watch for loading state changes and clear fields when loading ends
+    useEffect(() => {
+        if (wasLoading && !isLoading) {
+            // Loading just ended, clear the fields
+            setEmail("")
+            setPassword("")
+            setSelectedRoleId("")
+            setIsRoleDropdownOpen(false)
+        }
+        setWasLoading(isLoading)
+    }, [isLoading, wasLoading])
+
     const handleSubmit = () => {
         onSubmit({
             email,
             password,
             roleId: selectedRoleId,
         })
+        // Don't clear fields here - wait for loading to end
     }
 
     const toggleRoleDropdown = () => {

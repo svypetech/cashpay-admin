@@ -1,19 +1,29 @@
-
 import Merchant from "@/src/Types/Merchant"
 import axios from "axios"
 import { useEffect, useState } from "react"
 
-export default function useFetchMerchants(page: number, limit: number, sortBy?: string) {
+export default function useFetchMerchants(page: number, limit: number, sortBy?: string, status?: string) {
     const [merchants, setMerchants] = useState<Merchant []>([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<null| string>(null)
     const [totalPages, setTotalPages] = useState(0)
 
-
   useEffect(() => {
     setIsLoading(true)
     const fetchmerchants = async () => {
-      const url = sortBy?.trim() ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/merchant/Merchants?page=${page}&limit=${limit}&sortBy=${sortBy}` : `${process.env.NEXT_PUBLIC_BACKEND_URL}/merchant/Merchants?page=${page}&limit=${limit}`
+      // Build base URL with pagination
+      let url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/merchant/Merchants?page=${page}&limit=${limit}`
+      
+      // Add sortBy parameter if provided
+      if (sortBy?.trim()) {
+        url += `&sortBy=${sortBy}`
+      }
+      
+      // Add status parameter if provided
+      if (status?.trim()) {
+        url += `&filterStatus=${status}`
+      }
+
       try {
         const response = await axios.get(url, {
           headers: {
@@ -27,13 +37,14 @@ export default function useFetchMerchants(page: number, limit: number, sortBy?: 
       } catch (error) {
         setError("Failed to fetch merchants")
         console.error("Error fetching merchants:", error)
+        setMerchants([]);
       }
       finally {
         setIsLoading(false)
       }
     }
     fetchmerchants() 
-  }, [page, limit, sortBy]) // Re-run the effect when page, limit, or sortBy changes
+  }, [page, limit, sortBy, status]) // Re-run the effect when page, limit, sortBy, or status changes
 
-  return { merchants, isLoading, error, totalPages }
+  return { merchants, isLoading, error, totalPages, setMerchants }
 }

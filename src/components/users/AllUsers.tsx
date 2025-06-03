@@ -32,13 +32,25 @@ export default function UsersComponent() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("userStatus");
 
+  // Map tab to status parameter
+  const getStatusFromTab = (tab: string) => {
+    switch (tab) {
+      case "Verified":
+        return "Active";
+      case "Pending Verifications":
+        return "Pending";
+      default:
+        return undefined; // "All" case - no status filter
+    }
+  };
+
   const {
     users: allUsers,
     totalPages,
     isLoading,
     isError,
     setUsers,
-  } = useFetchUsers(currentPage, 10, sortBy);
+  } = useFetchUsers(currentPage, 10, sortBy, getStatusFromTab(activeTab));
 
   // Define tabs for the Tabs component
   const tabs = ["All", "Verified", "Pending Verifications"];
@@ -59,27 +71,20 @@ export default function UsersComponent() {
     setSortBy(value);
   };
 
-  // Filter and sort users based on activeTab, searchTerm, and sortBy
+  // Handle tab change
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    setCurrentPage(1); // Reset to first page when changing tabs
+  };
+
+  // Filter users based on searchTerm (status filtering is now handled by the API)
   const filteredUsers = useMemo(() => {
     if (!allUsers) return [];
 
-    // First filter by tab
-    let filtered = allUsers;
-
-    if (activeTab === "Verified") {
-      filtered = allUsers.filter(
-        (user) => user.verificationStatus === "Approved"
-      );
-    } else if (activeTab === "Pending Verifications") {
-      filtered = allUsers.filter(
-        (user) => user.verificationStatus === "Pending"
-      );
-    }
-
-    // Then apply search filter if searchTerm exists
+    // Apply search filter if searchTerm exists
     if (searchTerm.trim()) {
       const search = searchTerm.toLowerCase();
-      filtered = filtered.filter((user) => {
+      return allUsers.filter((user) => {
         if (!user.name) return false; // Handle case where name is undefined
         let name = user.name.firstName + " " + user.name.lastName;
         return (
@@ -90,10 +95,9 @@ export default function UsersComponent() {
       });
     }
 
-    // Apply sorting
-
-    return filtered;
-  }, [allUsers, activeTab, searchTerm]);
+    // If no search term, return all users (filtering by status is handled by API)
+    return allUsers;
+  }, [allUsers, searchTerm]);
 
   return (
     <>
@@ -101,7 +105,7 @@ export default function UsersComponent() {
       <Tabs
         tabs={tabs}
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={handleTabChange}
         size="normal"
       />
 

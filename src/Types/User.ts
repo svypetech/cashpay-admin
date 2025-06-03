@@ -25,3 +25,18 @@ export interface User {
     totalTime: number;
     lastActivity: string
   }
+
+  
+export type DashboardUser = {
+  name: {
+    firstName: string;
+    lastName: string;
+  };
+  contact: {
+    code: string;
+    number: string;
+  };
+  status: string;
+  email: string;
+  transactionCount: number;
+};
