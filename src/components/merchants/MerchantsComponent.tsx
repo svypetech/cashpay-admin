@@ -26,6 +26,7 @@ const sortOptions = [
   { label: "Status", value: "userStatus" },
   { label: "Date", value: "date" },
   { label: "Title", value: "title" },
+  { label: "None" , value: "" }, 
 ];
 
 export default function MerchantsComponent() {

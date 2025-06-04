@@ -4,6 +4,7 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import AdminSidebar from "@/src/components/admins/AdminSidebar"
+import ConfirmModal from "../ui/ConfirmModal"
 import { Admin } from "@/src/Types/Admin"
 import { formatJoiningDate } from "@/src/lib/functions"
 import axios from "axios"
@@ -18,6 +19,13 @@ const AdminTable: React.FC<Props> = ({ data, headings }) => {
     const [showAdminSidebar, setShowAdminSidebar] = useState(false)
     const [selectedAdmin, setSelectedAdmin] = useState<Admin | null>(null)
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
+
+    // Confirmation modal states
+    const [showSuspendModal, setShowSuspendModal] = useState(false)
+    const [showBanModal, setShowBanModal] = useState(false)
+    const [adminToSuspend, setAdminToSuspend] = useState<string | null>(null)
+    const [adminToBan, setAdminToBan] = useState<string | null>(null)
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     // Simple dropdown logic: close on outside click
     useEffect(() => {
@@ -48,6 +56,7 @@ const AdminTable: React.FC<Props> = ({ data, headings }) => {
     }
 
     const handleSuspendAdmin = async (id: string) => {
+        setIsSubmitting(true)
         try {
             const response = await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/suspendUser`, {
                 id: id,
@@ -65,12 +74,15 @@ const AdminTable: React.FC<Props> = ({ data, headings }) => {
             }
         } catch (error) {
             console.error("Error suspending admin:", error)
+            alert("Failed to suspend admin. Please try again later.")
         } finally {
+            setIsSubmitting(false)
             setActiveDropdown(null)
         }
     }
 
     const handleBanAdmin = async (id: string) => {
+        setIsSubmitting(true)
         try {
             const response = await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/banUser`, {
                 id: id,
@@ -88,9 +100,43 @@ const AdminTable: React.FC<Props> = ({ data, headings }) => {
             }
         } catch (error) {
             console.error("Error banning admin:", error)
+            alert("Failed to ban admin. Please try again later.")
         } finally {
+            setIsSubmitting(false)
             setActiveDropdown(null)
         }
+    }
+
+    // Handle suspend admin confirmation
+    const handleSuspendConfirmation = (adminId: string) => {
+        setAdminToSuspend(adminId)
+        setShowSuspendModal(true)
+        setActiveDropdown(null)
+    }
+
+    // Handle ban admin confirmation
+    const handleBanConfirmation = (adminId: string) => {
+        setAdminToBan(adminId)
+        setShowBanModal(true)
+        setActiveDropdown(null)
+    }
+
+    // Execute suspend admin
+    const executeSuspendAdmin = async () => {
+        if (!adminToSuspend) return
+        
+        await handleSuspendAdmin(adminToSuspend)
+        setShowSuspendModal(false)
+        setAdminToSuspend(null)
+    }
+
+    // Execute ban admin
+    const executeBanAdmin = async () => {
+        if (!adminToBan) return
+        
+        await handleBanAdmin(adminToBan)
+        setShowBanModal(false)
+        setAdminToBan(null)
     }
 
     const handleDeleteAdmin = (admin: Admin) => {
@@ -100,7 +146,7 @@ const AdminTable: React.FC<Props> = ({ data, headings }) => {
 
     // Calculate if we need padding based on current state
     const needsPadding = activeDropdown !== null && (
-        selectedIndex >= (data.length - 3) || // Last two rows
+        selectedIndex >= (data.length - 3) || // Last three rows due to longer dropdown
         data.length <= 2 // If there are 2 or fewer rows, always add padding
     );
 
@@ -155,13 +201,13 @@ const AdminTable: React.FC<Props> = ({ data, headings }) => {
                                                     <div className="border-t border-gray-100"></div>
                                                     <button
                                                         className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
-                                                        onClick={() => handleSuspendAdmin(admin._id)}
+                                                        onClick={() => handleSuspendConfirmation(admin._id)}
                                                     >
                                                         Suspend Admin
                                                     </button>
                                                     <button
                                                         className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
-                                                        onClick={() => handleBanAdmin(admin._id)}
+                                                        onClick={() => handleBanConfirmation(admin._id)}
                                                     >
                                                         Ban Admin
                                                     </button>
@@ -187,10 +233,38 @@ const AdminTable: React.FC<Props> = ({ data, headings }) => {
                     showSidebar={showAdminSidebar}
                     onClose={() => setShowAdminSidebar(false)}
                     admin={selectedAdmin}
-                    onSuspendAdmin={handleSuspendAdmin}
-                    onBanAdmin={handleBanAdmin}
+                    onSuspendAdmin={() => handleSuspendConfirmation(selectedAdmin._id)}
+                    onBanAdmin={() => handleBanConfirmation(selectedAdmin._id)}
                 />
             )}
+
+            {/* Suspend Admin Confirmation Modal */}
+            <ConfirmModal
+                isOpen={showSuspendModal}
+                onClose={() => !isSubmitting && setShowSuspendModal(false)}
+                onConfirm={executeSuspendAdmin}
+                title="Suspend Admin"
+                message="Are you sure you want to suspend this admin? They will lose access to their admin account temporarily."
+                warningText="This action can be reversed later."
+                cancelText="Cancel"
+                confirmText="Suspend Admin"
+                isLoading={isSubmitting}
+                style="red"
+            />
+
+            {/* Ban Admin Confirmation Modal */}
+            <ConfirmModal
+                isOpen={showBanModal}
+                onClose={() => !isSubmitting && setShowBanModal(false)}
+                onConfirm={executeBanAdmin}
+                title="Ban Admin"
+                message="Are you sure you want to ban this admin? They will lose access to their admin account permanently."
+                warningText="This action is permanent and cannot be undone."
+                cancelText="Cancel"
+                confirmText="Ban Admin"
+                isLoading={isSubmitting}
+                style="red"
+            />
         </div>
     )
 }

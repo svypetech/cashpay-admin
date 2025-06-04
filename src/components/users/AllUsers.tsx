@@ -23,6 +23,8 @@ const headings = [
 const sortOptions = [
   { label: "Date", value: "date" },
   { label: "Status", value: "userStatus" },
+  { label: "Title", value: "title" },
+  { label: "None" , value: "" }, 
 ];
 
 export default function UsersComponent() {
@@ -30,7 +32,7 @@ export default function UsersComponent() {
   const [activeTab, setActiveTab] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("userStatus");
+  const [sortBy, setSortBy] = useState("");
 
   // Map tab to status parameter
   const getStatusFromTab = (tab: string) => {

@@ -21,6 +21,7 @@ const headings = [
 const sortOptions = [
   { label: "ID", value: "id" },
   { label: "Name", value: "name" },
+  { label: "None" , value: "" }, 
 ];
 
 export default function WalletComponent() {

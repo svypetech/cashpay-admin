@@ -33,7 +33,7 @@ const AssignRequestTable: React.FC<Props> = ({ headings, agents, handleAssignReq
                             agents.map((agent, index) => (
                                 <tr
                                     key={index} 
-                                    className="border-b text-[12px] sm:text-[16px]"
+                                    className="border-b border-gray-200 text-[12px] sm:text-[16px]"
                                 >
                                     <td
                                         className={`whitespace-nowrap p-2 sm:p-4 font-satoshi w-[100px]`}

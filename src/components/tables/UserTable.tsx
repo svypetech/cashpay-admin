@@ -6,6 +6,7 @@ import { useEffect, useState } from "react"
 import UserProfileSidebar from "../users/UserProfileSidebar"
 import Image from "next/image"
 import ColourfulBlock from "../ui/ColourfulBlock"
+import ConfirmModal from "../ui/ConfirmModal"
 import { User } from "@/src/Types/User"
 import handleSuspendUser from "@/src/hooks/users/suspendUser"
 import handleBanUser from "@/src/hooks/users/banUser"
@@ -41,6 +42,13 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
     const [selectedUser, setSelectedUser] = useState<User>({} as User)
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
+    // Confirmation modal states
+    const [showSuspendModal, setShowSuspendModal] = useState(false)
+    const [showBanModal, setShowBanModal] = useState(false)
+    const [userToSuspend, setUserToSuspend] = useState<string | null>(null)
+    const [userToBan, setUserToBan] = useState<string | null>(null)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+
     // Simple dropdown logic: close on outside click
     useEffect(() => {
         console.log("length: " ,data.length)
@@ -68,6 +76,56 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
         setSelectedUser(user)
         setShowUserSidebar(true)
         setActiveDropdown(null)
+    }
+
+    // Handle suspend user confirmation
+    const handleSuspendConfirmation = (userId: string) => {
+        setUserToSuspend(userId)
+        setShowSuspendModal(true)
+        setActiveDropdown(null)
+    }
+
+    // Handle ban user confirmation
+    const handleBanConfirmation = (userId: string) => {
+        setUserToBan(userId)
+        setShowBanModal(true)
+        setActiveDropdown(null)
+    }
+
+    // Execute suspend user
+    const executeSuspendUser = async () => {
+        if (!userToSuspend) return
+        
+        setIsSubmitting(true)
+        try {
+            await handleSuspendUser(userToSuspend)
+            // display success message
+        } catch (error) {
+            console.error("Error suspending user:", error)
+            alert("Failed to suspend user. Please try again later.")
+        } finally {
+            setIsSubmitting(false)
+            setShowSuspendModal(false)
+            setUserToSuspend(null)
+        }
+    }
+
+    // Execute ban user
+    const executeBanUser = async () => {
+        if (!userToBan) return
+        
+        setIsSubmitting(true)
+        try {
+            await handleBanUser(userToBan)            
+            // display success message
+        } catch (error) {
+            console.error("Error banning user:", error)
+            alert("Failed to ban user. Please try again later.")
+        } finally {
+            setIsSubmitting(false)
+            setShowBanModal(false)
+            setUserToBan(null)
+        }
     }
 
     const needsPadding = activeDropdown !== null && (
@@ -148,19 +206,13 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
                                                     <div className="border-t border-gray-100"></div>
                                                     <button
                                                         className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
-                                                        onClick={() => {
-                                                            setActiveDropdown(null)
-                                                            handleSuspendUser(user._id)
-                                                        }}
+                                                        onClick={() => handleSuspendConfirmation(user._id)}
                                                     >
                                                         Suspend User
                                                     </button>
                                                     <button
                                                         className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
-                                                        onClick={() => {
-                                                            setActiveDropdown(null)
-                                                            handleBanUser(user._id)
-                                                        }}
+                                                        onClick={() => handleBanConfirmation(user._id)}
                                                     >
                                                         Ban User
                                                     </button>
@@ -189,6 +241,34 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
                     }}
                 />
             )}
+
+            {/* Suspend User Confirmation Modal */}
+            <ConfirmModal
+                isOpen={showSuspendModal}
+                onClose={() => !isSubmitting && setShowSuspendModal(false)}
+                onConfirm={executeSuspendUser}
+                title="Suspend User"
+                message="Are you sure you want to suspend this user? They will lose access to their account temporarily."
+                warningText="This action can be reversed later."
+                cancelText="Cancel"
+                confirmText="Suspend User"
+                isLoading={isSubmitting}
+                style="red"
+            />
+
+            {/* Ban User Confirmation Modal */}
+            <ConfirmModal
+                isOpen={showBanModal}
+                onClose={() => !isSubmitting && setShowBanModal(false)}
+                onConfirm={executeBanUser}
+                title="Ban User"
+                message="Are you sure you want to ban this user? They will lose access to their account permanently."
+                warningText="This action is permanent and cannot be undone."
+                cancelText="Cancel"
+                confirmText="Ban User"
+                isLoading={isSubmitting}
+                style="red"
+            />
         </div>
     )
 }

@@ -21,9 +21,9 @@ export default function SettingsPage() {
   type FormValues = z.infer<typeof formSchema>;
   const [user, setUser] = useState<FormValues | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [showTransferDialog, setShowTransferDialog] = useState(false)
+  const [showTransferDialog, setShowTransferDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [image, setImage] = useState<string>("/images/user-avatar.png");
+  const [image, setImage] = useState<string>("/images/blank-profile.webp");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -117,6 +117,11 @@ export default function SettingsPage() {
           // Continue with form submission even if image upload fails
         }
 
+        // Set editing to false and reload page after image upload
+        setIsEditing(false);
+        setImageFile(null);
+        alert("Profile updated successfully");
+        window.location.reload();
         return;
       }
 
@@ -136,6 +141,7 @@ export default function SettingsPage() {
         setIsEditing(false);
         setImageFile(null);
         alert("Profile updated successfully");
+        window.location.reload(); // Reload the page
       } else {
         alert("Failed to update profile");
       }
@@ -153,7 +159,7 @@ export default function SettingsPage() {
         if (user) {
           setValue("email", user.email);
           setValue("name", user.name);
-          setImage(user.image || "/images/user-avatar.png");
+          setImage(user.image || "");
         }
       } catch (error) {
         alert("Error discarding changes");
@@ -163,24 +169,27 @@ export default function SettingsPage() {
   };
 
   const handleTransferOwnership = async (newOwnerID: string) => {
-    setIsSubmitting(true)
-        const response = await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/transferOwnership`, {id: newOwnerID}, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        })
-        
-        if (response.data.success) {
-            alert("Ownership transferred successfully")
-        }
-        else {
-            alert("Failed to transfer ownership")
-        }
-        setIsSubmitting(false)
-  }
+    setIsSubmitting(true);
+    const response = await axios.put(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/transferOwnership`,
+      { id: newOwnerID },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
+
+    if (response.data.success) {
+      alert("Ownership transferred successfully");
+    } else {
+      alert("Failed to transfer ownership");
+    }
+    setIsSubmitting(false);
+  };
 
   return (
-    <div className="container mx-auto px-10 py-8 font-[satoshi]">
+    <div className="container mx-auto px-10 md:px-30 py-8 font-[satoshi]">
       <div
         className={`flex ${
           isEditing ? "flex-col" : ""
@@ -333,10 +342,10 @@ export default function SettingsPage() {
         </div>
 
         {/* Action Items */}
-        <div className="mt-8 space-y-4 border-t border-gray-200 pt-6">
+        <div className="mt-8 space-y-4 pt-6">
           <Link
             href={"/change-password"}
-            className="w-full cursor-pointer border-b border-gray-300 flex items-center justify-between py-3 px-1 text-left group"
+            className="w-full cursor-pointer border-b border-gray-200 flex items-center justify-between py-3 px-1 text-left group"
           >
             <div className="flex items-center">
               <div className="mr-3 text-gray-400">
@@ -348,20 +357,27 @@ export default function SettingsPage() {
                   className="h-6 w-6"
                 />
               </div>
-              <span className="font-medium">Change password</span>
+              <span className="font-medium text-gray-500 group-hover:scale-105">Change password</span>
             </div>
             <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-gray-600" />
           </Link>
-          <div className="border-t border-gray-100"></div>
           
+
           <button
             onClick={() => setShowTransferDialog(true)}
-            className="w-full cursor-pointer border-b border-gray-300 flex items-center justify-between py-3 px-1 text-left rounded-md group">
+            className="w-full cursor-pointer border-b border-gray-200 flex items-center justify-between py-3 px-1 text-left rounded-md group"
+          >
             <div className="flex items-center">
               <div className="mr-3 text-gray-400">
-                <Image src="/icons/profile-2user.svg" alt="accounts" width={20} height={20} className="h-6 w-6" />
+                <Image
+                  src="/icons/profile-2user.svg"
+                  alt="accounts"
+                  width={20}
+                  height={20}
+                  className="h-6 w-6"
+                />
               </div>
-              <span className="font-medium">Transfer Ownership</span>
+              <span className="font-medium text-gray-500 group-hover:scale-105">Transfer Ownership</span>
             </div>
             <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-gray-600" />
           </button>

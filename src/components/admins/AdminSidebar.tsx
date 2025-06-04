@@ -88,7 +88,7 @@ export default function AdminSidebar({
     if (!isVisible && !showSidebar) return null
 
     return (
-        <div className="fixed inset-0 z-100 overflow-hidden">
+        <div className="fixed inset-0 z-40 overflow-hidden">
             {/* Overlay with fade animation */}
             <div
                 className={`absolute inset-0 bg-black/50 transition-opacity duration-300 ${shouldSlideIn ? 'opacity-100' : 'opacity-0'}`}
@@ -103,7 +103,7 @@ export default function AdminSidebar({
                 <div className="flex h-full flex-col overflow-y-auto">
                     {/* Header */}
                     <div className="flex items-center justify-between px-6 py-4 mt-5">
-                        <h2 className="text-2xl font-semibold">User Profile</h2>
+                        <h2 className="text-2xl font-semibold">Admin Profile</h2>
                         <button onClick={onClose} className="rounded-full cursor-pointer p-1 hover:bg-gray-100" aria-label="Close sidebar">
                             <X className="h-6 w-6" />
                         </button>
@@ -114,7 +114,7 @@ export default function AdminSidebar({
                         {/* Profile Image */}
                         <div className="mb-4 h-32 w-32 overflow-hidden rounded-full">
                             <img
-                                src={admin.image || "/placeholder.svg?height=200&width=200"}
+                                src={admin.image || "/images/blank-profile.webp"}
                                 alt={admin.name}
                                 width={128}
                                 height={128}

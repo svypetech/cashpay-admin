@@ -18,6 +18,7 @@ const headings = ["ID", "Name", "E-mail", "Joined date", "Role", "Actions"];
 const sortOptions = [
   { label: "Date", value: "date" },
   { label: "Title", value: "title" },
+  { label: "None" , value: "" }, 
 ];
 
 export default function Admins() {

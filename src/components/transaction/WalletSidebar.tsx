@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { X } from "lucide-react";
 import {Wallet} from "@/src/Types/Wallet"
 import { cal_USDT_Value, formatNumberToTwoDecimals } from "@/src/lib/functions";
@@ -83,7 +82,7 @@ export default function WalletSidebar({
             {/* Profile Image */}
             <div className="mb-4 h-32 w-32 overflow-hidden rounded-full">
               <img
-                src={wallet.data.image === "" ? "/placeholder.svg" : wallet.data.image}
+                src={wallet.data.image && wallet.data.image.trim() ? wallet.data.image : "/images/blank-profile.webp"}
                 alt={"User Avatar"}
                 width={128}
                 height={128}
@@ -113,7 +112,7 @@ export default function WalletSidebar({
           {/* Crypto Holdings */}
           <div className="flex flex-col items-center mx-10 py-8 font-[satoshi] border-b border-gray-300">
             <div className="flex flex-col w-full">
-              {wallet &&
+              {wallet && wallet.data.balances.tokens ?
                 wallet.data.balances.tokens.map((item, index) => (
                   <CryptoCard
                     key={index}
@@ -122,7 +121,9 @@ export default function WalletSidebar({
                     usdValue={cal_USDT_Value({balance: item.balance, contract_decimals: Number(item.contractAddress), quote_rate: Number(item.quote) || 0})}  
                     iconUrl={item.logo || "/placeholder.svg"}
                   />
-                ))}
+                )): (
+                  <p className="text-gray-500 text-center">No crypto holdings available.</p>
+                )}
             </div>
           </div>
         </div>

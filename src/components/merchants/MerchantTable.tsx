@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import ColourfulBlock from "../ui/ColourfulBlock";
 import MerchantInfoSidebar from "./MerchantInfoSidebar";
+import ConfirmModal from "../ui/ConfirmModal";
 import Merchant from "@/src/Types/Merchant";
 import handleSuspendUser from "@/src/hooks/users/suspendUser";
 import handleBanUser from "@/src/hooks/users/banUser";
@@ -24,6 +25,13 @@ export default function MerchantsTable({
   const [showSidebar, setShowSidebar] = useState(false);
   const [selectedMerchant, setSelectedMerchant] = useState<Merchant | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
+
+  // Confirmation modal states
+  const [showSuspendModal, setShowSuspendModal] = useState(false);
+  const [showBanModal, setShowBanModal] = useState(false);
+  const [userToSuspend, setUserToSuspend] = useState<string | null>(null);
+  const [userToBan, setUserToBan] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Simple dropdown logic: close on outside click
   useEffect(() => {
@@ -52,6 +60,56 @@ export default function MerchantsTable({
     setSelectedMerchant(merchant);
     setShowSidebar(true);
     setActiveDropdown(null);
+  };
+
+  // Handle suspend user confirmation
+  const handleSuspendConfirmation = (userId: string) => {
+    setUserToSuspend(userId);
+    setShowSuspendModal(true);
+    setActiveDropdown(null);
+  };
+
+  // Handle ban user confirmation
+  const handleBanConfirmation = (userId: string) => {
+    setUserToBan(userId);
+    setShowBanModal(true);
+    setActiveDropdown(null);
+  };
+
+  // Execute suspend user
+  const executeSuspendUser = async () => {
+    if (!userToSuspend) return;
+    
+    setIsSubmitting(true);
+    try {
+      await handleSuspendUser(userToSuspend);
+      // Display success message to user
+    } catch (error) {
+      console.error("Error suspending merchant:", error);
+      alert("Failed to suspend merchant. Please try again later.");
+    } finally {
+      setIsSubmitting(false);
+      setShowSuspendModal(false);
+      setUserToSuspend(null);
+    }
+  };
+
+  // Execute ban user
+  const executeBanUser = async () => {
+    if (!userToBan) return;
+    
+    setIsSubmitting(true);
+    try {
+      await handleBanUser(userToBan);
+      // Display success message to user
+    } catch (error) {
+      console.error("Error banning merchant:", error);
+      alert("Failed to ban merchant. Please try again later.");
+    } finally {
+      setIsSubmitting(false);
+      setShowBanModal(false);
+      setUserToBan(null);
+    }
   };
 
   // Calculate if we need padding based on current state
@@ -147,19 +205,13 @@ export default function MerchantsTable({
                           <div className="border-t border-gray-100"></div>
                           <button
                             className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
-                            onClick={() => {
-                              handleSuspendUser(merchant._id);
-                              setActiveDropdown(null);
-                            }}
+                            onClick={() => handleSuspendConfirmation(merchant._id)}
                           >
                             Suspend User
                           </button>
                           <button
                             className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
-                            onClick={() => {
-                              handleBanUser(merchant._id);
-                              setActiveDropdown(null);
-                            }}
+                            onClick={() => handleBanConfirmation(merchant._id)}
                           >
                             Ban User
                           </button>
@@ -172,16 +224,45 @@ export default function MerchantsTable({
           </tbody>
         </table>
       </div>
+
       {/* Sidebar for merchant info */}
       {selectedMerchant && (
         <MerchantInfoSidebar
           showSidebar={showSidebar}
           onClose={() => setShowSidebar(false)}
           merchant={selectedMerchant}
-          onSuspend={() => handleSuspendUser(selectedMerchant._id)}
-          onBan={() => handleBanUser(selectedMerchant._id)}
+          onSuspend={() => handleSuspendConfirmation(selectedMerchant._id)}
+          onBan={() => handleBanConfirmation(selectedMerchant._id)}
         />
       )}
+
+      {/* Suspend Merchant Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showSuspendModal}
+        onClose={() => !isSubmitting && setShowSuspendModal(false)}
+        onConfirm={executeSuspendUser}
+        title="Suspend Merchant"
+        message="Are you sure you want to suspend this merchant? They will lose access to their account temporarily."
+        warningText="This action can be reversed later."
+        cancelText="Cancel"
+        confirmText="Suspend Merchant"
+        isLoading={isSubmitting}
+        style="red"
+      />
+
+      {/* Ban Merchant Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showBanModal}
+        onClose={() => !isSubmitting && setShowBanModal(false)}
+        onConfirm={executeBanUser}
+        title="Ban Merchant"
+        message="Are you sure you want to ban this merchant? They will lose access to their account permanently."
+        warningText="This action is permanent and cannot be undone."
+        cancelText="Cancel"
+        confirmText="Ban Merchant"
+        isLoading={isSubmitting}
+        style="red"
+      />
     </div>
   );
 }

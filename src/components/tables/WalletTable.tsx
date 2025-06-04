@@ -4,6 +4,7 @@ import Image from "next/image";
 import type React from "react"
 import { useEffect, useState } from "react"
 import WalletSidebar from "../transaction/WalletSidebar";
+import ConfirmModal from "../ui/ConfirmModal";
 import {Wallet} from "@/src/Types/Wallet"
 import { formatNumberToTwoDecimals } from "@/src/lib/functions";
 import handleBanUser from "@/src/hooks/users/banUser";
@@ -19,8 +20,14 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
     const [showSidebar, setShowSidebar] = useState(false)
     const [selectedWallet, setSelectedWallet] = useState<Wallet | null>(null)
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
+    
+    // Confirmation modal states
+    const [showSuspendModal, setShowSuspendModal] = useState(false)
+    const [showBanModal, setShowBanModal] = useState(false)
+    const [userToSuspend, setUserToSuspend] = useState<string | null>(null)
+    const [userToBan, setUserToBan] = useState<string | null>(null)
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
-    // Simple dropdown logic: close on outside click
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (activeDropdown !== null) {
@@ -42,7 +49,56 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
         setActiveDropdown(activeDropdown === index ? null : index)
     }
 
-    // Calculate if we need padding based on current state
+    // Handle suspend user confirmation
+    const handleSuspendConfirmation = (userId: string) => {
+        setUserToSuspend(userId)
+        setShowSuspendModal(true)
+        setActiveDropdown(null)
+    }
+
+    // Handle ban user confirmation
+    const handleBanConfirmation = (userId: string) => {
+        setUserToBan(userId)
+        setShowBanModal(true)
+        setActiveDropdown(null)
+    }
+
+    // Execute suspend user
+    const executeSuspendUser = async () => {
+        if (!userToSuspend) return
+        
+        setIsSubmitting(true)
+        try {
+            await handleSuspendUser(userToSuspend)
+            // Display success message
+        } catch (error) {
+            console.error("Error suspending user:", error)
+            alert("Failed to suspend user. Please try again later.")
+        } finally {
+            setIsSubmitting(false)
+            setShowSuspendModal(false)
+            setUserToSuspend(null)
+        }
+    }
+
+    // Execute ban user
+    const executeBanUser = async () => {
+        if (!userToBan) return
+        
+        setIsSubmitting(true)
+        try {
+            await handleBanUser(userToBan)            
+            // Display success message
+        } catch (error) {
+            console.error("Error banning user:", error)
+            alert("Failed to ban user. Please try again later.")
+        } finally {
+            setIsSubmitting(false)
+            setShowBanModal(false)
+            setUserToBan(null)
+        }
+    }
+
     const needsPadding = activeDropdown !== null && (
         selectedIndex >= (data.length - 2) || // Last two rows
         data.length <= 2 // If there are 2 or fewer rows, always add padding
@@ -51,7 +107,7 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
     return (
         <div className="flex-1 rounded-lg w-full py-5">
             {/* Table - Add dynamic padding for dropdown space */}
-            <div className={`rounded-lg overflow-x-auto w-full ${needsPadding ? "pb-28" : ""}`}>
+            <div className={`rounded-lg overflow-x-auto w-full ${needsPadding ? "pb-32" : ""}`}>
                 <table className="w-full text-left table-auto">
                     <thead className="bg-secondary/10">
                         <tr className="font-satoshi text-[12px] md:text-[16px] p-2 md:p-4">
@@ -105,19 +161,13 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
                                                     <div className="border-t border-gray-100"></div>
                                                     <button
                                                         className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
-                                                        onClick={() => {
-                                                            setActiveDropdown(null)
-                                                            handleSuspendUser(wallet.data.userId.toString())
-                                                        }}
+                                                        onClick={() => handleSuspendConfirmation(wallet.data.userId.toString())}
                                                     >
                                                         Suspend User
                                                     </button>
                                                     <button
                                                         className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
-                                                        onClick={() => {
-                                                            setActiveDropdown(null)
-                                                            handleBanUser(wallet.data.userId.toString())
-                                                        }}
+                                                        onClick={() => handleBanConfirmation(wallet.data.userId.toString())}
                                                     >
                                                         Ban User
                                                     </button>
@@ -131,14 +181,42 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
                 </table>
             </div>
 
-            {/* Wallet Details Sidebar */}
-            {selectedWallet && selectedWallet.data.balances.tokens && (
+            {/* Wallet Sidebar */}
+            {selectedWallet && (
                 <WalletSidebar
                     showSidebar={showSidebar}
                     onClose={() => setShowSidebar(false)}
                     wallet={selectedWallet}
                 />
             )}
+
+            {/* Suspend User Confirmation Modal */}
+            <ConfirmModal
+                isOpen={showSuspendModal}
+                onClose={() => !isSubmitting && setShowSuspendModal(false)}
+                onConfirm={executeSuspendUser}
+                title="Suspend User"
+                message="Are you sure you want to suspend this user? They will lose access to their account temporarily."
+                warningText="This action can be reversed later."
+                cancelText="Cancel"
+                confirmText="Suspend User"
+                isLoading={isSubmitting}
+                style="red"
+            />
+
+            {/* Ban User Confirmation Modal */}
+            <ConfirmModal
+                isOpen={showBanModal}
+                onClose={() => !isSubmitting && setShowBanModal(false)}
+                onConfirm={executeBanUser}
+                title="Ban User"
+                message="Are you sure you want to ban this user? They will lose access to their account permanently."
+                warningText="This action is permanent and cannot be undone."
+                cancelText="Cancel"
+                confirmText="Ban User"
+                isLoading={isSubmitting}
+                style="red"
+            />
         </div>
     )
 }
