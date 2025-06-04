@@ -1,148 +1,208 @@
-"use client"
+"use client";
 
-import { useEffect } from "react"
-import Image from "next/image"
-import { X } from "lucide-react"
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import { X, Copy } from "lucide-react";
+import { formatJoiningDate, shortenAddress } from "@/src/lib/functions";
+import Transaction from "@/src/Types/TransactionManagement";
 
 interface TransactionDetailsPopupProps {
-    showPopup: boolean
-    onClose: () => void
-    transaction?: {
-        id: string
-        transactionNumber: string
-        userId: string
-        amount: number
-        status: "Pending" | "Completed" | "Failed"
-        timestamp: string
-        currency: "BTC" | "ETH" | "USDT"
-    }
+  showPopup: boolean;
+  onClose: () => void;
+  transaction: Transaction;
 }
 
-export default function TransactionDetailsPopup({
-    showPopup,
-    onClose,
-    transaction = {
-        id: "TXN-001",
-        transactionNumber: "192802",
-        userId: "CP-001",
-        amount: 1.35,
-        status: "Pending",
-        timestamp: "2025-03-10 10:00",
-        currency: "BTC",
-    },
+export default function TransactionManagementPopup({
+  showPopup,
+  onClose,
+  transaction,
 }: TransactionDetailsPopupProps) {
-    // Prevent body scrolling when popup is open
-    useEffect(() => {
-        if (showPopup) {
-            document.body.style.overflow = "hidden"
-        } else {
-            document.body.style.overflow = "auto"
-        }
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
-        return () => {
-            document.body.style.overflow = "auto"
-        }
-    }, [showPopup])
-
-    if (!showPopup) return null
-
-    // Get currency icon and color
-    const getCurrencyDetails = (currency: string) => {
-        switch (currency) {
-            case "BTC":
-                return { bgColor: "bg-orange-400", icon: "₿" }
-            case "ETH":
-                return { bgColor: "bg-gray-400", icon: "Ξ" }
-            case "USDT":
-                return { bgColor: "bg-green-400", icon: "₮" }
-            default:
-                return { bgColor: "bg-blue-400", icon: "$" }
-        }
+  // Prevent body scrolling when popup is open
+  useEffect(() => {
+    if (showPopup) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
     }
 
-    const currencyDetails = getCurrencyDetails(transaction.currency)
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [showPopup]);
 
-    // Get status color
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case "Pending":
-                return "text-amber-500 bg-amber-50"
-            case "Completed":
-                return "text-green-500 bg-green-50"
-            case "Failed":
-                return "text-red-500 bg-red-50"
-            default:
-                return "text-gray-500 bg-gray-50"
-        }
-    }
+  // Handle copying to clipboard with feedback
+  const copyToClipboard = (text: string, field: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 2000);
+  };
 
-    const statusColor = getStatusColor(transaction.status)
+  if (!showPopup) return null;
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-black/50 p-4">
-            <div className="relative max-h-full w-full max-w-md">
-                {/* Popup Content */}
-                <div className="relative rounded-lg bg-white shadow-lg">
-                    {/* Header */}
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-black/50 p-4">
+      <div className="relative  max-h-full w-full max-w-md">
+        {/* Popup Content */}
+        <div className="relative rounded-lg bg-white shadow-lg flex flex-col items-center">
+          {/* Header */}
+          <button
+            type="button"
+            onClick={onClose}
+            className="absolute cursor-pointer right-5 top-5 ml-auto inline-flex h-8 w-8 items-center justify-center rounded-full text-sm text-black hover:scale-105 hover:bg-gray-100"
+          >
+            <X className="h-5 w-5" />
+            <span className="sr-only">Close modal</span>
+          </button>
 
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="absolute right-7 top-7 ml-auto inline-flex h-8 w-8 items-center justify-center rounded-full text-sm text-black hover:scale-105 hover:bg-gray-100"
-                    >
-                        <X className="h-5 w-5" />
-                        <span className="sr-only">Close modal</span>
-                    </button>
+          {/* Body */}
+          <div className="flex flex-col items-center p-6 font-[satoshi]">
+            <h3 className="text-xl font-semibold text-gray-900 mb-5 mt-6">
+              Transaction Details
+            </h3>
 
-
-                    {/* Body */}
-                    <div className="flex flex-col items-center p-6 font-[satoshi]">
-                        <h3 className="text-xl font-semibold text-gray-900 mb-5 mt-10">Transaction Details</h3>
-                        {/* Currency Icon */}
-                        <div className={`mb-4 flex h-20 w-20 items-center justify-center rounded-full ${currencyDetails.bgColor}`}>
-                            {transaction.currency === "BTC" ? (
-                                <Image
-                                    src="/icons/bitcoin.svg"
-                                    alt="Bitcoin"
-                                    width={80}
-                                    height={80}
-                                    className="h-full w-full rounded-full"
-                                />
-                            ) : (
-                                <span className="text-3xl font-bold text-white">{currencyDetails.icon}</span>
-                            )}
-                        </div>
-
-                        {/* Transaction Number */}
-                        <div className="mb-6 text-center">
-                            <p className="text-md font-semibold">Transaction#{transaction.transactionNumber}</p>
-                            <p className="text-xs text-gray-500">Transaction-ID: {transaction.id}</p>
-                        </div>
-
-                        {/* Transaction Details */}
-                        <div className="space-y-1   ">
-                            <div className="flex gap-8">
-                                <span className="w-28 text-sm font-bold bg-[#27AAE11A] px-4 py-1">User ID</span>
-                                <span className="text-sm text-gray-800">{transaction.userId}</span>
-                            </div>
-                            <div className="flex gap-8">
-                                <span className="w-28 text-sm font-bold bg-[#27AAE11A] px-4 py-1">Amount</span>
-                                <span className="text-sm text-gray-800">{transaction.amount}</span>
-                            </div>
-                            <div className="flex gap-8">
-                                <span className="w-28 text-sm font-bold bg-[#27AAE11A] px-4 py-1">Status</span>
-                                <span className={`text-sm text-red-500 font-bold`}>
-                                    {transaction.status}
-                                </span>
-                            </div>
-                            <div className="flex gap-8">
-                                <span className="w-28 text-sm font-bold bg-[#27AAE11A] px-4 py-1">Timestamp</span>
-                                <span className="text-xs text-gray-800">{transaction.timestamp}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            {/* Currency Icon */}
+            <div
+              className={
+                "mb-4 flex h-[100px] items-center justify-center rounded-full bg-[#27AAE11A]"
+              }
+            >
+              <Image
+                src="/icons/bitcoin.svg"
+                alt="Transaction icon"
+                width={120}
+                height={120}
+                className="h-full w-full rounded-full"
+              />
             </div>
+
+            {/* Transaction Number */}
+            <div className="mb-6 text-center">
+              <div className="flex items-center justify-center gap-2">
+                <p className="text-[18px] font-semibold max-w-[280px] truncate">
+
+                  Transaction#{shortenAddress(transaction.transactionHash, 10)}
+                </p>
+                <button
+                  onClick={() =>
+                    copyToClipboard(
+                      transaction.transactionHash,
+                      "hash"
+                    )
+                  }
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  {copiedField === "hash" ? (
+                    <span className="text-xs text-green-500">Copied!</span>
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Transaction-ID: {transaction.id}
+              </p>
+            </div>
+
+            {/* Transaction Details */}
+            <div className="flex flex-col items-start gap-x-4 w-full mb-4">
+              <div className="space-y-2">
+                {/* To address */}
+                <div className="flex flex-row sm:items-start gap-2">
+                  <span className="w-28 text-sm font-bold bg-[#27AAE11A] px-4 py-1 rounded-md">
+                    User ID
+                  </span>
+                  <div className="flex items-center gap-2 flex-1 overflow-hidden">
+                    <span className="text-sm text-gray-800 truncate">
+                      {transaction.userId ? transaction.userId : "N/A"}
+                    </span>
+                    <button
+                      onClick={() =>
+                        copyToClipboard(transaction.userId, "userId")
+                      }
+                      className="text-gray-500 hover:text-gray-700 flex-shrink-0"
+                    >
+                      {copiedField === "userId" ? (
+                        <span className="text-xs text-green-500">Copied!</span>
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* From address */}
+                <div className="flex flex-row  sm:items-start gap-2">
+                  <span className="w-28 text-sm font-bold bg-[#27AAE11A] px-4 py-1 rounded-md">
+                    Amount
+                  </span>
+                  <div className="flex items-center gap-2 flex-1 overflow-hidden">
+                    <span className="text-sm text-gray-800 truncate">
+                      {transaction.amount}
+                    </span>
+                    <button
+                      onClick={() =>
+                        copyToClipboard(transaction.amount, "amount")
+                      }
+                      className="text-gray-500 hover:text-gray-700 flex-shrink-0"
+                    >
+                      {copiedField === "amount" ? (
+                        <span className="text-xs text-green-500">Copied!</span>
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Status */}
+                <div className="flex flex-row sm:items-center gap-2">
+                  <span className="w-28 text-sm font-bold bg-[#27AAE11A] px-4 py-1 rounded-md">
+                    Status
+                  </span>
+                  <span
+                    className={`text-sm text-gray-600 font-semibold ${
+                      transaction.status.toLowerCase() === "completed"
+                        ? "text-success"
+                        : "text-[#DF1D1D]"
+                    }`}
+                  >
+                    {transaction.status.charAt(0).toUpperCase() +
+                      transaction.status.slice(1)}
+                  </span>
+                </div>
+
+                {/* Block */}
+                <div className="flex flex-row sm:items-start gap-2">
+                  <span className="w-28 text-sm font-bold bg-[#27AAE11A] px-4 py-1 rounded-md">
+                    Timestamp
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-800">
+                      {formatJoiningDate(transaction.date)}
+                    </span>
+                    <button
+                      onClick={() =>
+                        copyToClipboard(formatJoiningDate(transaction.date), "date")
+                      }
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      {copiedField === "date" ? (
+                        <span className="text-xs text-green-500">Copied!</span>
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Date */}
+              </div>
+            </div>
+          </div>
         </div>
-    )
+      </div>
+    </div>
+  );
 }

@@ -77,11 +77,9 @@ export default function UserProfileSidebar({
                     <div className="flex flex-col items-center px-6 py-8 font-[satoshi]">
                         {/* Profile Image */}
                         <div className="mb-4 h-32 w-32 overflow-hidden rounded-full">
-                            <Image
-                                src={user.selfieUrl || "/placeholder.svg?height=200&width=200"}
+                            <img
+                                src={user.selfieUrl || "/images/blank-profile.webp"}
                                 alt={"User Avatar"}
-                                width={128}
-                                height={128}
                                 className="h-full w-full object-cover"
                             />
                         </div>

@@ -32,7 +32,7 @@ interface Web3Transaction {
 
 export default interface Transaction {
     id: string;
-    userId?: string;
+    userId: string;
     to?: string;
     token: string;
     tokenName: string;
