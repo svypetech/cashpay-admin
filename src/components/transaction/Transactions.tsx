@@ -11,11 +11,18 @@ import Tabs from "../ui/Tabs";
 import useFetchTransactions from "@/src/hooks/Transactions/transactionsManagement";
 const headings = ["ID", "From", "To", "Amount", "Status", "Block#", "Date"];
 const navigationTabs = ["All", "Completed", "Pending", "Failed"];
+const sortOptions = [
+  { label: "None", value: "" }, 
+  { label: "Date", value: "date" },
+  { label: "Amount", value: "amount" },
+  { label: "Token", value: "tokenName" },
+];
 
 export default function Transactions() {
   const [currentPage, setCurrentPage] = useState(1);
   const [activeTab, setActiveTab] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState("");
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -26,11 +33,16 @@ export default function Transactions() {
     limit: 10,
     searchQuery,
     status: activeTab === "All" ? "" : activeTab,
+    sortBy,
   });
 
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, activeTab]);
+
+  const handleSort = (value: string) => {
+    setSortBy(value);
+  };
 
   return (
     <div>
@@ -52,8 +64,8 @@ export default function Transactions() {
         <Sort
           className="sm:w-[20%] w-full"
           title="Sort"
-          options={[]}
-          onSort={() => {}}
+          options={sortOptions}
+          onSort={handleSort}
         />
       </div>
       {loading ? (

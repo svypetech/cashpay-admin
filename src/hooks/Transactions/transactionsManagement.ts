@@ -3,7 +3,7 @@ import axios from 'axios';
 import Transaction from '@/src/Types/TransactionManagement';
   
 
-const useFetchTransactions = ({page, limit, searchQuery, status} : {page: number, limit: number, searchQuery?:string, status?: string})  => {
+const useFetchTransactions = ({page, limit, searchQuery, status, sortBy} : {page: number, limit: number, searchQuery?:string, status?: string, sortBy?: string})  => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [totalPages, setTotalPages] = useState<number>(0);
@@ -21,6 +21,11 @@ const useFetchTransactions = ({page, limit, searchQuery, status} : {page: number
         // Append status if provided
         if (status) {
           url += `&status=${status}`;
+        }
+
+        // Append sortBy if provided
+        if (sortBy) {
+          url += `&sort=${sortBy}`;
         }
 
         const response = await axios.get(url, {
@@ -44,7 +49,7 @@ const useFetchTransactions = ({page, limit, searchQuery, status} : {page: number
     }
 
     fetchData();
-  }, [page, limit, searchQuery, status]);
+  }, [page, limit, searchQuery, status, sortBy]);
 
   return { transactions, totalPages, loading, error };
 };

@@ -38,7 +38,7 @@ export default function UsersComponent() {
   const getStatusFromTab = (tab: string) => {
     switch (tab) {
       case "Verified":
-        return "Active";
+        return "Approved";
       case "Pending Verifications":
         return "Pending";
       default:

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import {Wallet} from "@/src/Types/Wallet"
 import { cal_USDT_Value, formatNumberToTwoDecimals } from "@/src/lib/functions";
+import { parse } from "path";
 interface WalletSidebarProps {
   showSidebar: boolean;
   onClose: () => void;
@@ -116,10 +117,13 @@ export default function WalletSidebar({
                 wallet.data.balances.tokens.map((item, index) => (
                   <CryptoCard
                     key={index}
-                    symbol={item.symbol}
-                    amount={item.balance}
-                    usdValue={cal_USDT_Value({balance: item.balance, contract_decimals: Number(item.contractAddress), quote_rate: Number(item.quote) || 0})}  
+                    symbol={item.symbol.toLocaleUpperCase()}
+                    name={item.name}
+                    balance={item.balance}
+                    convertedBalance={item.convertedBalance}
+                    usdValue={parseFloat(item.quote) || 0}
                     iconUrl={item.logo || "/placeholder.svg"}
+                    decimals={item.decimals}
                   />
                 )): (
                   <p className="text-gray-500 text-center">No crypto holdings available.</p>
@@ -134,12 +138,23 @@ export default function WalletSidebar({
 
 interface CryptoCardProps {
   symbol: string;
-  amount: string;
+  name: string;
+  balance: string;
+  convertedBalance: string;
   usdValue: number;
   iconUrl: string;
+  decimals: number;
 }
 
-function CryptoCard({ symbol, amount, usdValue, iconUrl }: CryptoCardProps) {
+function CryptoCard({ symbol, balance, usdValue, iconUrl, decimals }: CryptoCardProps) {
+
+  const formatBalance = (balance: string, decimals: number) => {
+    const balanceNumber = parseFloat(balance);
+    const divisor = Math.pow(10, decimals);
+    const readableBalance = balanceNumber / divisor;
+    return formatNumberToTwoDecimals(readableBalance);
+  };
+
   return (
     <div className="mb-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
       <div className="flex items-center justify-between">
@@ -155,7 +170,7 @@ function CryptoCard({ symbol, amount, usdValue, iconUrl }: CryptoCardProps) {
           </div>
           <div>
             <p className="text-sm font-medium text-gray-600">{symbol}</p>
-            <p className="text-sm font-bold text-blue-900">{amount}</p>
+            <p className="text-sm font-bold text-blue-900">{formatBalance(balance, decimals)}</p>
           </div>
         </div>
         <div className="text-right">
