@@ -11,6 +11,7 @@ import VerificationSteps from "../cards/VerificationForm";
 import ConfirmModal from "../ui/ConfirmModal";
 import handleBanUser from "@/src/hooks/users/banUser";
 import handleSuspendUser from "@/src/hooks/users/suspendUser";
+import handleActivateUser from "@/src/hooks/users/activateUser";
 
 interface UserProfileSidebarProps {
     showSidebar: boolean;
@@ -38,9 +39,18 @@ export default function UserProfileSidebar({
     ]);
     const [isVerifying, setIsVerifying] = useState(false);
 
+    // ADD THIS: Local state to track current user status
+    const [currentUserStatus, setCurrentUserStatus] = useState(user.userStatus);
+
     // Confirmation modal states
     const [showSuspendModal, setShowSuspendModal] = useState(false);
     const [showBanModal, setShowBanModal] = useState(false);
+    const [showActivateModal, setShowActivateModal] = useState(false);
+
+    // Update local status when user prop changes
+    useEffect(() => {
+        setCurrentUserStatus(user.userStatus);
+    }, [user.userStatus]);
 
     const handleStartVerification = () => {
         console.log("Starting verification process");
@@ -81,16 +91,46 @@ export default function UserProfileSidebar({
         }
     };
 
+    // Handle activate user confirmation
+    const handleActivateConfirmation = () => {
+        setShowActivateModal(true);
+    };
+
     // Handle suspend user confirmation
     const handleSuspendConfirmation = () => {
-        setIsVisible(false);
         setShowSuspendModal(true);
     };
 
     // Handle ban user confirmation
     const handleBanConfirmation = () => {
-        setIsVisible(false);
         setShowBanModal(true);
+    };
+
+    // Execute activate user
+    const executeActivateUser = async () => {
+        setIsSubmitting(true);
+        setActionType("activate");
+        try {
+            await handleActivateUser(user._id);
+            alert("User activated successfully.");
+            
+            // Update both local state and parent state
+            setCurrentUserStatus("Active");
+            setData((prevUsers) =>
+                prevUsers.map((prevUser) =>
+                    prevUser._id === user._id
+                        ? { ...prevUser, userStatus: "Active" }
+                        : prevUser
+                )
+            );
+        } catch (error) {
+            console.error("Error activating user:", error);
+            alert("Failed to activate user. Please try again later.");
+        } finally {
+            setIsSubmitting(false);
+            setActionType("");
+            setShowActivateModal(false);
+        }
     };
 
     // Execute suspend user
@@ -99,6 +139,17 @@ export default function UserProfileSidebar({
         setActionType("suspend");
         try {
             await handleSuspendUser(user._id);
+            alert("User suspended successfully.");
+            
+            // Update both local state and parent state
+            setCurrentUserStatus("Suspended");
+            setData((prevUsers) =>
+                prevUsers.map((prevUser) =>
+                    prevUser._id === user._id
+                        ? { ...prevUser, userStatus: "Suspended" }
+                        : prevUser
+                )
+            );
         } catch (error) {
             console.error("Error suspending user:", error);
             alert("Failed to suspend user. Please try again later.");
@@ -115,6 +166,17 @@ export default function UserProfileSidebar({
         setActionType("ban");
         try {
             await handleBanUser(user._id);
+            alert("User banned successfully.");
+            
+            // Update both local state and parent state
+            setCurrentUserStatus("Banned");
+            setData((prevUsers) =>
+                prevUsers.map((prevUser) =>
+                    prevUser._id === user._id
+                        ? { ...prevUser, userStatus: "Banned" }
+                        : prevUser
+                )
+            );
         } catch (error) {
             console.error("Error banning user:", error);
             alert("Failed to ban user. Please try again later.");
@@ -125,27 +187,24 @@ export default function UserProfileSidebar({
         }
     };
 
-    // Handle animation and visibility states - UPDATED to match UserInfoSidebar
+    // Handle animation and visibility states
     useEffect(() => {
         if (showSidebar) {
-            setIsVisible(true) // Render the sidebar
-            // Use a small timeout to ensure DOM is ready before starting animation
+            setIsVisible(true)
             setTimeout(() => {
-                setShouldSlideIn(true) // Trigger slide-in animation
+                setShouldSlideIn(true)
             }, 0)
-            document.body.style.overflow = "hidden" // Prevent scrolling
+            document.body.style.overflow = "hidden"
         } else {
-            setShouldSlideIn(false) // Start slide-out animation
-            // Wait for animation to complete before removing from DOM
+            setShouldSlideIn(false)
             const timer = setTimeout(() => {
                 setIsVisible(false)
-                document.body.style.overflow = "auto" // Re-enable scrolling
-            }, 300) // Match transition duration
+                document.body.style.overflow = "auto"
+            }, 300)
             return () => clearTimeout(timer)
         }
     }, [showSidebar])
 
-    // Clean up overflow style when component unmounts - ADDED from UserInfoSidebar
     useEffect(() => {
         return () => {
             document.body.style.overflow = "auto"
@@ -156,19 +215,18 @@ export default function UserProfileSidebar({
 
     return (
         <>
-            <div className="fixed inset-0 z-40 overflow-hidden">
-                {/* Overlay with fade animation - UPDATED to match UserInfoSidebar */}
+            <div className="fixed inset-0 z-50 overflow-hidden">
                 <div
                     className={`absolute inset-0 bg-black/50 transition-opacity duration-300 ${shouldSlideIn ? 'opacity-100' : 'opacity-0'}`}
                     onClick={onClose}
                     aria-hidden="true"
                 />
                 
-                {/* Sidebar with slide animation - UPDATED to match UserInfoSidebar */}
                 <div
                     className={`absolute inset-y-0 right-0 w-full max-w-md bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${shouldSlideIn ? 'translate-x-0' : 'translate-x-full'}`}
                 >
                     {verificationStarted ? (
+                        // Verification flow content...
                         <div className="flex h-full flex-col overflow-y-auto">
                             <div className="flex items-center justify-between px-6 py-4 mt-5">
                                 <div></div>
@@ -337,30 +395,55 @@ export default function UserProfileSidebar({
                                     )}
                                 </div>
 
-                                {/* Action Buttons */}
-                                <div className="flex justify-between mt-auto w-full gap-4 px-5">
-                                    <button 
-                                        className="rounded-md border px-6 py-2 border-[#DF1D1D] text-[#DF1D1D] hover:bg-red-50 cursor-pointer font-bold disabled:opacity-50"
-                                        onClick={handleSuspendConfirmation}
-                                        disabled={isSubmitting}
-                                    >
-                                        {isSubmitting && actionType === "suspend" ? "Suspending..." : "Suspend"}
-                                    </button>
-                                    <button 
-                                        className="rounded-md px-6 py-2 bg-[#DF1D1D] text-white hover:bg-red-700 cursor-pointer font-bold disabled:opacity-50"
-                                        onClick={handleBanConfirmation}
-                                        disabled={isSubmitting}
-                                    >
-                                        {isSubmitting && actionType === "ban" ? "Banning..." : "Ban"}
-                                    </button>
-                                </div>
+                                {/* Action Buttons - FIXED: Use currentUserStatus instead of user.userStatus */}
+                                {currentUserStatus === "Active" ? (
+                                    <div className="flex justify-between mt-auto w-full gap-4 px-5">
+                                        <button 
+                                            className="rounded-md border px-6 py-2 border-[#DF1D1D] text-[#DF1D1D] hover:bg-red-50 cursor-pointer font-bold disabled:opacity-50"
+                                            onClick={handleSuspendConfirmation}
+                                            disabled={isSubmitting}
+                                        >
+                                            {isSubmitting && actionType === "suspend" ? "Suspending..." : "Suspend"}
+                                        </button>
+                                        <button 
+                                            className="rounded-md px-6 py-2 bg-[#DF1D1D] text-white hover:bg-red-700 cursor-pointer font-bold disabled:opacity-50"
+                                            onClick={handleBanConfirmation}
+                                            disabled={isSubmitting}
+                                        >
+                                            {isSubmitting && actionType === "ban" ? "Banning..." : "Ban"}
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="w-full px-5">
+                                        <button 
+                                            className="w-full rounded-md px-6 py-2 bg-primary text-white hover:bg-blue-700 cursor-pointer font-bold disabled:opacity-50"
+                                            onClick={handleActivateConfirmation}
+                                            disabled={isSubmitting}
+                                        >
+                                            {isSubmitting && actionType === "activate" ? "Activating..." : "Activate User"}
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* Suspend User Confirmation Modal */}
+            {/* Confirmation Modals */}
+            <ConfirmModal
+                isOpen={showActivateModal}
+                onClose={() => !isSubmitting && setShowActivateModal(false)}
+                onConfirm={executeActivateUser}
+                title="Activate User"
+                message="Are you sure you want to activate this user? They will regain access to their account."
+                warningText="This action will restore the user's account access."
+                cancelText="Cancel"
+                confirmText="Activate User"
+                isLoading={isSubmitting}
+                style="blue"
+            />
+
             <ConfirmModal
                 isOpen={showSuspendModal}
                 onClose={() => !isSubmitting && setShowSuspendModal(false)}
@@ -374,7 +457,6 @@ export default function UserProfileSidebar({
                 style="red"
             />
 
-            {/* Ban User Confirmation Modal */}
             <ConfirmModal
                 isOpen={showBanModal}
                 onClose={() => !isSubmitting && setShowBanModal(false)}

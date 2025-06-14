@@ -9,13 +9,15 @@ import {Wallet} from "@/src/Types/Wallet"
 import { formatNumberToTwoDecimals } from "@/src/lib/functions";
 import handleBanUser from "@/src/hooks/users/banUser";
 import handleSuspendUser from "@/src/hooks/users/suspendUser";
+import handleActivateUser from "@/src/hooks/users/activateUser";
 
 interface Props {
     headings: string[]
     data: Wallet[]
+    setData: React.Dispatch<React.SetStateAction<Wallet[]>>
 }
 
-const WalletTable: React.FC<Props> = ({ data, headings }) => {
+const WalletTable: React.FC<Props> = ({ data, headings, setData }) => {
     const [activeDropdown, setActiveDropdown] = useState<number | null>(null)
     const [showSidebar, setShowSidebar] = useState(false)
     const [selectedWallet, setSelectedWallet] = useState<Wallet | null>(null)
@@ -24,8 +26,10 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
     // Confirmation modal states
     const [showSuspendModal, setShowSuspendModal] = useState(false)
     const [showBanModal, setShowBanModal] = useState(false)
+    const [showActivateModal, setShowActivateModal] = useState(false)
     const [userToSuspend, setUserToSuspend] = useState<string | null>(null)
     const [userToBan, setUserToBan] = useState<string | null>(null)
+    const [userToActivate, setUserToActivate] = useState<string | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
 
     useEffect(() => {
@@ -45,7 +49,7 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
     }, [activeDropdown])
 
     const toggleDropdown = (index: number) => {
-        setSelectedIndex(index) // Set selected index first
+        setSelectedIndex(index)
         setActiveDropdown(activeDropdown === index ? null : index)
     }
 
@@ -63,6 +67,13 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
         setActiveDropdown(null)
     }
 
+    // Handle activate user confirmation
+    const handleActivateConfirmation = (userId: string) => {
+        setUserToActivate(userId)
+        setShowActivateModal(true)
+        setActiveDropdown(null)
+    }
+
     // Execute suspend user
     const executeSuspendUser = async () => {
         if (!userToSuspend) return
@@ -70,7 +81,22 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
         setIsSubmitting(true)
         try {
             await handleSuspendUser(userToSuspend)
-            // Display success message
+            alert("User suspended successfully.")
+            
+            // Update local state
+            setData((prevWallets) =>
+                prevWallets.map((wallet) =>
+                    wallet.data.user_id.toString() === userToSuspend
+                        ? { 
+                            ...wallet, 
+                            data: { 
+                                ...wallet.data, 
+                                userStatus: "Suspended" 
+                            } 
+                        }
+                        : wallet
+                )
+            );
         } catch (error) {
             console.error("Error suspending user:", error)
             alert("Failed to suspend user. Please try again later.")
@@ -88,7 +114,22 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
         setIsSubmitting(true)
         try {
             await handleBanUser(userToBan)            
-            // Display success message
+            alert("User banned successfully.")
+            
+            // Update local state
+            setData((prevWallets) =>
+                prevWallets.map((wallet) =>
+                    wallet.data.user_id.toString() === userToBan
+                        ? { 
+                            ...wallet, 
+                            data: { 
+                                ...wallet.data, 
+                                userStatus: "Banned" 
+                            } 
+                        }
+                        : wallet
+                )
+            );
         } catch (error) {
             console.error("Error banning user:", error)
             alert("Failed to ban user. Please try again later.")
@@ -96,6 +137,38 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
             setIsSubmitting(false)
             setShowBanModal(false)
             setUserToBan(null)
+        }
+    }
+
+    // Execute activate user
+    const executeActivateUser = async () => {
+        if (!userToActivate) return
+        
+        setIsSubmitting(true)
+        try {
+            await handleActivateUser(userToActivate)
+            
+            // Update local state
+            setData((prevWallets) =>
+                prevWallets.map((wallet) =>
+                    wallet.data.user_id.toString() === userToActivate
+                        ? { 
+                            ...wallet, 
+                            data: { 
+                                ...wallet.data, 
+                                userStatus: "Active" 
+                            } 
+                        }
+                        : wallet
+                )
+            );
+        } catch (error) {
+            console.error("Error activating user:", error)
+            alert("Failed to activate user. Please try again later.")
+        } finally {
+            setIsSubmitting(false)
+            setShowActivateModal(false)
+            setUserToActivate(null)
         }
     }
 
@@ -159,18 +232,24 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
                                                         View Wallet
                                                     </button>
                                                     <div className="border-t border-gray-100"></div>
-                                                    <button
+                                                    {wallet.data.userStatus === "Active" && <button
                                                         className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
-                                                        onClick={() => handleSuspendConfirmation(wallet.data.userId.toString())}
+                                                        onClick={() => handleSuspendConfirmation(wallet.data.user_id)}
                                                     >
                                                         Suspend User
-                                                    </button>
-                                                    <button
+                                                    </button>}
+                                                    {wallet.data.userStatus === "Active" && <button
                                                         className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
-                                                        onClick={() => handleBanConfirmation(wallet.data.userId.toString())}
+                                                        onClick={() => handleBanConfirmation(wallet.data.user_id)}
                                                     >
                                                         Ban User
-                                                    </button>
+                                                    </button>}
+                                                    {wallet.data.userStatus !== "Active" && <button
+                                                        className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
+                                                        onClick={() => handleActivateConfirmation(wallet.data.user_id)}
+                                                    >
+                                                        Activate User
+                                                    </button>}
                                                 </div>
                                             )}
                                         </div>
@@ -189,6 +268,20 @@ const WalletTable: React.FC<Props> = ({ data, headings }) => {
                     wallet={selectedWallet}
                 />
             )}
+
+            {/* Activate User Confirmation Modal */}
+            <ConfirmModal
+                isOpen={showActivateModal}
+                onClose={() => !isSubmitting && setShowActivateModal(false)}
+                onConfirm={executeActivateUser}
+                title="Activate User"
+                message="Are you sure you want to activate this user? They will regain access to their account."
+                warningText="This action will restore the user's account access."
+                cancelText="Cancel"
+                confirmText="Activate User"
+                isLoading={isSubmitting}
+                style="blue"
+            />
 
             {/* Suspend User Confirmation Modal */}
             <ConfirmModal

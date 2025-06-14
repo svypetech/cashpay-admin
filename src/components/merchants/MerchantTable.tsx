@@ -8,17 +8,20 @@ import ConfirmModal from "../ui/ConfirmModal";
 import Merchant from "@/src/Types/Merchant";
 import handleSuspendUser from "@/src/hooks/users/suspendUser";
 import handleBanUser from "@/src/hooks/users/banUser";
+import handleActivateUser from "@/src/hooks/users/activateUser";
 import { formatNumberToTwoDecimals } from "@/src/lib/functions";
 
 interface MerchantsTableProps {
   headings: string[];
   merchants: Merchant[];
+  setMerchants: React.Dispatch<React.SetStateAction<Merchant[]>>;
   onViewUser: (userId: string) => void;
 }
 
 export default function MerchantsTable({
   headings,
   merchants,
+  setMerchants,
   onViewUser,
 }: MerchantsTableProps) {
   const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
@@ -26,12 +29,27 @@ export default function MerchantsTable({
   const [selectedMerchant, setSelectedMerchant] = useState<Merchant | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
+  // Local state to track merchant statuses for real-time updates
+  const [merchantStatuses, setMerchantStatuses] = useState<{[key: string]: string}>({});
+
   // Confirmation modal states
   const [showSuspendModal, setShowSuspendModal] = useState(false);
   const [showBanModal, setShowBanModal] = useState(false);
+  const [showActivateModal, setShowActivateModal] = useState(false);
   const [userToSuspend, setUserToSuspend] = useState<string | null>(null);
   const [userToBan, setUserToBan] = useState<string | null>(null);
+  const [userToActivate, setUserToActivate] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Track merchant data changes and update local statuses
+  useEffect(() => {
+    console.log("MerchantTable data changed:", merchants);
+    const statusMap: {[key: string]: string} = {};
+    merchants.forEach(merchant => {
+      statusMap[merchant._id] = merchant.status || merchant.status || "Active";
+    });
+    setMerchantStatuses(statusMap);
+  }, [merchants]);
 
   // Simple dropdown logic: close on outside click
   useEffect(() => {
@@ -51,7 +69,7 @@ export default function MerchantsTable({
   }, [activeDropdown]);
 
   const toggleDropdown = (index: number) => {
-    setSelectedIndex(index); // Set selected index first
+    setSelectedIndex(index);
     setActiveDropdown(activeDropdown === index ? null : index);
   };
 
@@ -76,6 +94,13 @@ export default function MerchantsTable({
     setActiveDropdown(null);
   };
 
+  // Handle activate user confirmation
+  const handleActivateConfirmation = (userId: string) => {
+    setUserToActivate(userId);
+    setShowActivateModal(true);
+    setActiveDropdown(null);
+  };
+
   // Execute suspend user
   const executeSuspendUser = async () => {
     if (!userToSuspend) return;
@@ -83,7 +108,22 @@ export default function MerchantsTable({
     setIsSubmitting(true);
     try {
       await handleSuspendUser(userToSuspend);
-      // Display success message to user
+      
+      // Update both merchants data and local status
+      if (setMerchants) {
+        setMerchants(prevData => 
+          prevData.map(merchant => 
+            merchant._id === userToSuspend ? { ...merchant, userStatus: "Suspended" } : merchant
+          )
+        );
+      }
+      
+      // Update local status for immediate UI response
+      setMerchantStatuses(prev => ({
+        ...prev,
+        [userToSuspend]: "Suspended"
+      }));
+      
     } catch (error) {
       console.error("Error suspending merchant:", error);
       alert("Failed to suspend merchant. Please try again later.");
@@ -101,7 +141,22 @@ export default function MerchantsTable({
     setIsSubmitting(true);
     try {
       await handleBanUser(userToBan);
-      // Display success message to user
+      
+      // Update both merchants data and local status
+      if (setMerchants) {
+        setMerchants(prevData => 
+          prevData.map(merchant => 
+            merchant._id === userToBan ? { ...merchant, userStatus: "Banned" } : merchant
+          )
+        );
+      }
+      
+      // Update local status for immediate UI response
+      setMerchantStatuses(prev => ({
+        ...prev,
+        [userToBan]: "Banned"
+      }));
+      
     } catch (error) {
       console.error("Error banning merchant:", error);
       alert("Failed to ban merchant. Please try again later.");
@@ -110,6 +165,44 @@ export default function MerchantsTable({
       setShowBanModal(false);
       setUserToBan(null);
     }
+  };
+
+  // Execute activate user
+  const executeActivateUser = async () => {
+    if (!userToActivate) return;
+    
+    setIsSubmitting(true);
+    try {
+      await handleActivateUser(userToActivate);
+      
+      // Update both merchants data and local status
+      if (setMerchants) {
+        setMerchants(prevData =>
+          prevData.map(merchant =>
+            merchant._id === userToActivate ? { ...merchant, userStatus: "Active" } : merchant
+          )
+        );
+      }
+      
+      // Update local status for immediate UI response
+      setMerchantStatuses(prev => ({
+        ...prev,
+        [userToActivate]: "Active"
+      }));
+      
+    } catch (error) {
+      console.error("Error activating merchant:", error);
+      alert("Failed to activate merchant. Please try again later.");
+    } finally {
+      setIsSubmitting(false);
+      setShowActivateModal(false);
+      setUserToActivate(null);
+    }
+  };
+
+  // Helper function to get current merchant status
+  const getCurrentMerchantStatus = (merchantId: string) => {
+    return merchantStatuses[merchantId] || "Active";
   };
 
   // Calculate if we need padding based on current state
@@ -150,77 +243,97 @@ export default function MerchantsTable({
           </thead>
           <tbody>
             {Array.isArray(merchants) &&
-              merchants.map((merchant, index) => (
-                <tr
-                  key={index}
-                  className="border-b border-gray-200 text-[12px] sm:text-[16px]"
-                >
-                  <td className="p-2 sm:p-6 font-satoshi min-w-[100px] break-words whitespace-nowrap">
-                    {merchant.userId}
-                  </td>
-                  <td className="p-2 sm:p-6 font-satoshi font-bold text-primary min-w-[120px] break-words whitespace-nowrap">
-                    {merchant.name.firstName ? (`${merchant.name.firstName} ${merchant.name.lastName}`) : "N/A"}
-                  </td>
-                  <td className="p-2 sm:p-6 font-satoshi min-w-[150px] break-words whitespace-nowrap">
-                    {merchant.email}
-                  </td>
-                  <td className="p-2 sm:p-6 font-satoshi min-w-[100px] whitespace-nowrap">
-                    <p className="text-center">{merchant.completedTrades}</p>
-                  </td>
-                  <td className="p-2 sm:p-6 font-satoshi min-w-[120px] whitespace-nowrap">
-                    <p className="text-center">{formatNumberToTwoDecimals(merchant.successRate)}%</p>
-                  </td>
-                  <td className="p-2 sm:p-6 font-satoshi min-w-[120px] py-[20px]">
-                    <ColourfulBlock
-                      text={merchant.verified ? "Verified" : "Pending"}
-                      className={`text-left px-4 py-2 rounded-xl md:text-md font-semibold whitespace-nowrap ${merchant.verified
-                          ? "bg-[#71FB5533] text-[#20C000]"
-                          : "text-[#727272] bg-[#72727233]"
-                        }`}
-                    />
-                  </td>
-                  <td className="relative p-2 sm:p-6 font-satoshi min-w-[60px] text-center">
-                    <div className="dropdown-container relative inline-block">
-                      <button
-                        className="relative cursor-pointer"
-                        onClick={() => toggleDropdown(index)}
-                      >
-                        <Image
-                          src="/icons/options.svg"
-                          alt="Options"
-                          width={24}
-                          height={24}
-                          className="w-4 h-4"
-                        />
-                      </button>
+              merchants.map((merchant, index) => {
+                // Get current status from local state for real-time updates
+                const currentStatus = getCurrentMerchantStatus(merchant._id);
+                
+                return (
+                  <tr
+                    key={index}
+                    className="border-b border-gray-200 text-[12px] sm:text-[16px]"
+                  >
+                    <td className="p-2 sm:p-6 font-satoshi min-w-[100px] break-words whitespace-nowrap">
+                      {merchant.userId}
+                    </td>
+                    <td className="p-2 sm:p-6 font-satoshi font-bold text-primary min-w-[120px] break-words whitespace-nowrap">
+                      {merchant.name.firstName ? (`${merchant.name.firstName} ${merchant.name.lastName}`) : "N/A"}
+                    </td>
+                    <td className="p-2 sm:p-6 font-satoshi min-w-[150px] break-words whitespace-nowrap">
+                      {merchant.email}
+                    </td>
+                    <td className="p-2 sm:p-6 font-satoshi min-w-[100px] whitespace-nowrap">
+                      <p className="text-center">{merchant.completedTrades}</p>
+                    </td>
+                    <td className="p-2 sm:p-6 font-satoshi min-w-[120px] whitespace-nowrap">
+                      <p className="text-center">{formatNumberToTwoDecimals(merchant.successRate)}%</p>
+                    </td>
+                    <td className="p-2 sm:p-6 font-satoshi min-w-[120px] py-[20px]">
+                      <ColourfulBlock
+                        text={merchant.verified ? "Verified" : "Pending"}
+                        className={`text-left px-4 py-2 rounded-xl md:text-md font-semibold whitespace-nowrap ${merchant.verified
+                            ? "bg-[#71FB5533] text-[#20C000]"
+                            : "text-[#727272] bg-[#72727233]"
+                          }`}
+                      />
+                    </td>
+                    <td className="relative p-2 sm:p-6 font-satoshi min-w-[60px] text-center">
+                      <div className="dropdown-container relative inline-block">
+                        <button
+                          className="relative cursor-pointer"
+                          onClick={() => toggleDropdown(index)}
+                        >
+                          <Image
+                            src="/icons/options.svg"
+                            alt="Options"
+                            width={24}
+                            height={24}
+                            className="w-4 h-4"
+                          />
+                        </button>
 
-                      {activeDropdown === index && (
-                        <div className="absolute z-10 right-0 top-full mt-2 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-100">
-                          <button
-                            className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
-                            onClick={() => handleViewMerchant(merchant)}
-                          >
-                            View
-                          </button>
-                          <div className="border-t border-gray-100"></div>
-                          <button
-                            className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
-                            onClick={() => handleSuspendConfirmation(merchant._id)}
-                          >
-                            Suspend User
-                          </button>
-                          <button
-                            className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
-                            onClick={() => handleBanConfirmation(merchant._id)}
-                          >
-                            Ban User
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                        {activeDropdown === index && (
+                          <div className="absolute z-10 right-0 top-full mt-2 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-100">
+                            <button
+                              className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
+                              onClick={() => handleViewMerchant(merchant)}
+                            >
+                              View
+                            </button>
+                            <div className="border-t border-gray-100"></div>
+                            
+                            {/* Dynamic dropdown options based on current merchant status */}
+                            {currentStatus === "Active" && (
+                              <>
+                                <button
+                                  className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
+                                  onClick={() => handleSuspendConfirmation(merchant._id)}
+                                >
+                                  Suspend User
+                                </button>
+                                <button
+                                  className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
+                                  onClick={() => handleBanConfirmation(merchant._id)}
+                                >
+                                  Ban User
+                                </button>
+                              </>
+                            )}
+                            
+                            {currentStatus !== "Active" && (
+                              <button
+                                className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
+                                onClick={() => handleActivateConfirmation(merchant._id)}
+                              >
+                                Activate User
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
           </tbody>
         </table>
       </div>
@@ -231,10 +344,29 @@ export default function MerchantsTable({
           showSidebar={showSidebar}
           onClose={() => setShowSidebar(false)}
           merchant={selectedMerchant}
-          onSuspend={() => handleSuspendConfirmation(selectedMerchant._id)}
-          onBan={() => handleBanConfirmation(selectedMerchant._id)}
+          setMerchants={setMerchants}
+          onStatusUpdate={(merchantId: string, newStatus: string) => {
+            setMerchantStatuses(prev => ({
+              ...prev,
+              [merchantId]: newStatus
+            }));
+          }}
         />
       )}
+
+      {/* Activate Merchant Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showActivateModal}
+        onClose={() => !isSubmitting && setShowActivateModal(false)}
+        onConfirm={executeActivateUser}
+        title="Activate Merchant"
+        message="Are you sure you want to activate this merchant? They will regain access to their account."
+        warningText="This action will restore the merchant's account access."
+        cancelText="Cancel"
+        confirmText="Activate Merchant"
+        isLoading={isSubmitting}
+        style="blue"
+      />
 
       {/* Suspend Merchant Confirmation Modal */}
       <ConfirmModal

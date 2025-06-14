@@ -15,7 +15,7 @@ export interface User {
     canApproveKyc: boolean;
     idDocUrl: string;
     selfieUrl: string;
-    suspendDate: string;
+    suspendDate?: string;
     updateDate: string;
     lastLoginDate: string;
     totalLogin: number;
@@ -24,6 +24,7 @@ export interface User {
     sessionDuration: number;
     totalTime: number;
     lastActivity: string
+    userStatus: string;
   }
 
   

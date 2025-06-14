@@ -6,7 +6,9 @@ export interface Wallet {
 
 export interface UserData {
   userId: number;
+  user_id: string;
   userName: UserName;
+  userStatus: string;
   image: string;
   cryptoHoldings: number;
   balances: Balances;

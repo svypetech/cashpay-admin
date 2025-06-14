@@ -10,6 +10,7 @@ import ConfirmModal from "../ui/ConfirmModal"
 import { User } from "@/src/Types/User"
 import handleSuspendUser from "@/src/hooks/users/suspendUser"
 import handleBanUser from "@/src/hooks/users/banUser"
+import handleActivateUser from "@/src/hooks/users/activateUser"
 
 interface Props {
     headings: string[]
@@ -45,8 +46,10 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
     // Confirmation modal states
     const [showSuspendModal, setShowSuspendModal] = useState(false)
     const [showBanModal, setShowBanModal] = useState(false)
+    const [showActivateModal, setShowActivateModal] = useState(false)
     const [userToSuspend, setUserToSuspend] = useState<string | null>(null)
     const [userToBan, setUserToBan] = useState<string | null>(null)
+    const [userToActivate, setUserToActivate] = useState<string | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
 
     // Simple dropdown logic: close on outside click
@@ -92,6 +95,13 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
         setActiveDropdown(null)
     }
 
+    // Handle activate user confirmation
+    const handleActivateConfirmation = (userId: string) => {
+        setUserToActivate(userId)
+        setShowActivateModal(true)
+        setActiveDropdown(null)
+    }
+
     // Execute suspend user
     const executeSuspendUser = async () => {
         if (!userToSuspend) return
@@ -99,7 +109,11 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
         setIsSubmitting(true)
         try {
             await handleSuspendUser(userToSuspend)
-            // display success message
+            setData(prevData => 
+                prevData.map(user => 
+                    user._id === userToSuspend ? { ...user, userStatus : "Suspended" } : user
+                )
+            )
         } catch (error) {
             console.error("Error suspending user:", error)
             alert("Failed to suspend user. Please try again later.")
@@ -117,7 +131,11 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
         setIsSubmitting(true)
         try {
             await handleBanUser(userToBan)            
-            // display success message
+            setData(prevData => 
+                prevData.map(user => 
+                    user._id === userToSuspend ? { ...user, userStatus : "Banned" } : user
+                )
+            )
         } catch (error) {
             console.error("Error banning user:", error)
             alert("Failed to ban user. Please try again later.")
@@ -125,6 +143,28 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
             setIsSubmitting(false)
             setShowBanModal(false)
             setUserToBan(null)
+        }
+    }
+
+    // Execute activate user
+    const executeActivateUser = async () => {
+        if (!userToActivate) return
+        
+        setIsSubmitting(true)
+        try {
+            await handleActivateUser(userToActivate)
+            setData(prevData =>
+                prevData.map(user =>
+                    user._id === userToActivate ? { ...user, userStatus : "Active" } : user
+                )
+            )
+        } catch (error) {
+            console.error("Error activating user:", error)
+            alert("Failed to activate user. Please try again later.")
+        } finally {
+            setIsSubmitting(false)
+            setShowActivateModal(false)
+            setUserToActivate(null)
         }
     }
 
@@ -204,18 +244,24 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
                                                         View
                                                     </button>
                                                     <div className="border-t border-gray-100"></div>
-                                                    <button
+                                                    {user.userStatus === "Active" && <button
                                                         className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
-                                                        onClick={() => handleSuspendConfirmation(user._id)}
+                                                        onClick={() => handleSuspendConfirmation(user._id)}                                                        
                                                     >
                                                         Suspend User
-                                                    </button>
-                                                    <button
+                                                    </button>}
+                                                    {user.userStatus === "Active" && <button
                                                         className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
                                                         onClick={() => handleBanConfirmation(user._id)}
                                                     >
                                                         Ban User
-                                                    </button>
+                                                    </button>}
+                                                    {user.userStatus !== "Active" && <button
+                                                        className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
+                                                        onClick={() => handleActivateConfirmation(user._id)} 
+                                                    >
+                                                        Activate User
+                                                    </button>}
                                                 </div>
                                             )}
                                         </div>
@@ -241,6 +287,20 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
                     }}
                 />
             )}
+
+            {/* Activate User Confirmation Modal */}
+            <ConfirmModal
+                isOpen={showActivateModal}
+                onClose={() => !isSubmitting && setShowActivateModal(false)}
+                onConfirm={executeActivateUser}
+                title="Activate User"
+                message="Are you sure you want to activate this user? They will regain access to their account."
+                warningText="This action will restore the user's account access."
+                cancelText="Cancel"
+                confirmText="Activate User"
+                isLoading={isSubmitting}
+                style="blue"
+            />
 
             {/* Suspend User Confirmation Modal */}
             <ConfirmModal

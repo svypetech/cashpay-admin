@@ -1,19 +1,34 @@
 import { Admin } from "@/src/Types/Admin"
 import axios from "axios"
-import { set } from "date-fns"
 import { useEffect, useState } from "react"
 
-export default function useGetAdmins(page: number, limit: number, sortBy?: string) {
+export default function useGetAdmins(page: number, limit: number, sortBy?: string, role?: string, search?: string) {
     const [admins, setAdmins] = useState<Admin []>([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<null| string>(null)
     const [totalPages, setTotalPages] = useState(0)
 
-
   useEffect(() => {
     setIsLoading(true)
     const fetchAdmins = async () => {
-      const url = sortBy?.trim() ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/?limit=${limit}&page=${page}&sortBy=${sortBy}` : `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/?limit=${limit}&page=${page}`
+      // Build URL with conditional parameters
+      let url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/?limit=${limit}&page=${page}`;
+      
+      // Add sortBy parameter if it exists and is not empty
+      if (sortBy?.trim()) {
+        url += `&sortBy=${sortBy}`;
+      }
+      
+      // Add role parameter if it exists and is not empty
+      if (role?.trim()) {
+        url += `&role=${role}`;
+      }
+
+      // Add search parameter if it exists and is not empty
+      if (search?.trim()) {
+        url += `&search=${encodeURIComponent(search)}`;
+      }
+
       try {
         const response = await axios.get(url, {
           headers: {
@@ -38,7 +53,7 @@ export default function useGetAdmins(page: number, limit: number, sortBy?: strin
       }
     }
     fetchAdmins() 
-  }, [page, limit, sortBy]) // Re-run the effect when page, limit, or sortBy changes
+  }, [page, limit, sortBy, role, search]) // Add role to dependency array
 
   return { admins, isLoading, error, totalPages }
 }

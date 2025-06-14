@@ -77,7 +77,7 @@ export default function WalletComponent() {
         <Error text="No data found" />
       ) : (
         <>
-          <WalletTable headings={headings} data={filteredData} />
+          <WalletTable headings={headings} data={filteredData} setData={setFilteredData} />
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}

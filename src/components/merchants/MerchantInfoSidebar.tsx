@@ -11,22 +11,23 @@ import { formatJoiningDate } from "@/src/lib/functions";
 import useFetchAccounts from "@/src/hooks/merchants/getMerchankBankAccounts";
 import handleSuspendUser from "@/src/hooks/users/suspendUser";
 import handleBanUser from "@/src/hooks/users/banUser";
+import handleActivateUser from "@/src/hooks/users/activateUser";
 import axios from "axios";
 
 interface MerchantInfoSidebarProps {
   showSidebar: boolean;
   onClose: () => void;
   merchant: Merchant;
-  onSuspend: (userId: string) => void;
-  onBan: (userId: string) => void;
+  setMerchants: React.Dispatch<React.SetStateAction<Merchant[]>>;
+  onStatusUpdate: (merchantId: string, newStatus: string) => void;
 }
 
 export default function MerchantInfoSidebar({
   showSidebar,
   onClose,
   merchant,
-  onSuspend,
-  onBan,
+  setMerchants,
+  onStatusUpdate,
 }: MerchantInfoSidebarProps) {
   const [activeTab, setActiveTab] = useState<"Overview" | "Bank Accounts">("Overview");
   const [isVisible, setIsVisible] = useState(false);
@@ -38,11 +39,20 @@ export default function MerchantInfoSidebar({
     type: "",
   });
 
+  // Local state to track current merchant status
+  const [currentMerchantStatus, setCurrentMerchantStatus] = useState(merchant.status || "Active");
+
   // Confirmation modal states
   const [showSuspendModal, setShowSuspendModal] = useState(false);
   const [showBanModal, setShowBanModal] = useState(false);
+  const [showActivateModal, setShowActivateModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [actionType, setActionType] = useState("");
+
+  // Update local status when merchant prop changes
+  useEffect(() => {
+    setCurrentMerchantStatus(merchant.status || "Active");
+  }, [merchant.status]);
 
   // Reset active tab when sidebar is closed
   const handleClose = () => {
@@ -57,31 +67,33 @@ export default function MerchantInfoSidebar({
   // Handle animation and visibility states
   useEffect(() => {
     if (showSidebar) {
-      setIsVisible(true) // Render the sidebar
-      // Use a small timeout to ensure DOM is ready before starting animation
+      setIsVisible(true)
       setTimeout(() => {
-        setShouldSlideIn(true) // Trigger slide-in animation
+        setShouldSlideIn(true)
       }, 0)
-      document.body.style.overflow = "hidden" // Prevent scrolling
+      document.body.style.overflow = "hidden"
     } else {
-      setShouldSlideIn(false) // Start slide-out animation
-      // Reset active tab when sidebar is closed
+      setShouldSlideIn(false)
       setActiveTab("Overview");
-      // Wait for animation to complete before removing from DOM
       const timer = setTimeout(() => {
         setIsVisible(false)
-        document.body.style.overflow = "auto" // Re-enable scrolling
-      }, 300) // Match transition duration
+        document.body.style.overflow = "auto"
+      }, 300)
       return () => clearTimeout(timer)
     }
   }, [showSidebar]);
 
-  // Clean up overflow style when component unmounts - ADDED from UserInfoSidebar
+  // Clean up overflow style when component unmounts
   useEffect(() => {
     return () => {
       document.body.style.overflow = "auto"
     }
   }, []);
+
+  // Handle activate merchant confirmation
+  const handleActivateConfirmation = () => {
+    setShowActivateModal(true);
+  };
 
   // Handle suspend merchant confirmation
   const handleSuspendConfirmation = () => {
@@ -93,12 +105,56 @@ export default function MerchantInfoSidebar({
     setShowBanModal(true);
   };
 
+  // Execute activate merchant
+  const executeActivateMerchant = async () => {
+    setIsSubmitting(true);
+    setActionType("activate");
+    try {
+      await handleActivateUser(merchant._id);
+      
+      // Update both local state and parent state
+      setCurrentMerchantStatus("Active");
+      if (setMerchants) {
+        setMerchants((prevMerchants) =>
+          prevMerchants.map((prevMerchant) =>
+            prevMerchant._id === merchant._id
+              ? { ...prevMerchant, userStatus: "Active" }
+              : prevMerchant
+          )
+        );
+      }
+      // Notify table about status change
+      onStatusUpdate(merchant._id, "Active");
+    } catch (error) {
+      console.error("Error activating merchant:", error);
+      alert("Failed to activate merchant. Please try again later.");
+    } finally {
+      setIsSubmitting(false);
+      setActionType("");
+      setShowActivateModal(false);
+    }
+  };
+
   // Execute suspend merchant
   const executeSuspendMerchant = async () => {
     setIsSubmitting(true);
     setActionType("suspend");
     try {
       await handleSuspendUser(merchant._id);
+      
+      // Update both local state and parent state
+      setCurrentMerchantStatus("Suspended");
+      if (setMerchants) {
+        setMerchants((prevMerchants) =>
+          prevMerchants.map((prevMerchant) =>
+            prevMerchant._id === merchant._id
+              ? { ...prevMerchant, userStatus: "Suspended" }
+              : prevMerchant
+          )
+        );
+      }
+      // Notify table about status change
+      onStatusUpdate(merchant._id, "Suspended");
     } catch (error) {
       console.error("Error suspending merchant:", error);
       alert("Failed to suspend merchant. Please try again later.");
@@ -115,6 +171,20 @@ export default function MerchantInfoSidebar({
     setActionType("ban");
     try {
       await handleBanUser(merchant._id);
+      
+      // Update both local state and parent state
+      setCurrentMerchantStatus("Banned");
+      if (setMerchants) {
+        setMerchants((prevMerchants) =>
+          prevMerchants.map((prevMerchant) =>
+            prevMerchant._id === merchant._id
+              ? { ...prevMerchant, userStatus: "Banned" }
+              : prevMerchant
+          )
+        );
+      }
+      // Notify table about status change
+      onStatusUpdate(merchant._id, "Banned");
     } catch (error) {
       console.error("Error banning merchant:", error);
       alert("Failed to ban merchant. Please try again later.");
@@ -186,14 +256,14 @@ export default function MerchantInfoSidebar({
   return (
     <>
       <div className="fixed inset-0 z-40 overflow-hidden">
-        {/* Overlay with fade animation - UPDATED to match UserInfoSidebar */}
+        {/* Overlay with fade animation */}
         <div
           className={`absolute inset-0 bg-black/50 transition-opacity duration-300 ${shouldSlideIn ? 'opacity-100' : 'opacity-0'}`}
           onClick={handleClose}
           aria-hidden="true"
         />
 
-        {/* Sidebar with slide animation - UPDATED to match UserInfoSidebar */}
+        {/* Sidebar with slide animation */}
         <div
           className={`absolute inset-y-0 right-0 w-full max-w-md bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${shouldSlideIn ? 'translate-x-0' : 'translate-x-full'}`}
         >
@@ -332,23 +402,35 @@ export default function MerchantInfoSidebar({
                       <p className="text-[24px] text-primary font-[700] text-right">{merchant.successRate}</p>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex justify-between gap-4 w-full">
-                      <button
-                        className="w-[40%] rounded-[8px] border-[1px] border-[#DF1D1D] py-2 font-[700] text-[#DF1D1D] bg-white hover:bg-red-50 disabled:opacity-50"
-                        onClick={handleSuspendConfirmation}
-                        disabled={isSubmitting}
-                      >
-                        {isSubmitting && actionType === "suspend" ? "Suspending..." : "Suspend"}
-                      </button>
-                      <button
-                        className="w-[20%] rounded-[8px] bg-[#E21B1B] py-2 font-medium text-white hover:bg-red-700 disabled:opacity-50"
-                        onClick={handleBanConfirmation}
-                        disabled={isSubmitting}
-                      >
-                        {isSubmitting && actionType === "ban" ? "Banning..." : "Ban"}
-                      </button>
-                    </div>
+                    {/* Action Buttons - Use currentMerchantStatus for real-time updates */}
+                    {currentMerchantStatus === "Active" ? (
+                      <div className="flex justify-between gap-4 w-full">
+                        <button
+                          className="w-[40%] rounded-[8px] border-[1px] border-[#DF1D1D] py-2 font-[700] text-[#DF1D1D] bg-white hover:bg-red-50 disabled:opacity-50"
+                          onClick={handleSuspendConfirmation}
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting && actionType === "suspend" ? "Suspending..." : "Suspend"}
+                        </button>
+                        <button
+                          className="w-[20%] rounded-[8px] bg-[#E21B1B] py-2 font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                          onClick={handleBanConfirmation}
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting && actionType === "ban" ? "Banning..." : "Ban"}
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="w-full">
+                        <button
+                          className="w-full rounded-[8px] bg-primary py-2 font-[700] text-white hover:bg-blue-700 disabled:opacity-50"
+                          onClick={handleActivateConfirmation}
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting && actionType === "activate" ? "Activating..." : "Activate Merchant"}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -374,6 +456,20 @@ export default function MerchantInfoSidebar({
 
         </div>
       </div>
+
+      {/* Activate Merchant Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showActivateModal}
+        onClose={() => !isSubmitting && setShowActivateModal(false)}
+        onConfirm={executeActivateMerchant}
+        title="Activate Merchant"
+        message="Are you sure you want to activate this merchant? They will regain access to their account."
+        warningText="This action will restore the merchant's account access."
+        cancelText="Cancel"
+        confirmText="Activate Merchant"
+        isLoading={isSubmitting}
+        style="blue"
+      />
 
       {/* Suspend Merchant Confirmation Modal */}
       <ConfirmModal

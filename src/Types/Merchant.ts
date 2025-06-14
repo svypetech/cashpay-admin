@@ -7,6 +7,7 @@ export default interface Merchant {
   };
   email: string;
   verified: boolean;
+  status: string;
   image?: string;
   joinedDate: string;
   activeTime: number;
