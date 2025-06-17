@@ -9,6 +9,7 @@ import { User } from "@/src/Types/User";
 import VerificationAccordion from "../cards/VerficationStatus";
 import VerificationSteps from "../cards/VerificationForm";
 import ConfirmModal from "../ui/ConfirmModal";
+import ErrorPopup from "../ui/ErrorPopup";
 import handleBanUser from "@/src/hooks/users/banUser";
 import handleSuspendUser from "@/src/hooks/users/suspendUser";
 import handleActivateUser from "@/src/hooks/users/activateUser";
@@ -39,7 +40,11 @@ export default function UserProfileSidebar({
     ]);
     const [isVerifying, setIsVerifying] = useState(false);
 
-    // ADD THIS: Local state to track current user status
+    // Error popup state
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+
+    // Local state to track current user status for immediate UI updates
     const [currentUserStatus, setCurrentUserStatus] = useState(user.userStatus);
 
     // Confirmation modal states
@@ -61,7 +66,7 @@ export default function UserProfileSidebar({
         setIsVerifying(true);
 
         try {
-            await axios.put(
+            const response = await axios.put(
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/updateKycStatus`,
                 {
                     status: "Approved",
@@ -73,21 +78,43 @@ export default function UserProfileSidebar({
                     },
                 }
             );
-            setIsVerifying(false);
-            setData((prevUsers) =>
-                prevUsers.map((prevUser) =>
-                    prevUser._id === user._id
-                        ? { ...prevUser, verificationStatus: "Approved" }
-                        : prevUser
-                )
-            );
-            alert("User verification status updated successfully.");
-        } catch (error) {
-            alert("Error updating user verification status.");
+
+            // Check if the response indicates success
+            if (response.data.success !== false) {
+                setIsVerifying(false);
+                setData((prevUsers) =>
+                    prevUsers.map((prevUser) =>
+                        prevUser._id === user._id
+                            ? { ...prevUser, verificationStatus: "Approved" }
+                            : prevUser
+                    )
+                );
+                alert("User verification status updated successfully.");
+                onClose();
+                setVerificationStarted(false);
+            } else {
+                // Handle case where success is false but no error thrown
+                throw new Error(response.data.error || "Failed to update verification status");
+            }
+        } catch (error: any) {
             console.error("Error updating user verification status:", error);
+            
+            // Extract error message from different possible sources
+            let errorMsg = "An unexpected error occurred while updating verification status.";
+            
+            if (error.response?.data?.error) {
+                errorMsg = error.response.data.error;
+            } else if (error.response?.data?.message) {
+                errorMsg = error.response.data.message;
+            } else if (error.message) {
+                errorMsg = error.message;
+            }
+            
+            // Show error popup instead of alert
+            setErrorMessage(errorMsg);
+            setShowErrorPopup(true);
         } finally {
-            onClose();
-            setVerificationStarted(false);
+            setIsVerifying(false);
         }
     };
 
@@ -114,7 +141,7 @@ export default function UserProfileSidebar({
             await handleActivateUser(user._id);
             alert("User activated successfully.");
             
-            // Update both local state and parent state
+            // Update both local state and parent state immediately
             setCurrentUserStatus("Active");
             setData((prevUsers) =>
                 prevUsers.map((prevUser) =>
@@ -141,7 +168,7 @@ export default function UserProfileSidebar({
             await handleSuspendUser(user._id);
             alert("User suspended successfully.");
             
-            // Update both local state and parent state
+            // Update both local state and parent state immediately
             setCurrentUserStatus("Suspended");
             setData((prevUsers) =>
                 prevUsers.map((prevUser) =>
@@ -168,7 +195,7 @@ export default function UserProfileSidebar({
             await handleBanUser(user._id);
             alert("User banned successfully.");
             
-            // Update both local state and parent state
+            // Update both local state and parent state immediately
             setCurrentUserStatus("Banned");
             setData((prevUsers) =>
                 prevUsers.map((prevUser) =>
@@ -291,6 +318,7 @@ export default function UserProfileSidebar({
                             </div>
                         </div>
                     ) : (
+                        // Regular sidebar content...
                         <div className="flex h-full flex-col overflow-y-auto">
                             {/* Header */}
                             <div className="flex items-center justify-between px-6 py-4 mt-5">
@@ -303,7 +331,7 @@ export default function UserProfileSidebar({
                                     <X className="h-6 w-6" />
                                 </button>
                             </div>
-                            {/* Content */}
+                            {/* Rest of your existing sidebar content... */}
                             <div className="flex flex-col items-center px-6 py-8 font-[satoshi]">
                                 {/* Profile Image */}
                                 <div className="mb-4 h-32 w-32 overflow-hidden rounded-full">
@@ -395,7 +423,7 @@ export default function UserProfileSidebar({
                                     )}
                                 </div>
 
-                                {/* Action Buttons - FIXED: Use currentUserStatus instead of user.userStatus */}
+                                {/* Action Buttons - Use currentUserStatus for immediate UI updates */}
                                 {currentUserStatus === "Active" ? (
                                     <div className="flex justify-between mt-auto w-full gap-4 px-5">
                                         <button 
@@ -416,7 +444,7 @@ export default function UserProfileSidebar({
                                 ) : (
                                     <div className="w-full px-5">
                                         <button 
-                                            className="w-full rounded-md px-6 py-2 bg-primary text-white hover:bg-blue-700 cursor-pointer font-bold disabled:opacity-50"
+                                            className="w-full rounded-md px-6 py-2 bg-primary text-white hover:scale-105 cursor-pointer font-bold disabled:opacity-50"
                                             onClick={handleActivateConfirmation}
                                             disabled={isSubmitting}
                                         >
@@ -429,6 +457,15 @@ export default function UserProfileSidebar({
                     )}
                 </div>
             </div>
+
+            {/* Error Popup */}
+            <ErrorPopup
+                isOpen={showErrorPopup}
+                onClose={() => setShowErrorPopup(false)}
+                title="KYC Update Failed"
+                message={errorMessage}
+                autoClose={false}
+            />
 
             {/* Confirmation Modals */}
             <ConfirmModal

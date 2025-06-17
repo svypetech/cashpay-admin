@@ -231,18 +231,18 @@ export default function MerchantInfoSidebar({
     setAction({ isLoading: true, type: "deny" });
     const data = { cardId: accountId }
     try {
-      // const response = await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/transaction/card/denyCards`, data, {
-      //   headers: {
-      //     Authorization: `Bearer ${localStorage.getItem("token")}`,
-      //   },
-      // });
+      const response = await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/transaction/card/declineCards`, data, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
 
-      // if (response.data.success) {
-      //   alert("Account denied successfully");
-      // }
-      // else {
-      //   alert("Failed to deny account");
-      // }
+      if (response.data.success) {
+        alert("Account denied successfully");
+      }
+      else {
+        alert("Failed to deny account");
+      }
     } catch (error) {
       console.error("Error denying account:", error);
       alert("An error occurred while denying the account");

@@ -88,3 +88,31 @@ export const handleSuspendAdmin = async (id: string, setIsSubmitting?: Dispatch<
         }
     }
 }
+
+
+export const handleDeleteAdmin = async (id: string, setIsSubmitting?: Dispatch<SetStateAction<boolean>>) => {
+    try {
+        if (setIsSubmitting) {
+            setIsSubmitting(true)
+        }
+        const response = await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/deleteAdmin`, {
+            data: { id: id },
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            }
+        })
+        if (response.data.success) {
+            // Don't show alert here, let the calling component handle it
+            return Promise.resolve()
+        } else {
+            throw new Error("Failed to delete admin")
+        }
+    } catch (error) {
+        console.error("Error deleting admin:", error)
+        throw error
+    } finally {
+        if (setIsSubmitting) {
+            setIsSubmitting(false)
+        }
+    }
+}

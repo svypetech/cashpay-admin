@@ -6,6 +6,7 @@ import UserProfileSidebar from "../users/UserInfoSidebar";
 interface Props {
   headings: string[];
   data: User[];
+  setData: React.Dispatch<React.SetStateAction<User[]>>
 }
 
 const formatDate = (dateString: string): string => {
@@ -31,7 +32,7 @@ const formatDate = (dateString: string): string => {
   }
 };
 
-const ActiveUsersTable: React.FC<Props> = ({ data, headings }) => {
+const ActiveUsersTable: React.FC<Props> = ({ data, setData, headings }) => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [user, setUser] = useState<User>({} as User);
   return (
@@ -97,6 +98,7 @@ const ActiveUsersTable: React.FC<Props> = ({ data, headings }) => {
           showSidebar={showSidebar}
           onClose={() => setShowSidebar(false)}
           user={user}
+          setData={setData}
         />
       </div>
     </div>

@@ -157,7 +157,7 @@ export default function ActiveUsers() {
       ) : filteredUsers.length === 0 ? (
         <Error text="No data found" />
       ) : (
-        <ActiveUsersTable headings={headings} data={filteredUsers} />
+        <ActiveUsersTable headings={headings} data={filteredUsers} setData={setFilteredUsers} />
       )}
 
       <Pagination
