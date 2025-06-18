@@ -5,6 +5,7 @@ import TransactionDetailsPopup from "../transaction/TransactionDetailsPopup";
 import Transaction from "@/src/Types/TransactionManagement";
 import { formatJoiningDate, shortenAddress } from "@/src/lib/functions";
 import { formatDate } from "date-fns";
+import ExpandableId from "../ui/ExpandableId";
 interface Props {
   headings: string[];
   data: Transaction[];
@@ -63,7 +64,7 @@ const TransactionFrequencyTable: React.FC<Props> = ({ data, headings }) => {
                   className="border-b border-gray-200 text-[12px] sm:text-[16px] cursor-pointer"
                 >
                   <td className={`px-2 sm:px-4 py-3 sm:py-4 font-satoshi ${getColumnWidthClass(0)}`}>
-                    {shortenAddress(transaction.id)}
+                    <ExpandableId id={transaction.id} />
                   </td>
                   <td className={`px-2 sm:px-4 py-3 sm:py-4 font-satoshi font-bold text-primary min-w-0 break-words ${getColumnWidthClass(1)}`}>
                     {transaction.userId ? shortenAddress(transaction.userId) : "N/A"}

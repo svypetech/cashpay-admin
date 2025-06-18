@@ -10,6 +10,7 @@ import handleSuspendUser from "@/src/hooks/users/suspendUser";
 import handleBanUser from "@/src/hooks/users/banUser";
 import handleActivateUser from "@/src/hooks/users/activateUser";
 import { formatNumberToTwoDecimals } from "@/src/lib/functions";
+import ExpandableId from "../ui/ExpandableId";
 
 interface MerchantsTableProps {
   headings: string[];
@@ -253,7 +254,7 @@ export default function MerchantsTable({
                     className="border-b border-gray-200 text-[12px] sm:text-[16px]"
                   >
                     <td className="p-2 sm:p-6 font-satoshi min-w-[100px] break-words whitespace-nowrap">
-                      {merchant.userId}
+                      <ExpandableId id={merchant._id} />
                     </td>
                     <td className="p-2 sm:p-6 font-satoshi font-bold text-primary min-w-[120px] break-words whitespace-nowrap">
                       {merchant.name.firstName ? (`${merchant.name.firstName} ${merchant.name.lastName}`) : "N/A"}

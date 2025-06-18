@@ -6,6 +6,7 @@ import Image from "next/image";
 import ListingDetailsPopup from "../p2pTrading/ListingPopup";
 import { Listing } from "@/src/Types/P2PListing";
 import axios from "axios";
+import ExpandableId from "../ui/ExpandableId";
 
 interface Props {
     headings: string[]
@@ -100,9 +101,11 @@ const ListingsTable: React.FC<Props> = ({ data, headings }) => {
                         {Array.isArray(data) &&
                             data.map((listing, index) => (
                                 <tr key={listing.id} className="border-b border-gray-200 text-[12px] md:text-[16px] font-[satoshi]">
-                                    <td className="px-2 md:px-4 py-3 md:py-4 whitespace-nowrap font-bold text-primary min-w-[100px] break-words">{listing.id}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 whitespace-nowrap font-bold text-primary min-w-[100px] break-words">
+                                        <ExpandableId id={listing.id} />
+                                    </td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 whitespace-nowrap min-w-[120px] break-words">
-                                        {listing.createdBy}
+                                        <ExpandableId id={listing.createdBy} />
                                     </td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 whitespace-nowrap min-w-[150px] break-words">{listing.type}</td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 whitespace-nowrap min-w-[150px] break-words">{listing.currency}</td>

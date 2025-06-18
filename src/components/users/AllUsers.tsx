@@ -47,12 +47,13 @@ export default function UsersComponent() {
   };
 
   const {
-    users: allUsers,
+    users,
     totalPages,
     isLoading,
     isError,
     setUsers,
-  } = useFetchUsers(currentPage, 10, sortBy, getStatusFromTab(activeTab));
+  } = useFetchUsers({
+    currentPage: currentPage, limit: 10, sortBy: sortBy, status: getStatusFromTab(activeTab), search: searchTerm});
 
   // Define tabs for the Tabs component
   const tabs = ["All", "Verified", "Pending Verifications"];
@@ -78,28 +79,6 @@ export default function UsersComponent() {
     setActiveTab(tab);
     setCurrentPage(1); // Reset to first page when changing tabs
   };
-
-  // Filter users based on searchTerm (status filtering is now handled by the API)
-  const filteredUsers = useMemo(() => {
-    if (!allUsers) return [];
-
-    // Apply search filter if searchTerm exists
-    if (searchTerm.trim()) {
-      const search = searchTerm.toLowerCase();
-      return allUsers.filter((user) => {
-        if (!user.name) return false; // Handle case where name is undefined
-        let name = user.name.firstName + " " + user.name.lastName;
-        return (
-          name.toLowerCase().includes(search) ||
-          user.email?.toLowerCase().includes(search) ||
-          user._id?.toString().includes(search)
-        );
-      });
-    }
-
-    // If no search term, return all users (filtering by status is handled by API)
-    return allUsers;
-  }, [allUsers, searchTerm]);
 
   return (
     <>
@@ -130,13 +109,13 @@ export default function UsersComponent() {
         <SkeletonTableLoader headings={headings} rowCount={10} />
       ) : isError ? (
         <Error text="Something went wrong." />
-      ) : filteredUsers.length === 0 ? (
+      ) : users.length === 0 ? (
         <Error text="No data found." />
       ) : (
         <div className="mt-4">
           <UserTable
             headings={headings}
-            data={filteredUsers}
+            data={users}
             setData={setUsers}
           />
           <Pagination

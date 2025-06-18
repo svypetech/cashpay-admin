@@ -13,6 +13,7 @@ import {
   handleDeleteAdmin,
   handleSuspendAdmin,
 } from "@/src/hooks/admins/AdminActions";
+import ExpandableId from "../ui/ExpandableId";
 
 interface Props {
   headings: string[];
@@ -261,7 +262,7 @@ const AdminTable: React.FC<Props> = ({ data, headings, setData }) => {
                     className="border-b border-gray-200 text-[12px] md:text-[16px]"
                   >
                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[100px] break-words">
-                      {admin.id}
+                      <ExpandableId id={admin._id} />
                     </td>
                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi font-bold text-primary min-w-[120px] break-words">
                       {admin.name ? admin.name : "N/A"}

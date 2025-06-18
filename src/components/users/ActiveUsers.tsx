@@ -3,31 +3,43 @@
 import { useState, useEffect } from "react";
 import Pagination from "../pagination/pagination";
 import ActiveUsersTable from "../tables/ActiveUsersTable";
-
 import SkeletonTableLoader from "../skeletons/SkeletonTableLoader";
 import Search from "../ui/Search";
 import Image from "next/image";
-
 import Error from "../ui/Error";
+import { useDateRangeFilter } from "@/src/hooks/filter/useSetDate";
 import useFetchUsers from "@/src/hooks/users/getUsers";
-import { User } from "@/src/Types/User";
 import { useDownloadData } from "@/src/hooks/downloadData/useDownloadData";
-
+import DateRangePicker from "../ui/DateRangePicker";
+import { User } from "@/src/Types/User";
 
 const headings = [
   "User ID",
   "Name",
-  "Last Login",
-  "Total Logins",
-  "Session Duration",
+  "Email",
+  "Registration Date",
+  "Last Activity",
+  "Status",
 ];
 
 export default function ActiveUsers() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const { startDate, endDate, handleDateChange } = useDateRangeFilter();
+  const { users: fetchedUsers, isLoading, isError, totalPages } = useFetchUsers({
+    currentPage: currentPage, 
+    limit: 10, 
+    startDate, 
+    endDate, 
+    search: searchQuery,
+  });
+  const [users, setUsers] = useState<User []>([])
 
-  const { users, totalPages, isError, isLoading } = useFetchUsers(currentPage, 10);
+  useEffect(() => {
+    if(fetchedUsers) {
+      setUsers(fetchedUsers)
+    }
+  }, [fetchedUsers])
 
   // Use the CSV download hook
   const { downloadData, isDownloading } = useDownloadData({
@@ -37,18 +49,30 @@ export default function ActiveUsers() {
 
   // Define CSV field mapping for Active Users
   const csvFields = [
-    { key: "id", label: "User ID" },
+    { key: "_id", label: "User ID" },
     {
       key: "name",
       label: "Name",
       transform: (value: any) => {
         if (!value) return "N/A";
-        return `${value.firstName || ""} ${value.lastName || ""}.trim()`;
+        return `${value.firstName || ""} ${value.lastName || ""}`.trim();
+      },
+    },
+    { key: "email", label: "Email" },
+    {
+      key: "date",
+      label: "Registration Date",
+      transform: (value: string) => {
+        try {
+          return value ? new Date(value).toLocaleDateString() : "N/A";
+        } catch {
+          return "N/A";
+        }
       },
     },
     {
-      key: "lastLoginDate",
-      label: "Last Login",
+      key: "lastActivity",
+      label: "Last Activity",
       transform: (value: string) => {
         try {
           return value ? new Date(value).toLocaleString() : "N/A";
@@ -57,18 +81,7 @@ export default function ActiveUsers() {
         }
       },
     },
-    { key: "totalLogin", label: "Total Logins" },
-    {
-      key: "sessionDuration",
-      label: "Session Duration",
-      transform: (value: number) => {
-        if (!value) return "N/A";
-        // Convert minutes to hours and minutes format
-        const hours = Math.floor(value / 60);
-        const minutes = value % 60;
-        return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
-      },
-    },
+    { key: "userStatus", label: "Status" },
   ];
 
   const handlePageChange = (page: number) => {
@@ -81,7 +94,7 @@ export default function ActiveUsers() {
 
   // Handle download button click
   const handleDownload = async () => {
-    const dataToDownload = filteredUsers.length > 0 ? filteredUsers : users;
+    const dataToDownload = users.length > 0 ? users : users;
     const result = await downloadData(dataToDownload, csvFields);
 
     if (!result.success) {
@@ -89,63 +102,52 @@ export default function ActiveUsers() {
     }
   };
 
-  // Filter users based on search query
   useEffect(() => {
-    if (!users) return;
-
-    if (!searchQuery) {
-      setFilteredUsers(users);
-      return;
-    }
-
-    const query = searchQuery.toLowerCase();
-    const filtered = users.filter((user) => {
-      const fullName = `${user.name?.firstName || ""} ${
-        user.name?.lastName || ""
-      }`.toLowerCase();
-      return fullName.includes(query);
-    });
-
-    setFilteredUsers(filtered);
-  }, [searchQuery, users]);
+    setCurrentPage(1); // Reset to first page when search query or date range changes
+  }, [searchQuery, startDate, endDate]);
 
   return (
     <div>
       {/* Search and Filter Section */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-6 mt-6 gap-4">
-        <div className="w-full md:w-1/2">
+      <div className="flex flex-col md:flex-row items-center mb-4 gap-4 w-full mt-6">
+        {/* Search Bar - 60% */}
+        <div className="md:w-[50%] w-full">
           <Search className="w-full" onSearch={handleSearch} />
         </div>
 
-        <div className="flex items-center gap-4 w-full md:w-1/2 font-[satoshi]">
-          <button className="w-full md:w-auto flex-1 cursor-pointer flex justify-between items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50">
-            <span>Filter</span>
-            <Image
-              src="/icons/calendar.svg"
-              alt="Calendar"
-              width={24}
-              height={24}
+        {/* Filter and Download - 40% */}
+        <div className="flex flex-col sm:flex-row gap-4 md:w-[50%] w-full">
+          <div className="sm:w-[50%] w-full">
+            <DateRangePicker
+              startDate={startDate}
+              endDate={endDate}
+              onDateChange={handleDateChange}
+              placeholder="Filter"
             />
-          </button>
-          <button
-            onClick={handleDownload}
-            disabled={
-              isDownloading || isLoading || !users || users.length === 0
-            }
-            className="w-[50%] flex justify-center items-center gap-2 px-4 py-2 font-bold border border-primary rounded-lg text-primary bg-white hover:bg-blue-50 ml-auto md:ml-0 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <span>{isDownloading ? "Downloading..." : "Download"}</span>
-            {isDownloading ? (
-              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-            ) : (
-              <Image
-                src="/icons/download.svg"
-                alt="Download"
-                width={24}
-                height={24}
-              />
-            )}
-          </button>
+          </div>
+
+          {/* Download - 50% */}
+          <div className="sm:w-[50%] w-full">
+            <button
+              onClick={handleDownload}
+              disabled={
+                isDownloading || isLoading || !users || users.length === 0
+              }
+              className="w-full flex justify-center items-center gap-2 px-4 py-2 font-bold border-[1px] border-primary rounded-[8px] text-primary bg-white hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span>{isDownloading ? "Downloading..." : "Download"}</span>
+              {isDownloading ? (
+                <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <Image
+                  src="/icons/download.svg"
+                  alt="Download"
+                  width={24}
+                  height={24}
+                />
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -153,11 +155,11 @@ export default function ActiveUsers() {
       {isLoading ? (
         <SkeletonTableLoader headings={headings} rowCount={10} />
       ) : isError ? (
-        <Error text="Something went wrong" />
-      ) : filteredUsers.length === 0 ? (
-        <Error text="No data found" />
+        <Error text="Error fetching active users" />
+      ) : users.length === 0 ? (
+        <Error text="No active users found" />
       ) : (
-        <ActiveUsersTable headings={headings} data={filteredUsers} setData={setFilteredUsers} />
+        <ActiveUsersTable headings={headings} data={users} setData={setUsers} />
       )}
 
       <Pagination

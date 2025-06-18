@@ -10,6 +10,7 @@ import { formatNumberToTwoDecimals } from "@/src/lib/functions";
 import handleBanUser from "@/src/hooks/users/banUser";
 import handleSuspendUser from "@/src/hooks/users/suspendUser";
 import handleActivateUser from "@/src/hooks/users/activateUser";
+import ExpandableId from "../ui/ExpandableId";
 
 interface Props {
     headings: string[]
@@ -195,7 +196,9 @@ const WalletTable: React.FC<Props> = ({ data, headings, setData }) => {
                         {Array.isArray(data) &&
                             data.map((wallet, index) => (
                                 <tr key={index} className="border-b border-gray-200 text-[12px] md:text-[16px]">
-                                    <td className="p-2 md:p-4 font-satoshi min-w-[100px] break-words">{wallet.data.userId}</td>
+                                    <td className="p-2 md:p-4 font-satoshi min-w-[100px] break-words">
+                                        <ExpandableId id={wallet.data.user_id} />
+                                    </td>
                                     <td className="p-2 md:p-4 font-satoshi font-bold text-primary min-w-[120px] break-words">
                                         {wallet.data.userName ? `${wallet.data.userName.firstName} ${wallet.data.userName.lastName}` : "N/A"}
                                     </td>

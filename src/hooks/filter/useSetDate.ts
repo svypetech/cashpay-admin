@@ -1,8 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 export const useDateRangeFilter = () => {
-  const [startDate, setStartDate] = useState<Date>();
-  const [endDate, setEndDate] = useState<Date>();
+  const searchParams = useSearchParams();
+  const [startDate, setStartDate] = useState<Date | undefined>();
+  const [endDate, setEndDate] = useState<Date | undefined>();
+
+  // Initialize from URL parameters
+  useEffect(() => {
+    const startDateParam = searchParams.get('startDate');
+    const endDateParam = searchParams.get('endDate');
+    
+    if (startDateParam) {
+      const start = new Date(startDateParam);
+      if (!isNaN(start.getTime())) {
+        setStartDate(start);
+      }
+    }
+    
+    if (endDateParam) {
+      const end = new Date(endDateParam);
+      if (!isNaN(end.getTime())) {
+        setEndDate(end);
+      }
+    }
+  }, [searchParams]);
 
   const handleDateChange = (start?: Date, end?: Date) => {
     setStartDate(start);
@@ -11,8 +33,6 @@ export const useDateRangeFilter = () => {
       start: start ? start.toISOString() : undefined,
       end: end ? end.toISOString() : undefined,
     });
-
-    // Log in ISO format
   };
 
   return {
@@ -21,5 +41,3 @@ export const useDateRangeFilter = () => {
     handleDateChange,
   };
 };
-
-

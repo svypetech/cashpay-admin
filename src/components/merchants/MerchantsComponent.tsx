@@ -87,29 +87,6 @@ export default function MerchantsComponent() {
     console.log(`View user ${userId}`);
   };
 
-  // Filter merchants based on searchTerm (status filtering is now handled by the API)
-  const filteredMerchants = useMemo(() => {
-    if (!merchants) return [];
-
-    // Apply search filter if searchTerm exists
-    if (searchTerm.trim()) {
-      const search = searchTerm.toLowerCase();
-      return merchants.filter((merchant) => {
-        const name = merchant.name 
-          ? `${merchant.name.firstName} ${merchant.name.lastName}`.toLowerCase()
-          : "";
-        return (
-          name.includes(search) ||
-          merchant.email?.toLowerCase().includes(search) ||
-          merchant.userId?.toString().includes(search)
-        );
-      });
-    }
-
-    // If no search term, return all merchants (filtering by status is handled by API)
-    return merchants;
-  }, [merchants, searchTerm]);
-
   return (
     <>
       {/* Navigation Tabs */}
@@ -137,13 +114,14 @@ export default function MerchantsComponent() {
         <SkeletonTableLoader headings={headings} rowCount={10} />
       ) : error ? (
         <Error text="Something went wrong." />
-      ) : filteredMerchants.length === 0 ? (
+      ) : merchants.length === 0 ? (
         <Error text="No data found" />
       ) : (
         <div className="mt-4">
           <MerchantsTable
             headings={headings}
-            merchants={filteredMerchants}
+            merchants={merchants}
+            setMerchants={setMerchants}
             onViewUser={handleViewUser}
           />
 
