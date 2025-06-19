@@ -7,6 +7,10 @@ import ChatsTable from "./ChatsTable";
 import useFetchChats from "@/src/hooks/support/getChats";
 import SkeletonTableLoader from "../skeletons/SkeletonTableLoader";
 import Error from "../ui/Error";
+import Search from "../ui/Search";
+import { useDateRangeFilter } from "@/src/hooks/filter/useSetDate";
+import { useDownloadData } from "@/src/hooks/downloadData/useDownloadData";
+import DateRangePicker from "../ui/DateRangePicker";
 
 const headings = [
   "ChatID",
@@ -28,17 +32,62 @@ export default function Chats() {
   const [currentPage, setCurrentPage] = useState(1);
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const { startDate, endDate, handleDateChange } = useDateRangeFilter();
+  
   const {
     requests: chatsData,
     isLoading,
     error,
     totalPages,
-  } = useFetchChats(currentPage, 10, activeTab);
+  } = useFetchChats({ page:currentPage, limit:10, tab:activeTab, search:searchQuery, startDate, endDate});
+  
   const [data, setData] = useState(chatsData);
   const [filteredData, setFilteredData] = useState(data);
 
+  // Use the CSV download hook
+  const { downloadData, isDownloading } = useDownloadData({
+    filename: "chats_data",
+    dateInFilename: true,
+  });
+
+  // Define CSV field mapping for Chats - Updated to remove lastUpdated and description, add chat link
+  const csvFields = [
+    { key: "_id", label: "Chat ID" },
+    { key: "userId", label: "User ID" },
+    { 
+      key: "agentId", 
+      label: "Agent ID",
+      transform: (value: any) => value || "Unassigned"
+    },
+    { key: "issueType", label: "Issue Type" },
+    { key: "status", label: "Status" },
+    {
+      key: "_id",
+      label: "Chat",
+      transform: (value: string) => {
+        // Generate chat link using the chat ID
+        const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+        return `${baseUrl}/chat/${value}`;
+      },
+    },
+  ];
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+  };
+
+  const handleSearch = (value: string) => {
+    setSearchQuery(value);
+  };
+
+  // Handle download button click
+  const handleDownload = async () => {
+    const dataToDownload = filteredData.length > 0 ? filteredData : chatsData;
+    const result = await downloadData(dataToDownload, csvFields);
+
+    if (!result.success) {
+      alert(result.error || "Failed to download data. Please try again.");
+    }
   };
 
   useEffect(() => {
@@ -46,7 +95,7 @@ export default function Chats() {
     setFilteredData(chatsData);
   }, [chatsData]);
 
-  // filter based on active tab
+  // Filter based on active tab
   useEffect(() => {
     const filtered = data.filter((request) => {
       if (activeTab === "all") {
@@ -56,16 +105,15 @@ export default function Chats() {
       } else if (activeTab === "resolved") {
         return request.status === "Resolved";
       }
+      return true;
     });
     setFilteredData(filtered);
-  }, [activeTab]);
+  }, [activeTab, data]);
 
+  // Reset to first page when search query, date range, or tab changes
   useEffect(() => {
-    const filtered = data.filter((chat) => {
-      return chat._id.toLowerCase().includes(searchQuery.toLowerCase());
-    });
-    setFilteredData(filtered);
-  }, [searchQuery]);
+    setCurrentPage(1);
+  }, [searchQuery, startDate, endDate, activeTab]);
 
   return (
     <div className="px-2">
@@ -88,43 +136,50 @@ export default function Chats() {
         </div>
       </div>
 
-      {/* Search and Actions */}
-      <div
-        className={`flex flex-col md:grid md:grid-cols-4 justify-between items-center mb-2 gap-4`}
-      >
-        <div className={`relative w-full md:w-auto md:col-span-3`}>
-          <div className="relative">
-            <input
-              onChange={(e) => setSearchQuery(e.target.value)}
-              type="text"
-              placeholder="Search..."
-              className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:gray-700 focus:border-transparent"
-            />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <Image
-                src="/icons/search.svg"
-                alt="Arrow right"
-                width={24}
-                height={24}
-              />
-            </div>
-          </div>
+      {/* Search and Filter Section - Updated to match UserEngagement */}
+      <div className="flex flex-col md:flex-row items-center mb-4 gap-4 w-full mt-6">
+        {/* Search Bar - 40% */}
+        <div className="md:w-[50%] w-full">
+          <Search className="w-full" onSearch={handleSearch} />
         </div>
 
-        <div
-          className={`flex items-center gap-4 w-full font-[satoshi] md:col-span-1`}
-        >
-          <button className="w-full flex justify-between items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50">
-            <span>Filter</span>
-            <Image
-              src="/icons/calendar.svg"
-              alt="Arrow right"
-              width={24}
-              height={24}
+        {/* Filter and Download - 60% */}
+        <div className="flex flex-col sm:flex-row gap-4 md:w-[50%] w-full">
+          <div className="sm:w-[50%] w-full">
+            <DateRangePicker
+              startDate={startDate}
+              endDate={endDate}
+              onDateChange={handleDateChange}
+              placeholder="Filter"
             />
-          </button>
+          </div>
+
+          {/* Download - 50% */}
+          <div className="sm:w-[50%] w-full">
+            <button
+              onClick={handleDownload}
+              disabled={
+                isDownloading || isLoading || !filteredData || filteredData.length === 0
+              }
+              className="w-full flex justify-center items-center gap-2 px-4 py-2 font-bold border-[1px] border-primary rounded-[8px] text-primary bg-white hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span>{isDownloading ? "Downloading..." : "Download"}</span>
+              {isDownloading ? (
+                <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <Image
+                  src="/icons/download.svg"
+                  alt="Download"
+                  width={24}
+                  height={24}
+                />
+              )}
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Table Section */}
       {isLoading ? (
         <SkeletonTableLoader rowCount={10} headings={headings} />
       ) : error ? (

@@ -2,7 +2,15 @@ import { SupportRequest } from "@/src/Types/SupportRequests"
 import axios from "axios"
 import { useEffect, useState } from "react"
 
-export default function useFetchSupportRequests(page: number, limit: number, sortBy?: string, tab?: string) {
+interface Props {
+    page: number
+    limit: number
+    sortBy?: string
+    tab?: string // "assigned", "unassigned", or undefined for "all"
+    search?: string // Optional search query
+}
+
+export default function useFetchSupportRequests({ page, limit, sortBy, tab, search }: Props) {
     const [requests, setRequests] = useState<SupportRequest[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [totalPages, setTotalPages] = useState(0)
@@ -17,6 +25,10 @@ export default function useFetchSupportRequests(page: number, limit: number, sor
             // Add sortBy parameter if provided
             if (sortBy?.trim()) {
                 url += `&sortBy=${sortBy}`
+            }
+
+            if(search?.trim()) {
+                url += `&search=${encodeURIComponent(search)}`
             }
             
             // Add status parameter based on tab
@@ -44,7 +56,7 @@ export default function useFetchSupportRequests(page: number, limit: number, sor
         }
         
         fetchRequests()
-    }, [page, limit, sortBy, tab]) // Added tab to dependency array to re-fetch when tab changes
+    }, [page, limit, sortBy, tab, search]) // Added tab to dependency array to re-fetch when tab changes
 
     return { requests, totalPages, isLoading, error }
 }

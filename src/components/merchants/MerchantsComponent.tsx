@@ -58,7 +58,8 @@ export default function MerchantsComponent() {
     currentPage,
     10,
     sortBy,
-    getStatusFromTab(activeTab)
+    getStatusFromTab(activeTab),
+    searchTerm
   );
 
   const handlePageChange = (page: number) => {

@@ -249,7 +249,7 @@ export default function SettingsPage() {
                   </h3>
                   <div className="relative w-36 h-36 overflow-hidden p-2">
                     <Image
-                      src={image}
+                      src={image || "/images/blank-profile.webp"}
                       alt="User avatar"
                       width={128}
                       height={128}

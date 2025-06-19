@@ -58,7 +58,7 @@ export default function Navbar() {
           <div className="flex items-center gap-2">
             <div className="relative h-8 w-8 rounded-full overflow-hidden">
               <img
-                src={image ? image : "/images/blank-profile.webp"}
+                src={image || "/images/blank-profile.webp"}
                 alt="Profile picture"
                 className="h-full w-full object-cover"
               />

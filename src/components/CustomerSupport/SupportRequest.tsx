@@ -34,12 +34,14 @@ export default function SupportRequests() {
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("");
-  const { requests, totalPages, isLoading, error } = useFetchSupportRequests(
-    currentPage,
-    10,
+  const { requests, totalPages, isLoading, error } = useFetchSupportRequests({
+    page: currentPage,
+    limit: 10,
     sortBy,
-    activeTab
-  );
+    tab: activeTab,
+    search: searchQuery,
+  });
+  
   const [filteredData, setFilteredData] = useState(requests);
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -62,13 +64,6 @@ export default function SupportRequests() {
     });
     setFilteredData(filtered);
   }, [activeTab]);
-
-  useEffect(() => {
-    const filtered = requests.filter((request) => {
-      return request._id.toLowerCase().includes(searchQuery.toLowerCase());
-    });
-    setFilteredData(filtered);
-  }, [searchQuery]);
 
   const handleSort = (option: string) => {
     setSortBy(option);

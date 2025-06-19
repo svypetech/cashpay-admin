@@ -6,6 +6,7 @@ import { useEffect, useState } from "react"
 import AssignRequestDialog from "../CustomerSupport/AssignRequestDialog";
 import { SupportRequest } from "@/src/Types/SupportRequests";
 import { formatJoiningDate, shortenAddress } from "@/src/lib/functions";
+import ColourfulBlock from "../ui/ColourfulBlock";
 
 interface Props {
     headings: string[]
@@ -43,6 +44,29 @@ const CustomerSupportTable: React.FC<Props> = ({ data, headings }) => {
         setActiveDropdown(activeDropdown === index ? null : index)
     }
 
+    // Function to get status display text and styling for support requests
+    const getStatusConfig = (status: string) => {
+        const normalizedStatus = status.toLowerCase();
+
+        switch (normalizedStatus) {
+            case "assigned":
+                return {
+                    text: "Assigned",
+                    className: "text-center rounded-xl text-xs md:text-base font-semibold bg-[#71FB5533] text-[#20C000]",
+                };
+            case "unassigned":
+                return {
+                    text: "Unassigned",
+                    className: "text-center rounded-xl text-xs md:text-base font-semibold bg-[#EFE40833] bg-[#EFE40833] text-[#B0A700]",
+                };
+            default:
+                return {
+                    text: status,
+                    className: "text-center rounded-xl text-xs md:text-base font-semibold bg-[#EFE40833] text-[#B0A700]",
+                };
+        }
+    };
+
     return (
         <div className="flex-1 rounded-lg w-full py-5">
             {/* Table - Add padding bottom for dropdown space */}
@@ -60,16 +84,23 @@ const CustomerSupportTable: React.FC<Props> = ({ data, headings }) => {
                     <tbody>
                         {Array.isArray(customerRequests) &&
                             customerRequests.map((request, index) => (
-                                <tr key={index} className="border-b border-gray-200 text-[12px] md:text-[16px]">
+                                <tr key={index} className="border-b border-gray-200 text-[12px] md:text-[16px] hover:bg-gray-50 transition-colors">
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{shortenAddress(request._id)}</td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{shortenAddress(request.userId)}</td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words"> - </td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{formatJoiningDate(request.updateDate)}</td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[200px] break-words text-center">{request.issueType}</td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[100px]">
-                                        <span className={`text-[12px] md:text-[16px] px-4 py-2 rounded-xl text-xs md:text-base font-semibold ${request.status === "Assigned" ? "bg-[#71FB5533] text-[#20C000]" : "bg-[#EFE40833] text-[#B0A700]"}`}>
-                                            {request.status === "Assigned" ? "Assigned" : "Unassigned"}
-                                        </span>
+                                        {(() => {
+                                            const statusConfig = getStatusConfig(request.status);
+                                            return (
+                                                <ColourfulBlock
+                                                    text={statusConfig.text}
+                                                    className={statusConfig.className}
+                                                    size="sm"
+                                                />
+                                            );
+                                        })()}
                                     </td>
                                     <td className="relative px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[60px] text-center">
                                         <div className="dropdown-container relative inline-block">
