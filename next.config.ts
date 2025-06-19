@@ -7,13 +7,8 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true, // Skip ESLint during build
   },
   images: {
-    domains: [
-      // Include your existing domains here
-      'storage.googleapis.com',
-      'logos.covalenthq.com',
-      'coin-images.coingecko.com',
-    ],
-  }
+    domains: ["logos.covalenthq.com", "storage.googleapis.com","coin-images.coingecko.com"],
+  },
 };
 
 export default nextConfig;

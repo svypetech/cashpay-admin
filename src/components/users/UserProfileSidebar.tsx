@@ -425,7 +425,7 @@ export default function UserProfileSidebar({
 
                                 {/* Action Buttons - Use currentUserStatus for immediate UI updates */}
                                 {currentUserStatus === "Active" ? (
-                                    <div className="z-5 flex justify-between mt-auto w-full gap-4 px-5">
+                                    <div className="z-10 flex justify-between mt-auto w-full gap-4 px-5">
                                         <button 
                                             className="rounded-md border px-6 py-2 border-[#DF1D1D] text-[#DF1D1D] hover:bg-red-50 cursor-pointer font-bold disabled:opacity-50"
                                             onClick={handleSuspendConfirmation}

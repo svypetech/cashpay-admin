@@ -248,17 +248,12 @@ export default function SettingsPage() {
                     Profile Photo
                   </h3>
                   <div className="relative w-36 h-36 overflow-hidden p-2">
-                    <Image
+                    <img
                       src={image || "/images/blank-profile.webp"}
                       alt="User avatar"
                       width={128}
                       height={128}
                       className="object-cover w-full h-full rounded-full"
-                      unoptimized={image.includes(".image/")} // Skip optimization for problematic URLs
-                      onError={() => {
-                        // Fall back to default avatar if the image fails to load
-                        setImage("/images/user-avatar.png");
-                      }}
                     />
 
                     {/* Hidden file input */}
