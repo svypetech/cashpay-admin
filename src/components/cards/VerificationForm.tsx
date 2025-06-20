@@ -19,7 +19,7 @@ export default function VerificationSteps({
   onStartVerification = () => console.log("Start verification"),
 }: VerificationStepsProps) {
   let user = localStorage.getItem("user")
-  let canApproveKyc = user ? JSON.parse(user).canApproveKyc : false;
+  // let canApproveKyc = user ? JSON.parse(user).canApproveKyc : false;
   return (
     <div className="w-full max-w-md mx-auto font-[satoshi] mb-15">
       <div className="space-y-0">
@@ -33,7 +33,7 @@ export default function VerificationSteps({
         ))}
       </div>
 
-      {canApproveKyc && (
+      {/* {canApproveKyc && ( */}
       <div className="mt-5 flex justify-center">
         <button
           onClick={onStartVerification}
@@ -42,7 +42,7 @@ export default function VerificationSteps({
           Start Verification
         </button>
       </div>
-      )}
+      {/* )} */}
     </div>
   )
 }

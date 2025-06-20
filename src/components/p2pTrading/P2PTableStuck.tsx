@@ -9,6 +9,7 @@ import ColourfulBlock from "../ui/ColourfulBlock";
 import axios from "axios";
 import ConfirmModal from "../ui/ConfirmModal";
 import Trade from "@/src/Types/Trades";
+import { useToast } from "@/src/lib/ToastProvider";
 
 interface Props {
   headings: string[];
@@ -17,6 +18,7 @@ interface Props {
 }
 
 const P2PTableStuck: React.FC<Props> = ({ data, headings, setData }) => {
+  const { showSuccess, showError } = useToast();
   const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
   const [showPopup, setShowPopup] = useState(false);
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
@@ -76,9 +78,10 @@ const P2PTableStuck: React.FC<Props> = ({ data, headings, setData }) => {
             : trade
         )
       );
-      alert("Dispute resolved successfully: " + JSON.stringify(response.data));
+      showSuccess("Trade resolved successfully!");
     } catch (error: any) {
-      alert(error.response.data.message);
+      console.error("Error resolving trade:", error);
+      showError("Failed to resolve trade. Please try again.");
     } finally {
       setShowResolvePopup(false);
       setIsSubmitting(false);

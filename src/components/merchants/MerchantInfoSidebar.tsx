@@ -6,6 +6,7 @@ import Image from "next/image";
 import Tabs from "../ui/Tabs";
 import BankAccountsTab from "./BankAccountsTab";
 import ConfirmModal from "../ui/ConfirmModal";
+import SuspendUserModal from "../ui/SuspendPopup";
 import Merchant from "@/src/Types/Merchant";
 import { formatJoiningDate } from "@/src/lib/functions";
 import useFetchAccounts from "@/src/hooks/merchants/getMerchankBankAccounts";
@@ -13,6 +14,7 @@ import handleSuspendUser from "@/src/hooks/users/suspendUser";
 import handleBanUser from "@/src/hooks/users/banUser";
 import handleActivateUser from "@/src/hooks/users/activateUser";
 import axios from "axios";
+import { useToast } from "@/src/lib/ToastProvider";
 
 interface MerchantInfoSidebarProps {
   showSidebar: boolean;
@@ -29,6 +31,8 @@ export default function MerchantInfoSidebar({
   setMerchants,
   onStatusUpdate,
 }: MerchantInfoSidebarProps) {
+  const { showSuccess, showError } = useToast();
+  const [success, setSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState<"Overview" | "Bank Accounts">("Overview");
   const [isVisible, setIsVisible] = useState(false);
   const [shouldSlideIn, setShouldSlideIn] = useState(false);
@@ -110,58 +114,73 @@ export default function MerchantInfoSidebar({
     setIsSubmitting(true);
     setActionType("activate");
     try {
-      await handleActivateUser(merchant._id);
-      
-      // Update both local state and parent state
+      await handleActivateUser({
+        id: merchant._id,
+        setIsSubmitting,
+        showSuccess,
+        showError,
+        setSuccess,
+      });
+
+      // Update both local state and parent state immediately
       setCurrentMerchantStatus("Active");
       if (setMerchants) {
         setMerchants((prevMerchants) =>
           prevMerchants.map((prevMerchant) =>
             prevMerchant._id === merchant._id
-              ? { ...prevMerchant, userStatus: "Active" }
+              ? { ...prevMerchant, status: "Active" }
               : prevMerchant
           )
         );
       }
+      
       // Notify table about status change
       onStatusUpdate(merchant._id, "Active");
     } catch (error) {
       console.error("Error activating merchant:", error);
-      alert("Failed to activate merchant. Please try again later.");
     } finally {
       setIsSubmitting(false);
       setActionType("");
       setShowActivateModal(false);
+      setSuccess(false);
     }
   };
 
   // Execute suspend merchant
-  const executeSuspendMerchant = async () => {
+  const executeSuspendMerchant = async (days: number) => {
     setIsSubmitting(true);
     setActionType("suspend");
     try {
-      await handleSuspendUser(merchant._id);
-      
-      // Update both local state and parent state
+      await handleSuspendUser({
+        id: merchant._id,
+        setIsSubmitting,
+        showSuccess,
+        showError,
+        setSuccess,
+        days
+      });
+
+      // Update both local state and parent state immediately
       setCurrentMerchantStatus("Suspended");
       if (setMerchants) {
         setMerchants((prevMerchants) =>
           prevMerchants.map((prevMerchant) =>
             prevMerchant._id === merchant._id
-              ? { ...prevMerchant, userStatus: "Suspended" }
+              ? { ...prevMerchant, status: "Suspended" }
               : prevMerchant
           )
         );
       }
+      
       // Notify table about status change
       onStatusUpdate(merchant._id, "Suspended");
     } catch (error) {
       console.error("Error suspending merchant:", error);
-      alert("Failed to suspend merchant. Please try again later.");
     } finally {
       setIsSubmitting(false);
       setActionType("");
       setShowSuspendModal(false);
+      setSuccess(false);
     }
   };
 
@@ -170,28 +189,35 @@ export default function MerchantInfoSidebar({
     setIsSubmitting(true);
     setActionType("ban");
     try {
-      await handleBanUser(merchant._id);
-      
-      // Update both local state and parent state
+      await handleBanUser({
+        id: merchant._id,
+        setIsSubmitting,
+        showSuccess,
+        showError,
+        setSuccess,
+      });
+
+      // Update both local state and parent state immediately
       setCurrentMerchantStatus("Banned");
       if (setMerchants) {
         setMerchants((prevMerchants) =>
           prevMerchants.map((prevMerchant) =>
             prevMerchant._id === merchant._id
-              ? { ...prevMerchant, userStatus: "Banned" }
+              ? { ...prevMerchant, status: "Banned" }
               : prevMerchant
           )
         );
       }
+      
       // Notify table about status change
       onStatusUpdate(merchant._id, "Banned");
     } catch (error) {
       console.error("Error banning merchant:", error);
-      alert("Failed to ban merchant. Please try again later.");
     } finally {
       setIsSubmitting(false);
       setActionType("");
       setShowBanModal(false);
+      setSuccess(false);
     }
   };
 
@@ -214,14 +240,14 @@ export default function MerchantInfoSidebar({
             account.id === accountId ? updatedCard : account
           )
         );
-        alert("Account verified successfully");
+        showSuccess("Success", "Account verified successfully");
       }
       else {
-        alert("Failed to verify account");
+        showError("Failed", "Could not verify account");
       }
     } catch (error) {
       console.error("Error verifying account:", error);
-      alert("An error occurred while verifying the account");
+      showError("Error", "An error occurred while verifying the account");
     } finally {
       setAction({ isLoading: false, type: "" });
     }
@@ -238,14 +264,14 @@ export default function MerchantInfoSidebar({
       });
 
       if (response.data.success) {
-        alert("Account denied successfully");
+        showSuccess("Success", "Account denied successfully");
       }
       else {
-        alert("Failed to deny account");
+        showError("Failed", "Could not deny account");
       }
     } catch (error) {
       console.error("Error denying account:", error);
-      alert("An error occurred while denying the account");
+      showError("Error", "An error occurred while denying the account");
     } finally {
       setAction({ isLoading: false, type: "" });
     }
@@ -457,6 +483,19 @@ export default function MerchantInfoSidebar({
         </div>
       </div>
 
+      {/* Replace ConfirmModal with SuspendUserModal for suspend actions */}
+      <SuspendUserModal
+        isOpen={showSuspendModal}
+        onClose={() => setShowSuspendModal(false)}
+        userName={
+          merchant.name
+            ? merchant.name.firstName + " " + merchant.name.lastName
+            : "N/A"
+        }
+        onConfirm={(days) => executeSuspendMerchant(days)}
+        isLoading={isSubmitting}
+      />
+
       {/* Activate Merchant Confirmation Modal */}
       <ConfirmModal
         isOpen={showActivateModal}
@@ -469,20 +508,6 @@ export default function MerchantInfoSidebar({
         confirmText="Activate Merchant"
         isLoading={isSubmitting}
         style="blue"
-      />
-
-      {/* Suspend Merchant Confirmation Modal */}
-      <ConfirmModal
-        isOpen={showSuspendModal}
-        onClose={() => !isSubmitting && setShowSuspendModal(false)}
-        onConfirm={executeSuspendMerchant}
-        title="Suspend Merchant"
-        message="Are you sure you want to suspend this merchant? They will lose access to their account temporarily."
-        warningText="This action can be reversed later."
-        cancelText="Cancel"
-        confirmText="Suspend Merchant"
-        isLoading={isSubmitting}
-        style="red"
       />
 
       {/* Ban Merchant Confirmation Modal */}

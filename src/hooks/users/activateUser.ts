@@ -1,11 +1,26 @@
 import axios from "axios"
 import { Dispatch, SetStateAction } from "react"
 
-const handleActivateUser = async (id: string, setIsSubmitting?: Dispatch<SetStateAction<boolean>>) => {
+interface HandleActivateUserProps {
+    id: string;
+    setIsSubmitting?: Dispatch<SetStateAction<boolean>>;
+    showSuccess?: (title: string, message?: string) => void;
+    showError?: (title: string, message?: string) => void;
+    setSuccess?: Dispatch<SetStateAction<boolean>>;
+}
+
+const handleActivateUser = async ({ 
+    id, 
+    setIsSubmitting, 
+    showSuccess, 
+    showError,
+    setSuccess
+}: HandleActivateUserProps) => {
     try {
         if (setIsSubmitting) {
             setIsSubmitting(true)
         }
+        
         const response = await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user/activateUser`, {
             id: id,
         }, {
@@ -13,14 +28,18 @@ const handleActivateUser = async (id: string, setIsSubmitting?: Dispatch<SetStat
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
             }
         })
+        
+        console.log("Response:", response.data)
+        
         if (response.data.success) {
-            alert("User activated successfully")
-        }
-        else {
-            alert("Failed to activate User")
+            showSuccess && showSuccess("Success", "User activated successfully")
+            setSuccess && setSuccess(true)
+        } else {
+            showError && showError("Activation Failed", "Failed to activate user")
         }
     } catch (error) {
-        console.error("Error activating User:", error)
+        console.error("Error activating user:", error)
+        showError && showError("Error", "An error occurred while activating the user")
     } finally {
         if (setIsSubmitting) {
             setIsSubmitting(false)

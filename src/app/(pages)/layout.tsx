@@ -1,5 +1,6 @@
 "use client"
 import ClientLayout from "@/src/components/layout/explorerLayout";
+import { ToastProvider } from "@/src/lib/ToastProvider";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
@@ -52,7 +53,9 @@ const Layout = ({ children }: { children: ReactNode }) => {
       }
   
     return (
-      <ClientLayout>{children}</ClientLayout>
+      <ToastProvider>
+        <ClientLayout>{children}</ClientLayout>
+      </ToastProvider>
     );
   };
   

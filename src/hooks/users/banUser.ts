@@ -1,7 +1,21 @@
 import axios from "axios"
 import { Dispatch, SetStateAction } from "react"
 
-const handleBanUser = async (id: string, setIsSubmitting?: Dispatch<SetStateAction<boolean>>) => {
+interface HandleBanUserProps {
+    id: string;
+    setIsSubmitting?: Dispatch<SetStateAction<boolean>>;
+    showSuccess?: (title: string, message?: string) => void;
+    showError?: (title: string, message?: string) => void;
+    setSuccess?: Dispatch<SetStateAction<boolean>>;
+}
+
+const handleBanUser = async ({ 
+    id, 
+    setIsSubmitting, 
+    showSuccess, 
+    showError,
+    setSuccess 
+}: HandleBanUserProps) => {
     try {
         if (setIsSubmitting) {
             setIsSubmitting(true)
@@ -15,13 +29,14 @@ const handleBanUser = async (id: string, setIsSubmitting?: Dispatch<SetStateActi
         })
         console.log("Response:", response.data)
         if (response.data.success) {
-            alert("User banned successfully")
-        }
-        else {
-            alert("Failed to ban User")
+            showSuccess && showSuccess("Success", "User banned successfully")
+            setSuccess && setSuccess(true)
+        } else {
+            showError && showError("Ban Failed", "Failed to ban user")
         }
     } catch (error) {
-        console.error("Error banning User:", error)
+        console.error("Error banning user:", error)
+        showError && showError("Error", "An error occurred while banning the user")
     } finally {
         if (setIsSubmitting) {
             setIsSubmitting(false)

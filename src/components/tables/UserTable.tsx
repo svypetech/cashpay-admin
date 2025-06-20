@@ -12,6 +12,8 @@ import handleSuspendUser from "@/src/hooks/users/suspendUser";
 import handleBanUser from "@/src/hooks/users/banUser";
 import handleActivateUser from "@/src/hooks/users/activateUser";
 import ExpandableId from "../ui/ExpandableId";
+import { useToast } from "@/src/lib/ToastProvider";
+import SuspendUserModal from "../ui/SuspendPopup";
 
 interface Props {
   headings: string[];
@@ -40,6 +42,8 @@ function formatDate(dateString: string): string {
 }
 
 const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
+  const { showSuccess, showError } = useToast();
+  const [success, setSuccess] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
   const [showUserSidebar, setShowUserSidebar] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User>({} as User);
@@ -53,6 +57,7 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
   const [userToBan, setUserToBan] = useState<string | null>(null);
   const [userToActivate, setUserToActivate] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [actionType, setActionType] = useState("");
 
   // Simple dropdown logic: close on outside click
   useEffect(() => {
@@ -104,13 +109,57 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
     setActiveDropdown(null);
   };
 
-  // Execute suspend user
-  const executeSuspendUser = async () => {
+  // Execute activate user with proper toast integration
+  const executeActivateUser = async () => {
+    if (!userToActivate) return;
+
+    setIsSubmitting(true);
+    setActionType("activate");
+    try {
+      await handleActivateUser({
+        id: userToActivate,
+        setIsSubmitting,
+        showSuccess,
+        showError,
+        setSuccess,
+      });
+
+      // Update data state on success
+      setData((prevData) =>
+        prevData.map((user) =>
+          user._id === userToActivate
+            ? { ...user, userStatus: "Active" }
+            : user
+        )
+      );
+    } catch (error) {
+      console.error("Error activating user:", error);
+    } finally {
+      setIsSubmitting(false);
+      setActionType("");
+      setShowActivateModal(false);
+      setUserToActivate(null);
+      setSuccess(false);
+    }
+  };
+
+  // Execute suspend user with proper toast integration
+  const executeSuspendUser = async (days: number) => {
     if (!userToSuspend) return;
 
     setIsSubmitting(true);
+    setActionType("suspend");
     try {
-      await handleSuspendUser(userToSuspend);
+      await handleSuspendUser({
+        id: userToSuspend,
+        setIsSubmitting,
+        showSuccess,
+        showError,
+        setSuccess,
+        days,
+      });
+
+      // Update data state on success
       setData((prevData) =>
         prevData.map((user) =>
           user._id === userToSuspend
@@ -120,55 +169,46 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
       );
     } catch (error) {
       console.error("Error suspending user:", error);
-      alert("Failed to suspend user. Please try again later.");
     } finally {
       setIsSubmitting(false);
+      setActionType("");
       setShowSuspendModal(false);
       setUserToSuspend(null);
+      setSuccess(false);
     }
   };
 
-  // Execute ban user
+  // Execute ban user with proper toast integration
   const executeBanUser = async () => {
     if (!userToBan) return;
 
     setIsSubmitting(true);
+    setActionType("ban");
     try {
-      await handleBanUser(userToBan);
+      await handleBanUser({
+        id: userToBan,
+        setIsSubmitting,
+        showSuccess,
+        showError,
+        setSuccess,
+      });
+
+      // Update data state on success
       setData((prevData) =>
         prevData.map((user) =>
-          user._id === userToSuspend ? { ...user, userStatus: "Banned" } : user
+          user._id === userToBan
+            ? { ...user, userStatus: "Banned" }
+            : user
         )
       );
     } catch (error) {
       console.error("Error banning user:", error);
-      alert("Failed to ban user. Please try again later.");
     } finally {
       setIsSubmitting(false);
+      setActionType("");
       setShowBanModal(false);
       setUserToBan(null);
-    }
-  };
-
-  // Execute activate user
-  const executeActivateUser = async () => {
-    if (!userToActivate) return;
-
-    setIsSubmitting(true);
-    try {
-      await handleActivateUser(userToActivate);
-      setData((prevData) =>
-        prevData.map((user) =>
-          user._id === userToActivate ? { ...user, userStatus: "Active" } : user
-        )
-      );
-    } catch (error) {
-      console.error("Error activating user:", error);
-      alert("Failed to activate user. Please try again later.");
-    } finally {
-      setIsSubmitting(false);
-      setShowActivateModal(false);
-      setUserToActivate(null);
+      setSuccess(false);
     }
   };
 
@@ -324,7 +364,22 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
         />
       )}
 
-      {/* Activate User Confirmation Modal */}
+      {/* Updated Modals */}
+      <SuspendUserModal
+        isOpen={showSuspendModal}
+        onClose={() => setShowSuspendModal(false)}
+        userName={
+          // Find user name based on userToSuspend ID
+          data.find((user) => user._id === userToSuspend)?.name
+            ? data.find((user) => user._id === userToSuspend)?.name?.firstName +
+              " " +
+              data.find((user) => user._id === userToSuspend)?.name?.lastName
+            : "N/A"
+        }
+        onConfirm={(days) => executeSuspendUser(days)}
+        isLoading={isSubmitting}
+      />
+
       <ConfirmModal
         isOpen={showActivateModal}
         onClose={() => !isSubmitting && setShowActivateModal(false)}
@@ -338,21 +393,6 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
         style="blue"
       />
 
-      {/* Suspend User Confirmation Modal */}
-      <ConfirmModal
-        isOpen={showSuspendModal}
-        onClose={() => !isSubmitting && setShowSuspendModal(false)}
-        onConfirm={executeSuspendUser}
-        title="Suspend User"
-        message="Are you sure you want to suspend this user? They will lose access to their account temporarily."
-        warningText="This action can be reversed later."
-        cancelText="Cancel"
-        confirmText="Suspend User"
-        isLoading={isSubmitting}
-        style="red"
-      />
-
-      {/* Ban User Confirmation Modal */}
       <ConfirmModal
         isOpen={showBanModal}
         onClose={() => !isSubmitting && setShowBanModal(false)}

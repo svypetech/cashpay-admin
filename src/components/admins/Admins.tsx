@@ -15,6 +15,7 @@ import Error from "../ui/Error";
 import Tabs from "../ui/Tabs";
 import { get } from "http";
 import Search from "../ui/Search";
+import { useToast } from "@/src/lib/ToastProvider";
 
 const headings = ["ID", "Name", "E-mail", "Joined date", "Role", "Actions"];
 // Sort options
@@ -36,6 +37,7 @@ const getStatusFromTab = (tab: string) => {
 };
 
 export default function Admins() {
+  const { showSuccess, showError } = useToast();
   const [currentPage, setCurrentPage] = useState(1);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -86,12 +88,12 @@ export default function Admins() {
       );
       console.log("Response:", res.data);
       if (res.data.success) {
-        alert("Admin added successfully");
+        showSuccess("Admin added successfully");
       } else {
-        alert("Failed to add admin");
+        showError("Failed to add admin");
       }
     } catch (error) {
-      alert("Failed to add admin");
+      showError("Failed to add admin");
       console.error("Error adding admin:", error);
     } finally {
       setIsLoading(false);

@@ -5,12 +5,14 @@ import Image from "next/image";
 import ColourfulBlock from "../ui/ColourfulBlock";
 import MerchantInfoSidebar from "./MerchantInfoSidebar";
 import ConfirmModal from "../ui/ConfirmModal";
+import SuspendUserModal from "../ui/SuspendPopup";
 import Merchant from "@/src/Types/Merchant";
 import handleSuspendUser from "@/src/hooks/users/suspendUser";
 import handleBanUser from "@/src/hooks/users/banUser";
 import handleActivateUser from "@/src/hooks/users/activateUser";
 import { formatNumberToTwoDecimals } from "@/src/lib/functions";
 import ExpandableId from "../ui/ExpandableId";
+import { useToast } from "@/src/lib/ToastProvider";
 
 interface MerchantsTableProps {
   headings: string[];
@@ -25,6 +27,8 @@ export default function MerchantsTable({
   setMerchants,
   onViewUser,
 }: MerchantsTableProps) {
+  const { showSuccess, showError } = useToast();
+  const [success, setSuccess] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
   const [showSidebar, setShowSidebar] = useState(false);
   const [selectedMerchant, setSelectedMerchant] = useState<Merchant | null>(null);
@@ -41,10 +45,10 @@ export default function MerchantsTable({
   const [userToBan, setUserToBan] = useState<string | null>(null);
   const [userToActivate, setUserToActivate] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [actionType, setActionType] = useState("");
 
   // Track merchant data changes and update local statuses
   useEffect(() => {
-    console.log("MerchantTable data changed:", merchants);
     const statusMap: {[key: string]: string} = {};
     merchants.forEach(merchant => {
       statusMap[merchant._id] = merchant.status || merchant.status || "Active";
@@ -102,19 +106,27 @@ export default function MerchantsTable({
     setActiveDropdown(null);
   };
 
-  // Execute suspend user
-  const executeSuspendUser = async () => {
+  // Execute suspend user with proper toast integration
+  const executeSuspendUser = async (days: number) => {
     if (!userToSuspend) return;
     
     setIsSubmitting(true);
+    setActionType("suspend");
     try {
-      await handleSuspendUser(userToSuspend);
+      await handleSuspendUser({
+        id: userToSuspend,
+        setIsSubmitting,
+        showSuccess,
+        showError,
+        setSuccess,
+        days
+      });
       
       // Update both merchants data and local status
       if (setMerchants) {
         setMerchants(prevData => 
           prevData.map(merchant => 
-            merchant._id === userToSuspend ? { ...merchant, userStatus: "Suspended" } : merchant
+            merchant._id === userToSuspend ? { ...merchant, status: "Suspended" } : merchant
           )
         );
       }
@@ -127,27 +139,35 @@ export default function MerchantsTable({
       
     } catch (error) {
       console.error("Error suspending merchant:", error);
-      alert("Failed to suspend merchant. Please try again later.");
     } finally {
       setIsSubmitting(false);
+      setActionType("");
       setShowSuspendModal(false);
       setUserToSuspend(null);
+      setSuccess(false);
     }
   };
 
-  // Execute ban user
+  // Execute ban user with proper toast integration
   const executeBanUser = async () => {
     if (!userToBan) return;
     
     setIsSubmitting(true);
+    setActionType("ban");
     try {
-      await handleBanUser(userToBan);
+      await handleBanUser({
+        id: userToBan,
+        setIsSubmitting,
+        showSuccess,
+        showError,
+        setSuccess,
+      });
       
       // Update both merchants data and local status
       if (setMerchants) {
         setMerchants(prevData => 
           prevData.map(merchant => 
-            merchant._id === userToBan ? { ...merchant, userStatus: "Banned" } : merchant
+            merchant._id === userToBan ? { ...merchant, status: "Banned" } : merchant
           )
         );
       }
@@ -160,27 +180,35 @@ export default function MerchantsTable({
       
     } catch (error) {
       console.error("Error banning merchant:", error);
-      alert("Failed to ban merchant. Please try again later.");
     } finally {
       setIsSubmitting(false);
+      setActionType("");
       setShowBanModal(false);
       setUserToBan(null);
+      setSuccess(false);
     }
   };
 
-  // Execute activate user
+  // Execute activate user with proper toast integration
   const executeActivateUser = async () => {
     if (!userToActivate) return;
     
     setIsSubmitting(true);
+    setActionType("activate");
     try {
-      await handleActivateUser(userToActivate);
+      await handleActivateUser({
+        id: userToActivate,
+        setIsSubmitting,
+        showSuccess,
+        showError,
+        setSuccess,
+      });
       
       // Update both merchants data and local status
       if (setMerchants) {
         setMerchants(prevData =>
           prevData.map(merchant =>
-            merchant._id === userToActivate ? { ...merchant, userStatus: "Active" } : merchant
+            merchant._id === userToActivate ? { ...merchant, status: "Active" } : merchant
           )
         );
       }
@@ -193,11 +221,12 @@ export default function MerchantsTable({
       
     } catch (error) {
       console.error("Error activating merchant:", error);
-      alert("Failed to activate merchant. Please try again later.");
     } finally {
       setIsSubmitting(false);
+      setActionType("");
       setShowActivateModal(false);
       setUserToActivate(null);
+      setSuccess(false);
     }
   };
 
@@ -369,18 +398,18 @@ export default function MerchantsTable({
         style="blue"
       />
 
-      {/* Suspend Merchant Confirmation Modal */}
-      <ConfirmModal
+      {/* Replace ConfirmModal with SuspendUserModal for suspend actions */}
+      <SuspendUserModal
         isOpen={showSuspendModal}
-        onClose={() => !isSubmitting && setShowSuspendModal(false)}
-        onConfirm={executeSuspendUser}
-        title="Suspend Merchant"
-        message="Are you sure you want to suspend this merchant? They will lose access to their account temporarily."
-        warningText="This action can be reversed later."
-        cancelText="Cancel"
-        confirmText="Suspend Merchant"
+        onClose={() => setShowSuspendModal(false)}
+        userName={
+          merchants.find(merchant => merchant._id === userToSuspend)?.name
+            ? merchants.find(merchant => merchant._id === userToSuspend)?.name?.firstName + " " +
+              merchants.find(merchant => merchant._id === userToSuspend)?.name?.lastName
+            : "N/A"
+        }
+        onConfirm={(days) => executeSuspendUser(days)}
         isLoading={isSubmitting}
-        style="red"
       />
 
       {/* Ban Merchant Confirmation Modal */}

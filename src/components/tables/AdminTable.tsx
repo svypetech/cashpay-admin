@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import AdminSidebar from "@/src/components/admins/AdminSidebar";
 import ConfirmModal from "../ui/ConfirmModal";
+import SuspendUserModal from "../ui/SuspendPopup";
 import { Admin } from "@/src/Types/Admin";
 import { formatJoiningDate } from "@/src/lib/functions";
 import {
@@ -14,6 +15,7 @@ import {
   handleSuspendAdmin,
 } from "@/src/hooks/admins/AdminActions";
 import ExpandableId from "../ui/ExpandableId";
+import { useToast } from "@/src/lib/ToastProvider";
 
 interface Props {
   headings: string[];
@@ -22,6 +24,8 @@ interface Props {
 }
 
 const AdminTable: React.FC<Props> = ({ data, headings, setData }) => {
+  const { showSuccess, showError } = useToast();
+  const [success, setSuccess] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
   const [showAdminSidebar, setShowAdminSidebar] = useState(false);
   const [selectedAdmin, setSelectedAdmin] = useState<Admin | null>(null);
@@ -38,10 +42,10 @@ const AdminTable: React.FC<Props> = ({ data, headings, setData }) => {
   const [showActivateModal, setShowActivateModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [actionType, setActionType] = useState("");
 
   // Track data changes and update local admin statuses
   useEffect(() => {
-    console.log("AdminTable data changed:", data);
     const statusMap: { [key: string]: string } = {};
     data.forEach((admin) => {
       statusMap[admin._id] = admin.userStatus || "Active";
@@ -106,118 +110,160 @@ const AdminTable: React.FC<Props> = ({ data, headings, setData }) => {
   };
 
   // Execute suspend admin
-  const executeSuspendAdmin = async (id: string) => {
+  const executeSuspendAdmin = async (days: number = 7) => {
+    if (!selectedAdmin?._id) return;
+
     setIsSubmitting(true);
+    setActionType("suspend");
     try {
-      await handleSuspendAdmin(id);
-      alert("Admin suspended successfully.");
+      await handleSuspendAdmin({
+        id: selectedAdmin._id,
+        setIsSubmitting,
+        showSuccess,
+        showError,
+        setSuccess,
+        days,
+      });
 
       // Update both data and local status immediately
       setData((prevAdmins) =>
         prevAdmins.map((admin) =>
-          admin._id === id ? { ...admin, userStatus: "Suspended" } : admin
+          admin._id === selectedAdmin._id
+            ? { ...admin, userStatus: "Suspended" }
+            : admin
         )
       );
 
       // Update local status for immediate UI response
       setAdminStatuses((prev) => ({
         ...prev,
-        [id]: "Suspended",
+        [selectedAdmin._id]: "Suspended",
       }));
     } catch (error) {
       console.error("Error suspending admin:", error);
-      alert("Failed to suspend admin. Please try again later.");
     } finally {
       setIsSubmitting(false);
+      setActionType("");
       setShowSuspendModal(false);
+      setSuccess(false);
     }
   };
 
   // Execute ban admin
-  const executeBanAdmin = async (id: string) => {
+  const executeBanAdmin = async () => {
+    if (!selectedAdmin?._id) return;
+
     setIsSubmitting(true);
+    setActionType("ban");
     try {
-      await handleBanAdmin(id);
-      alert("Admin banned successfully.");
+      await handleBanAdmin({
+        id: selectedAdmin._id,
+        setIsSubmitting,
+        showSuccess,
+        showError,
+        setSuccess,
+      });
 
       // Update both data and local status immediately
       setData((prevAdmins) =>
         prevAdmins.map((admin) =>
-          admin._id === id ? { ...admin, userStatus: "Banned" } : admin
+          admin._id === selectedAdmin._id
+            ? { ...admin, userStatus: "Banned" }
+            : admin
         )
       );
 
       // Update local status for immediate UI response
       setAdminStatuses((prev) => ({
         ...prev,
-        [id]: "Banned",
+        [selectedAdmin._id]: "Banned",
       }));
     } catch (error) {
       console.error("Error banning admin:", error);
-      alert("Failed to ban admin. Please try again later.");
     } finally {
       setIsSubmitting(false);
+      setActionType("");
       setShowBanModal(false);
+      setSuccess(false);
     }
   };
 
   // Execute activate admin
-  const executeActivateAdmin = async (id: string) => {
+  const executeActivateAdmin = async () => {
+    if (!selectedAdmin?._id) return;
+
     setIsSubmitting(true);
+    setActionType("activate");
     try {
-      await handleActivateAdmin(id);
-      alert("Admin activated successfully.");
+      await handleActivateAdmin({
+        id: selectedAdmin._id,
+        setIsSubmitting,
+        showSuccess,
+        showError,
+        setSuccess,
+      });
 
       // Update both data and local status immediately
       setData((prevAdmins) =>
         prevAdmins.map((admin) =>
-          admin._id === id ? { ...admin, userStatus: "Active" } : admin
+          admin._id === selectedAdmin._id
+            ? { ...admin, userStatus: "Active" }
+            : admin
         )
       );
 
       // Update local status for immediate UI response
       setAdminStatuses((prev) => ({
         ...prev,
-        [id]: "Active",
+        [selectedAdmin._id]: "Active",
       }));
     } catch (error) {
       console.error("Error activating admin:", error);
-      alert("Failed to activate admin. Please try again later.");
     } finally {
       setIsSubmitting(false);
+      setActionType("");
       setShowActivateModal(false);
+      setSuccess(false);
     }
   };
 
   // Execute delete admin
-  const executeDeleteAdmin = async (id: string) => {
-    console.log("ADMIN ID FOR DELETE: ", id);
+  const executeDeleteAdmin = async () => {
+    if (!selectedAdmin?._id) return;
+
     setIsSubmitting(true);
+    setActionType("delete");
     try {
-      await handleDeleteAdmin(id);
-      alert("Admin deleted successfully.");
+      await handleDeleteAdmin({
+        id: selectedAdmin._id,
+        setIsSubmitting,
+        showSuccess,
+        showError,
+        setSuccess,
+      });
 
       // Remove admin from local data array
-      setData((prevAdmins) => prevAdmins.filter((admin) => admin._id !== id));
+      setData((prevAdmins) => prevAdmins.filter((admin) => admin._id !== selectedAdmin._id));
 
       // Remove admin from local status tracking
       setAdminStatuses((prev) => {
         const newStatuses = { ...prev };
-        delete newStatuses[id];
+        delete newStatuses[selectedAdmin._id];
         return newStatuses;
       });
 
       // Close sidebar if the deleted admin was being viewed
-      if (selectedAdmin && selectedAdmin._id === id) {
+      if (showAdminSidebar && selectedAdmin) {
         setShowAdminSidebar(false);
-        setSelectedAdmin(null);
       }
     } catch (error) {
       console.error("Error deleting admin:", error);
-      alert("Failed to delete admin. Please try again later.");
     } finally {
       setIsSubmitting(false);
+      setActionType("");
       setShowDeleteModal(false);
+      setSelectedAdmin(null);
+      setSuccess(false);
     }
   };
 
@@ -370,11 +416,20 @@ const AdminTable: React.FC<Props> = ({ data, headings, setData }) => {
         />
       )}
 
+      {/* Replace ConfirmModal with SuspendUserModal for suspend actions */}
+      <SuspendUserModal
+        isOpen={showSuspendModal}
+        onClose={() => setShowSuspendModal(false)}
+        // userName={selectedAdmin?.name || "N/A"}
+        onConfirm={(days) => executeSuspendAdmin(days)}
+        isLoading={isSubmitting}
+      />
+
       {/* Activate Admin Confirmation Modal */}
       <ConfirmModal
         isOpen={showActivateModal}
         onClose={() => !isSubmitting && setShowActivateModal(false)}
-        onConfirm={() => executeActivateAdmin(selectedAdmin?._id || "")}
+        onConfirm={executeActivateAdmin}
         title="Activate Admin"
         message="Are you sure you want to activate this admin? They will regain access to their admin account."
         warningText="This action will restore the admin's account access."
@@ -384,25 +439,11 @@ const AdminTable: React.FC<Props> = ({ data, headings, setData }) => {
         style="blue"
       />
 
-      {/* Suspend Admin Confirmation Modal */}
-      <ConfirmModal
-        isOpen={showSuspendModal}
-        onClose={() => !isSubmitting && setShowSuspendModal(false)}
-        onConfirm={() => executeSuspendAdmin(selectedAdmin?._id || "")}
-        title="Suspend Admin"
-        message="Are you sure you want to suspend this admin? They will lose access to their admin account temporarily."
-        warningText="This action can be reversed later."
-        cancelText="Cancel"
-        confirmText="Suspend Admin"
-        isLoading={isSubmitting}
-        style="red"
-      />
-
       {/* Ban Admin Confirmation Modal */}
       <ConfirmModal
         isOpen={showBanModal}
         onClose={() => !isSubmitting && setShowBanModal(false)}
-        onConfirm={() => executeBanAdmin(selectedAdmin?._id || "")}
+        onConfirm={executeBanAdmin}
         title="Ban Admin"
         message="Are you sure you want to ban this admin? They will lose access to their admin account permanently."
         warningText="This action is permanent and cannot be undone."
@@ -416,7 +457,7 @@ const AdminTable: React.FC<Props> = ({ data, headings, setData }) => {
       <ConfirmModal
         isOpen={showDeleteModal}
         onClose={() => !isSubmitting && setShowDeleteModal(false)}
-        onConfirm={() => executeDeleteAdmin(selectedAdmin?._id || "")}
+        onConfirm={executeDeleteAdmin}
         title="Delete Admin"
         message={`Are you sure you want to delete this admin. This action will permanently remove the admin from the system.`}
         warningText="This action is permanent and cannot be undone. All admin data will be lost."

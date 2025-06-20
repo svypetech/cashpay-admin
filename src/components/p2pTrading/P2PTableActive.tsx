@@ -9,6 +9,7 @@ import axios from "axios";
 import ConfirmModal from "../ui/ConfirmModal";
 import ExpandableId from "../ui/ExpandableId";
 import Trade from "@/src/Types/Trades";
+import { useToast } from "@/src/lib/ToastProvider";
 
 interface Props {
   headings: string[];
@@ -17,6 +18,7 @@ interface Props {
 }
 
 const P2PTableActive: React.FC<Props> = ({ data, headings, setData }) => {
+  const { showSuccess, showError } = useToast();
   const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
   const [showPopup, setShowPopup] = useState(false);
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
@@ -63,7 +65,11 @@ const P2PTableActive: React.FC<Props> = ({ data, headings, setData }) => {
           },
         }
       );
-      alert("Dispute resolved successfully: " + JSON.stringify(response.data));
+      if (response.data.success === true) {
+        showSuccess("Trade canceled successfully");
+      } else {
+        showError("Failed to cancel trade");
+      }
       // update the local state to canceled
       setData((prevTrades) =>
         prevTrades.map((trade) =>
@@ -73,7 +79,8 @@ const P2PTableActive: React.FC<Props> = ({ data, headings, setData }) => {
         )
       );
     } catch (error: any) {
-      alert("Could not resolve due to insufficient balance");
+      console.error("Error canceling trade:", error);
+      showError("Failed to cancel trade");
     } finally {
       setShowResolvePopup(false);
       setIsSubmitting(false);

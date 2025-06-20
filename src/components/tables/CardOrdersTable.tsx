@@ -159,7 +159,6 @@ const CardOrdersTable: React.FC<Props> = ({ data, headings }) => {
                       );
                     })()}
                   </td>
-                  // And replace the cardStatus cell with:
                   <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px]">
                     {(() => {
                       const statusConfig = getCardStatusConfig(order.cardStatus);

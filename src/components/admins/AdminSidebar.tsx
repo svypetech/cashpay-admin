@@ -7,7 +7,9 @@ import { formatJoiningDate } from "@/src/lib/functions"
 import axios from "axios"
 import { Admin } from "@/src/Types/Admin"
 import ConfirmModal from "../ui/ConfirmModal"
+import SuspendUserModal from "../ui/SuspendPopup"
 import { handleSuspendAdmin, handleBanAdmin, handleActivateAdmin } from "@/src/hooks/admins/AdminActions"
+import { useToast } from "@/src/lib/ToastProvider"
 
 interface AdminProfileSidebarProps {
     showSidebar: boolean
@@ -32,6 +34,8 @@ export default function AdminSidebar({
     setData,
     onStatusUpdate
 }: AdminProfileSidebarProps) {
+    const { showSuccess, showError } = useToast();
+    const [success, setSuccess] = useState(false);
     const [isEditing, setIsEditing] = useState(false)
     const [showDropdown, setShowDropdown] = useState(false)
     const [selectedRole, setSelectedRole] = useState(admin.role)
@@ -86,19 +90,24 @@ export default function AdminSidebar({
     const handleAssignRole = async () => {
         setIsEditing(false)
         setShowDropdown(false)
-        const res = await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/updateRole`, {
-            role: selectedRole,
-            id: admin._id,
-        }, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
+        try {
+            const res = await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/updateRole`, {
+                role: selectedRole,
+                id: admin._id,
+            }, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                }
+            })
+            console.log("Assigned role:", selectedRole)
+            if (res.data.success) {
+                showSuccess("Success", "Admin role updated successfully");
+            } else {
+                showError("Update Failed", "Failed to update admin role");
             }
-        })
-        console.log("Assigned role:", selectedRole)
-        if (res.data.success) {
-            alert("Role updated successfully");
-        } else {
-            alert("Failed to update role");
+        } catch (error) {
+            console.error("Error updating role:", error);
+            showError("Error", "An error occurred while updating the admin role");
         }
     }
 
@@ -118,12 +127,18 @@ export default function AdminSidebar({
     }
 
     // Execute suspend admin
-    const executeSuspendAdmin = async () => {
+    const executeSuspendAdmin = async (days: number = 7) => {
         setIsSubmitting(true)
         setActionType("suspend")
         try {
-            await handleSuspendAdmin(admin._id)
-            alert("Admin suspended successfully.")
+            await handleSuspendAdmin({
+                id: admin._id,
+                setIsSubmitting,
+                showSuccess,
+                showError,
+                setSuccess,
+                days
+            });
             
             // Update both local state and parent state
             setLocalCurrentStatus("Suspended")
@@ -138,11 +153,11 @@ export default function AdminSidebar({
             onStatusUpdate(admin._id, "Suspended")
         } catch (error) {
             console.error("Error suspending admin:", error)
-            alert("Failed to suspend admin. Please try again later.")
         } finally {
             setIsSubmitting(false)
             setActionType("")
             setShowSuspendModal(false)
+            setSuccess(false)
         }
     }
 
@@ -151,8 +166,13 @@ export default function AdminSidebar({
         setIsSubmitting(true)
         setActionType("ban")
         try {
-            await handleBanAdmin(admin._id)
-            alert("Admin banned successfully.")
+            await handleBanAdmin({
+                id: admin._id,
+                setIsSubmitting,
+                showSuccess,
+                showError,
+                setSuccess
+            });
             
             // Update both local state and parent state
             setLocalCurrentStatus("Banned")
@@ -167,11 +187,11 @@ export default function AdminSidebar({
             onStatusUpdate(admin._id, "Banned")
         } catch (error) {
             console.error("Error banning admin:", error)
-            alert("Failed to ban admin. Please try again later.")
         } finally {
             setIsSubmitting(false)
             setActionType("")
             setShowBanModal(false)
+            setSuccess(false)
         }
     }
 
@@ -180,8 +200,13 @@ export default function AdminSidebar({
         setIsSubmitting(true)
         setActionType("activate")
         try {
-            await handleActivateAdmin(admin._id)
-            alert("Admin activated successfully.")
+            await handleActivateAdmin({
+                id: admin._id,
+                setIsSubmitting,
+                showSuccess,
+                showError,
+                setSuccess
+            });
             
             // Update both local state and parent state
             setLocalCurrentStatus("Active")
@@ -196,11 +221,11 @@ export default function AdminSidebar({
             onStatusUpdate(admin._id, "Active")
         } catch (error) {
             console.error("Error activating admin:", error)
-            alert("Failed to activate admin. Please try again later.")
         } finally {
             setIsSubmitting(false)
             setActionType("")
             setShowActivateModal(false)
+            setSuccess(false)
         }
     }
 
@@ -354,17 +379,13 @@ export default function AdminSidebar({
                 style="blue"
             />
 
-            <ConfirmModal
+            {/* Replace ConfirmModal with SuspendUserModal for suspend actions */}
+            <SuspendUserModal
                 isOpen={showSuspendModal}
-                onClose={() => !isSubmitting && setShowSuspendModal(false)}
-                onConfirm={executeSuspendAdmin}
-                title="Suspend Admin"
-                message="Are you sure you want to suspend this admin? They will lose access to their admin account temporarily."
-                warningText="This action can be reversed later."
-                cancelText="Cancel"
-                confirmText="Suspend Admin"
+                onClose={() => setShowSuspendModal(false)}
+                userName={admin?.name || "N/A"}
+                onConfirm={(days) => executeSuspendAdmin(days)}
                 isLoading={isSubmitting}
-                style="red"
             />
 
             <ConfirmModal

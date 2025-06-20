@@ -13,6 +13,8 @@ import ErrorPopup from "../ui/ErrorPopup";
 import handleBanUser from "@/src/hooks/users/banUser";
 import handleSuspendUser from "@/src/hooks/users/suspendUser";
 import handleActivateUser from "@/src/hooks/users/activateUser";
+import { useToast } from "@/src/lib/ToastProvider";
+import SuspendUserModal from "../ui/SuspendPopup";
 
 interface UserProfileSidebarProps {
     showSidebar: boolean;
@@ -27,10 +29,11 @@ export default function UserProfileSidebar({
     user,
     setData,
 }: UserProfileSidebarProps) {
-    // Renamed variables to match UserInfoSidebar
+    const { showSuccess, showError } = useToast();
     const [isVisible, setIsVisible] = useState(false);
     const [shouldSlideIn, setShouldSlideIn] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [success, setSuccess] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [actionType, setActionType] = useState("");
     const [verificationStarted, setVerificationStarted] = useState(false);
     const [steps, setSteps] = useState([
@@ -89,7 +92,7 @@ export default function UserProfileSidebar({
                             : prevUser
                     )
                 );
-                alert("User verification status updated successfully.");
+                showSuccess("Success", "User verification status updated successfully");
                 onClose();
                 setVerificationStarted(false);
             } else {
@@ -97,7 +100,7 @@ export default function UserProfileSidebar({
                 throw new Error(response.data.error || "Failed to update verification status");
             }
         } catch (error: any) {
-            console.error("Error updating user verification status:", error);
+            // console.error("Error updating user verification status:", error);
             
             // Extract error message from different possible sources
             let errorMsg = "An unexpected error occurred while updating verification status.";
@@ -138,9 +141,13 @@ export default function UserProfileSidebar({
         setIsSubmitting(true);
         setActionType("activate");
         try {
-            await handleActivateUser(user._id);
-            alert("User activated successfully.");
-            
+            await handleActivateUser({
+                id: user._id,
+                setIsSubmitting,
+                showSuccess,
+                showError,
+            });
+
             // Update both local state and parent state immediately
             setCurrentUserStatus("Active");
             setData((prevUsers) =>
@@ -152,22 +159,28 @@ export default function UserProfileSidebar({
             );
         } catch (error) {
             console.error("Error activating user:", error);
-            alert("Failed to activate user. Please try again later.");
         } finally {
             setIsSubmitting(false);
             setActionType("");
             setShowActivateModal(false);
+            setSuccess(false);
         }
     };
 
     // Execute suspend user
-    const executeSuspendUser = async () => {
+    const executeSuspendUser = async (days: number) => {
         setIsSubmitting(true);
         setActionType("suspend");
         try {
-            await handleSuspendUser(user._id);
-            alert("User suspended successfully.");
-            
+            await handleSuspendUser({
+                id: user._id,
+                setIsSubmitting,
+                showSuccess,
+                showError,
+                setSuccess,
+                days
+            });
+
             // Update both local state and parent state immediately
             setCurrentUserStatus("Suspended");
             setData((prevUsers) =>
@@ -179,11 +192,11 @@ export default function UserProfileSidebar({
             );
         } catch (error) {
             console.error("Error suspending user:", error);
-            alert("Failed to suspend user. Please try again later.");
         } finally {
             setIsSubmitting(false);
             setActionType("");
             setShowSuspendModal(false);
+            setSuccess(false);
         }
     };
 
@@ -192,9 +205,14 @@ export default function UserProfileSidebar({
         setIsSubmitting(true);
         setActionType("ban");
         try {
-            await handleBanUser(user._id);
-            alert("User banned successfully.");
-            
+            await handleBanUser({
+                id: user._id,
+                setIsSubmitting,
+                showSuccess,
+                showError,
+                setSuccess,
+            });
+
             // Update both local state and parent state immediately
             setCurrentUserStatus("Banned");
             setData((prevUsers) =>
@@ -206,11 +224,11 @@ export default function UserProfileSidebar({
             );
         } catch (error) {
             console.error("Error banning user:", error);
-            alert("Failed to ban user. Please try again later.");
         } finally {
             setIsSubmitting(false);
             setActionType("");
             setShowBanModal(false);
+            setSuccess(false);
         }
     };
 
@@ -425,30 +443,36 @@ export default function UserProfileSidebar({
 
                                 {/* Action Buttons - Use currentUserStatus for immediate UI updates */}
                                 {currentUserStatus === "Active" ? (
-                                    <div className="z-10 flex justify-between mt-auto w-full gap-4 px-5">
-                                        <button 
+                                    <div className="z-5 flex justify-between mt-auto w-full gap-4 px-5">
+                                        <button
                                             className="rounded-md border px-6 py-2 border-[#DF1D1D] text-[#DF1D1D] hover:bg-red-50 cursor-pointer font-bold disabled:opacity-50"
                                             onClick={handleSuspendConfirmation}
                                             disabled={isSubmitting}
                                         >
-                                            {isSubmitting && actionType === "suspend" ? "Suspending..." : "Suspend"}
+                                            {isSubmitting && actionType === "suspend"
+                                                ? "Suspending..."
+                                                : "Suspend"}
                                         </button>
-                                        <button 
+                                        <button
                                             className="rounded-md px-6 py-2 bg-[#DF1D1D] text-white hover:bg-red-700 cursor-pointer font-bold disabled:opacity-50"
                                             onClick={handleBanConfirmation}
                                             disabled={isSubmitting}
                                         >
-                                            {isSubmitting && actionType === "ban" ? "Banning..." : "Ban"}
+                                            {isSubmitting && actionType === "ban"
+                                                ? "Banning..."
+                                                : "Ban"}
                                         </button>
                                     </div>
                                 ) : (
                                     <div className="z-5 w-full px-5">
-                                        <button 
+                                        <button
                                             className="w-full rounded-md px-6 py-2 bg-primary text-white hover:scale-105 cursor-pointer font-bold disabled:opacity-50"
                                             onClick={handleActivateConfirmation}
                                             disabled={isSubmitting}
                                         >
-                                            {isSubmitting && actionType === "activate" ? "Activating..." : "Activate User"}
+                                            {isSubmitting && actionType === "activate"
+                                                ? "Activating..."
+                                                : "Activate User"}
                                         </button>
                                     </div>
                                 )}
@@ -468,6 +492,16 @@ export default function UserProfileSidebar({
             />
 
             {/* Confirmation Modals */}
+            <SuspendUserModal
+                isOpen={showSuspendModal}
+                onClose={() => setShowSuspendModal(false)}
+                userName={
+                    user.name ? user.name.firstName + " " + user.name.lastName : "N/A"
+                }
+                onConfirm={(days: number) => {executeSuspendUser(days)}}
+                isLoading={isSubmitting}
+            />
+
             <ConfirmModal
                 isOpen={showActivateModal}
                 onClose={() => !isSubmitting && setShowActivateModal(false)}
@@ -479,19 +513,6 @@ export default function UserProfileSidebar({
                 confirmText="Activate User"
                 isLoading={isSubmitting}
                 style="blue"
-            />
-
-            <ConfirmModal
-                isOpen={showSuspendModal}
-                onClose={() => !isSubmitting && setShowSuspendModal(false)}
-                onConfirm={executeSuspendUser}
-                title="Suspend User"
-                message="Are you sure you want to suspend this user? They will lose access to their account temporarily."
-                warningText="This action can be reversed later."
-                cancelText="Cancel"
-                confirmText="Suspend User"
-                isLoading={isSubmitting}
-                style="red"
             />
 
             <ConfirmModal

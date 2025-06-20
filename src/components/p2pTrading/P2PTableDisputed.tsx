@@ -13,6 +13,7 @@ import axios from "axios";
 import DisputeSkeletonCard from "../skeletons/DisputeSkeletonCard";
 import Trade from "@/src/Types/Trades";
 import { shortenAddress } from "@/src/lib/functions";
+import { useToast } from "@/src/lib/ToastProvider";
 
 interface Props {
   headings: string[];
@@ -35,6 +36,7 @@ interface SellerBuyer {
 }
 
 const P2PTableDisputed: React.FC<Props> = ({ data, headings, setData }) => {
+  const { showSuccess, showError } = useToast();
   const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
   const [showResolvePopup, setShowResolvePopup] = useState(false);
   const [favor, setFavor] = useState<string>("");
@@ -88,7 +90,8 @@ const P2PTableDisputed: React.FC<Props> = ({ data, headings, setData }) => {
         buyer: response.data.data.buyer,
       });
     } catch (error: any) {
-      alert(JSON.stringify(error.response.data.message));
+      showError("Failed to fetch seller and buyer details: " + error.response.data.message);
+      console.error("Error fetching seller and buyer details:", error);
     } finally {
       setIsFetchingSeller(false);
     }
@@ -129,7 +132,7 @@ const P2PTableDisputed: React.FC<Props> = ({ data, headings, setData }) => {
           },
         }
       );
-      alert("Dispute resolved successfully: " + JSON.stringify(response.data));
+      showSuccess("Dispute resolved successfully!");
       // Update the trade status in the local state
       setData((prevTrades) =>
         prevTrades.map((trade) =>
@@ -139,7 +142,8 @@ const P2PTableDisputed: React.FC<Props> = ({ data, headings, setData }) => {
         )
       );
     } catch (error: any) {
-      alert(error.response.data.message);
+      showError("Failed to resolve dispute");
+      console.error("Error resolving dispute:", error);
     } finally {
       setShowResolvePopup(false);
       setIsSubmitting(false);

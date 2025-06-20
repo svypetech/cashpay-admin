@@ -1,10 +1,25 @@
 import axios from "axios"
 import { Dispatch, SetStateAction } from "react"
 
-export const handleActivateAdmin = async (id: string, setIsSubmitting?: Dispatch<SetStateAction<boolean>>) => {
+interface AdminActionProps {
+    id: string;
+    setIsSubmitting?: Dispatch<SetStateAction<boolean>>;
+    showSuccess?: (title: string, message?: string) => void;
+    showError?: (title: string, message?: string) => void;
+    setSuccess?: Dispatch<SetStateAction<boolean>>;
+    days?: number; // Optional, for future suspension days feature
+}
+
+export const handleActivateAdmin = async ({ 
+    id, 
+    setIsSubmitting, 
+    showSuccess, 
+    showError,
+    setSuccess 
+}: AdminActionProps) => {
     try {
         if (setIsSubmitting) {
-            setIsSubmitting(true)
+            setIsSubmitting(true);
         }
         const response = await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/activateUser`, {
             id: id,
@@ -12,29 +27,36 @@ export const handleActivateAdmin = async (id: string, setIsSubmitting?: Dispatch
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
             }
-        })
+        });
         if (response.data.success) {
-            // Don't show alert here, let the calling component handle it
-            return Promise.resolve()
+            showSuccess && showSuccess("Success", "Admin activated successfully");
+            setSuccess && setSuccess(true);
+            return Promise.resolve();
         } else {
-            throw new Error("Failed to activate admin")
+            showError && showError("Activation Failed", "Failed to activate admin");
+            throw new Error("Failed to activate admin");
         }
     } catch (error) {
-        console.error("Error activating admin:", error)
-        throw error
+        console.error("Error activating admin:", error);
+        showError && showError("Error", "An error occurred while activating the admin");
+        throw error;
     } finally {
         if (setIsSubmitting) {
-            setIsSubmitting(false)
+            setIsSubmitting(false);
         }
     }
 }
 
-
-
-export const handleBanAdmin = async (id: string, setIsSubmitting?: Dispatch<SetStateAction<boolean>>) => {
+export const handleBanAdmin = async ({ 
+    id, 
+    setIsSubmitting, 
+    showSuccess, 
+    showError,
+    setSuccess 
+}: AdminActionProps) => {
     try {
         if (setIsSubmitting) {
-            setIsSubmitting(true)
+            setIsSubmitting(true);
         }
         const response = await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/banUser`, {
             id: id,
@@ -42,77 +64,99 @@ export const handleBanAdmin = async (id: string, setIsSubmitting?: Dispatch<SetS
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
             }
-        })
-        console.log("Response:", response.data)
+        });
+        console.log("Response:", response.data);
         if (response.data.success) {
-            // Don't show alert here, let the calling component handle it
-            return Promise.resolve()
+            showSuccess && showSuccess("Success", "Admin banned successfully");
+            setSuccess && setSuccess(true);
+            return Promise.resolve();
         } else {
-            throw new Error("Failed to ban admin")
+            showError && showError("Ban Failed", "Failed to ban admin");
+            throw new Error("Failed to ban admin");
         }
     } catch (error) {
-        console.error("Error banning admin:", error)
-        throw error
+        console.error("Error banning admin:", error);
+        showError && showError("Error", "An error occurred while banning the admin");
+        throw error;
     } finally {
         if (setIsSubmitting) {
-            setIsSubmitting(false)
+            setIsSubmitting(false);
         }
     }
 }
 
-export const handleSuspendAdmin = async (id: string, setIsSubmitting?: Dispatch<SetStateAction<boolean>>) => {
+export const handleSuspendAdmin = async ({ 
+    id, 
+    setIsSubmitting, 
+    showSuccess, 
+    showError,
+    setSuccess,
+    days 
+}: AdminActionProps) => {
     try {
         if (setIsSubmitting) {
-            setIsSubmitting(true)
+            setIsSubmitting(true);
         }
         const response = await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/suspendUser`, {
             id: id,
+            days: days // Include days if provided
         }, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
             }
-        })
-        console.log("Response:", response.data)
+        });
+        console.log("Response:", response.data);
         if (response.data.success) {
-            // Don't show alert here, let the calling component handle it
-            return Promise.resolve()
+            showSuccess && showSuccess("Success", "Admin suspended successfully");
+            setSuccess && setSuccess(true);
+            return Promise.resolve();
         } else {
-            throw new Error("Failed to suspend admin")
+            showError && showError("Suspend Failed", "Failed to suspend admin");
+            throw new Error("Failed to suspend admin");
         }
     } catch (error) {
-        console.error("Error suspending admin:", error)
-        throw error
+        console.error("Error suspending admin:", error);
+        showError && showError("Error", "An error occurred while suspending the admin");
+        throw error;
     } finally {
         if (setIsSubmitting) {
-            setIsSubmitting(false)
+            setIsSubmitting(false);
         }
     }
 }
 
-
-export const handleDeleteAdmin = async (id: string, setIsSubmitting?: Dispatch<SetStateAction<boolean>>) => {
+export const handleDeleteAdmin = async ({ 
+    id, 
+    setIsSubmitting, 
+    showSuccess, 
+    showError,
+    setSuccess 
+}: AdminActionProps) => {
     try {
         if (setIsSubmitting) {
-            setIsSubmitting(true)
+            setIsSubmitting(true);
         }
         const response = await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/deleteAdmin`, {
             data: { id: id },
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
             }
-        })
+        });
         if (response.data.success) {
-            // Don't show alert here, let the calling component handle it
-            return Promise.resolve()
+            showSuccess && showSuccess("Success", "Admin deleted successfully");
+            setSuccess && setSuccess(true);
+            return Promise.resolve();
         } else {
-            throw new Error("Failed to delete admin")
+            showError && showError("Delete Failed", "Failed to delete admin");
+            throw new Error("Failed to delete admin");
         }
     } catch (error) {
-        console.error("Error deleting admin:", error)
-        throw error
+        console.error("Error deleting admin:", error);
+        showError && showError("Error", "An error occurred while deleting the admin");
+        throw error;
     } finally {
         if (setIsSubmitting) {
-            setIsSubmitting(false)
+            setIsSubmitting(false);
         }
     }
 }

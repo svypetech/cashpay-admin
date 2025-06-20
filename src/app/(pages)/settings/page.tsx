@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import TransferOwnershipDialog from "@/src/components/cards/TransferOwnershipDialog";
+import { useToast } from "@/src/lib/ToastProvider";
 
 export default function SettingsPage() {
   // Form schema with Zod validation
@@ -25,7 +26,11 @@ export default function SettingsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [image, setImage] = useState<string>("/images/blank-profile.webp");
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [errorMessage, setErrorMessage] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Use toast hook
+  const { showSuccess, showError } = useToast();
 
   // Initialize form with react-hook-form and zod resolver
   const {
@@ -56,7 +61,7 @@ export default function SettingsPage() {
         }
       }
     } catch (error) {
-      alert("Error loading user data");
+      setErrorMessage("Error loading user data");
     }
   }, [setValue]);
 
@@ -114,14 +119,15 @@ export default function SettingsPage() {
           }
         } catch (error) {
           console.error("Error uploading profile image:", error);
+          showError("Upload Failed", "Failed to upload profile image");
           // Continue with form submission even if image upload fails
         }
 
         // Set editing to false and reload page after image upload
         setIsEditing(false);
         setImageFile(null);
-        alert("Profile updated successfully");
-        window.location.reload();
+        showSuccess("Success", "Profile updated successfully");
+        setTimeout(() => window.location.reload(), 1500);
         return;
       }
 
@@ -140,13 +146,13 @@ export default function SettingsPage() {
         setUser({ ...user, ...data });
         setIsEditing(false);
         setImageFile(null);
-        alert("Profile updated successfully");
-        window.location.reload(); // Reload the page
+        showSuccess("Success", "Profile updated successfully");
+        setTimeout(() => window.location.reload(), 1500);
       } else {
-        alert("Failed to update profile");
+        showError("Update Failed", "Failed to update profile");
       }
     } catch (error) {
-      alert("An error occurred while updating your profile");
+      showError("Error", "An error occurred while updating your profile");
     } finally {
       setIsSubmitting(false);
     }
@@ -162,7 +168,7 @@ export default function SettingsPage() {
           setImage(user.image || "");
         }
       } catch (error) {
-        alert("Error discarding changes");
+        showError("Error", "Error discarding changes");
       }
     }
     setIsEditing(!isEditing);
@@ -170,26 +176,38 @@ export default function SettingsPage() {
 
   const handleTransferOwnership = async (newOwnerID: string) => {
     setIsSubmitting(true);
-    const response = await axios.put(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/transferOwnership`,
-      { id: newOwnerID },
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
+    try {
+      const response = await axios.put(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/transferOwnership`,
+        { id: newOwnerID },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
-    if (response.data.success) {
-      alert("Ownership transferred successfully");
-    } else {
-      alert("Failed to transfer ownership");
+      if (response.data.success) {
+        showSuccess("Success", "Ownership transferred successfully");
+      } else {
+        showError("Transfer Failed", "Failed to transfer ownership");
+      }
+    } catch (error) {
+      showError("Error", "An error occurred during ownership transfer");
+    } finally {
+      setIsSubmitting(false);
     }
-    setIsSubmitting(false);
   };
 
   return (
     <div className="container mx-auto px-10 md:px-30 py-8 font-[satoshi]">
+      {/* Error Message Display for loading user data */}
+      {errorMessage && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm mb-4">
+          {errorMessage}
+        </div>
+      )}
+
       <div
         className={`flex ${
           isEditing ? "flex-col" : ""
@@ -357,7 +375,6 @@ export default function SettingsPage() {
             <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-gray-600" />
           </Link>
           
-
           <button
             onClick={() => setShowTransferDialog(true)}
             className="w-full cursor-pointer border-b border-gray-200 flex items-center justify-between py-3 px-1 text-left rounded-md group"

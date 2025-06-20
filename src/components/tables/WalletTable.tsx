@@ -11,6 +11,8 @@ import handleBanUser from "@/src/hooks/users/banUser";
 import handleSuspendUser from "@/src/hooks/users/suspendUser";
 import handleActivateUser from "@/src/hooks/users/activateUser";
 import ExpandableId from "../ui/ExpandableId";
+import { useToast } from "@/src/lib/ToastProvider";
+import SuspendUserModal from "../ui/SuspendPopup";
 
 interface Props {
     headings: string[]
@@ -19,70 +21,80 @@ interface Props {
 }
 
 const WalletTable: React.FC<Props> = ({ data, headings, setData }) => {
-    const [activeDropdown, setActiveDropdown] = useState<number | null>(null)
-    const [showSidebar, setShowSidebar] = useState(false)
-    const [selectedWallet, setSelectedWallet] = useState<Wallet | null>(null)
+    const { showSuccess, showError } = useToast();
+    const [success, setSuccess] = useState(false);
+    const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
+    const [showSidebar, setShowSidebar] = useState(false);
+    const [selectedWallet, setSelectedWallet] = useState<Wallet | null>(null);
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
     
     // Confirmation modal states
-    const [showSuspendModal, setShowSuspendModal] = useState(false)
-    const [showBanModal, setShowBanModal] = useState(false)
-    const [showActivateModal, setShowActivateModal] = useState(false)
-    const [userToSuspend, setUserToSuspend] = useState<string | null>(null)
-    const [userToBan, setUserToBan] = useState<string | null>(null)
-    const [userToActivate, setUserToActivate] = useState<string | null>(null)
-    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [showSuspendModal, setShowSuspendModal] = useState(false);
+    const [showBanModal, setShowBanModal] = useState(false);
+    const [showActivateModal, setShowActivateModal] = useState(false);
+    const [userToSuspend, setUserToSuspend] = useState<string | null>(null);
+    const [userToBan, setUserToBan] = useState<string | null>(null);
+    const [userToActivate, setUserToActivate] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [actionType, setActionType] = useState("");
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (activeDropdown !== null) {
-                const target = event.target as HTMLElement
+                const target = event.target as HTMLElement;
                 if (!target.closest(".dropdown-container")) {
-                    setActiveDropdown(null)
+                    setActiveDropdown(null);
                 }
             }
         }
 
-        document.addEventListener("mousedown", handleClickOutside)
+        document.addEventListener("mousedown", handleClickOutside);
         return () => {
-            document.removeEventListener("mousedown", handleClickOutside)
+            document.removeEventListener("mousedown", handleClickOutside);
         }
-    }, [activeDropdown])
+    }, [activeDropdown]);
 
     const toggleDropdown = (index: number) => {
-        setSelectedIndex(index)
-        setActiveDropdown(activeDropdown === index ? null : index)
+        setSelectedIndex(index);
+        setActiveDropdown(activeDropdown === index ? null : index);
     }
 
     // Handle suspend user confirmation
     const handleSuspendConfirmation = (userId: string) => {
-        setUserToSuspend(userId)
-        setShowSuspendModal(true)
-        setActiveDropdown(null)
+        setUserToSuspend(userId);
+        setShowSuspendModal(true);
+        setActiveDropdown(null);
     }
 
     // Handle ban user confirmation
     const handleBanConfirmation = (userId: string) => {
-        setUserToBan(userId)
-        setShowBanModal(true)
-        setActiveDropdown(null)
+        setUserToBan(userId);
+        setShowBanModal(true);
+        setActiveDropdown(null);
     }
 
     // Handle activate user confirmation
     const handleActivateConfirmation = (userId: string) => {
-        setUserToActivate(userId)
-        setShowActivateModal(true)
-        setActiveDropdown(null)
+        setUserToActivate(userId);
+        setShowActivateModal(true);
+        setActiveDropdown(null);
     }
 
-    // Execute suspend user
-    const executeSuspendUser = async () => {
-        if (!userToSuspend) return
+    // Execute suspend user with proper toast integration
+    const executeSuspendUser = async (days: number) => {
+        if (!userToSuspend) return;
         
-        setIsSubmitting(true)
+        setIsSubmitting(true);
+        setActionType("suspend");
         try {
-            await handleSuspendUser(userToSuspend)
-            alert("User suspended successfully.")
+            await handleSuspendUser({
+                id: userToSuspend,
+                setIsSubmitting,
+                showSuccess,
+                showError,
+                setSuccess,
+                days
+            });
             
             // Update local state
             setData((prevWallets) =>
@@ -99,23 +111,30 @@ const WalletTable: React.FC<Props> = ({ data, headings, setData }) => {
                 )
             );
         } catch (error) {
-            console.error("Error suspending user:", error)
-            alert("Failed to suspend user. Please try again later.")
+            console.error("Error suspending user:", error);
         } finally {
-            setIsSubmitting(false)
-            setShowSuspendModal(false)
-            setUserToSuspend(null)
+            setIsSubmitting(false);
+            setActionType("");
+            setShowSuspendModal(false);
+            setUserToSuspend(null);
+            setSuccess(false);
         }
     }
 
-    // Execute ban user
+    // Execute ban user with proper toast integration
     const executeBanUser = async () => {
-        if (!userToBan) return
+        if (!userToBan) return;
         
-        setIsSubmitting(true)
+        setIsSubmitting(true);
+        setActionType("ban");
         try {
-            await handleBanUser(userToBan)            
-            alert("User banned successfully.")
+            await handleBanUser({
+                id: userToBan,
+                setIsSubmitting,
+                showSuccess,
+                showError,
+                setSuccess
+            });    
             
             // Update local state
             setData((prevWallets) =>
@@ -132,22 +151,30 @@ const WalletTable: React.FC<Props> = ({ data, headings, setData }) => {
                 )
             );
         } catch (error) {
-            console.error("Error banning user:", error)
-            alert("Failed to ban user. Please try again later.")
+            console.error("Error banning user:", error);
         } finally {
-            setIsSubmitting(false)
-            setShowBanModal(false)
-            setUserToBan(null)
+            setIsSubmitting(false);
+            setActionType("");
+            setShowBanModal(false);
+            setUserToBan(null);
+            setSuccess(false);
         }
     }
 
-    // Execute activate user
+    // Execute activate user with proper toast integration
     const executeActivateUser = async () => {
-        if (!userToActivate) return
+        if (!userToActivate) return;
         
-        setIsSubmitting(true)
+        setIsSubmitting(true);
+        setActionType("activate");
         try {
-            await handleActivateUser(userToActivate)
+            await handleActivateUser({
+                id: userToActivate,
+                setIsSubmitting,
+                showSuccess,
+                showError,
+                setSuccess
+            });
             
             // Update local state
             setData((prevWallets) =>
@@ -164,12 +191,13 @@ const WalletTable: React.FC<Props> = ({ data, headings, setData }) => {
                 )
             );
         } catch (error) {
-            console.error("Error activating user:", error)
-            alert("Failed to activate user. Please try again later.")
+            console.error("Error activating user:", error);
         } finally {
-            setIsSubmitting(false)
-            setShowActivateModal(false)
-            setUserToActivate(null)
+            setIsSubmitting(false);
+            setActionType("");
+            setShowActivateModal(false);
+            setUserToActivate(null);
+            setSuccess(false);
         }
     }
 
@@ -227,9 +255,9 @@ const WalletTable: React.FC<Props> = ({ data, headings, setData }) => {
                                                     <button
                                                         className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
                                                         onClick={() => {
-                                                            setSelectedWallet(wallet)
-                                                            setShowSidebar(true)
-                                                            setActiveDropdown(null)
+                                                            setSelectedWallet(wallet);
+                                                            setShowSidebar(true);
+                                                            setActiveDropdown(null);
                                                         }}
                                                     >
                                                         View Wallet
@@ -286,18 +314,18 @@ const WalletTable: React.FC<Props> = ({ data, headings, setData }) => {
                 style="blue"
             />
 
-            {/* Suspend User Confirmation Modal */}
-            <ConfirmModal
+            {/* Replace ConfirmModal with SuspendUserModal for suspend actions */}
+            <SuspendUserModal
                 isOpen={showSuspendModal}
-                onClose={() => !isSubmitting && setShowSuspendModal(false)}
-                onConfirm={executeSuspendUser}
-                title="Suspend User"
-                message="Are you sure you want to suspend this user? They will lose access to their account temporarily."
-                warningText="This action can be reversed later."
-                cancelText="Cancel"
-                confirmText="Suspend User"
+                onClose={() => setShowSuspendModal(false)}
+                userName={
+                    data.find(wallet => wallet.data.user_id === userToSuspend)?.data.userName
+                        ? data.find(wallet => wallet.data.user_id === userToSuspend)?.data.userName.firstName + " " +
+                          data.find(wallet => wallet.data.user_id === userToSuspend)?.data.userName.lastName
+                        : "N/A"
+                }
+                onConfirm={(days) => executeSuspendUser(days)}
                 isLoading={isSubmitting}
-                style="red"
             />
 
             {/* Ban User Confirmation Modal */}
