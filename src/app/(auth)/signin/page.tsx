@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation"
 // Define the form schema with Zod
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
+  password: z.string().trim().nonempty({ message: "Password is required" }),
   role: z.string().optional(), // Optional field for role
 })
 
@@ -21,6 +21,7 @@ type FormValues = z.infer<typeof formSchema>
 
 export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("") 
   const router = useRouter()
 
   // Initialize react-hook-form with zod resolver
@@ -39,6 +40,7 @@ export default function SignIn() {
   // Handle form submission
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true)
+    setErrorMessage("") // Clear previous error message
 
     try {
       
@@ -53,10 +55,11 @@ export default function SignIn() {
         router.push("/dashboard")
       }
       if (response.data.success === false) {
-        alert(response.data.error)
+        setErrorMessage("Incorrect username or password")
       }
     } catch (error) {
       console.error("Login failed:", error)
+      setErrorMessage("Incorrect username or password")
     } finally {
       setIsLoading(false)
     }
@@ -72,6 +75,13 @@ export default function SignIn() {
           </h1>
 
           <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
+            {/* Error Message Display */}
+            {errorMessage && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+                {errorMessage}
+              </div>
+            )}
+
             <div>
               <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
                 E-mail
