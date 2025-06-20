@@ -99,7 +99,7 @@ export const handleSuspendAdmin = async ({
         }
         const response = await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/suspendUser`, {
             id: id,
-            days: days // Include days if provided
+            days: days 
         }, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,

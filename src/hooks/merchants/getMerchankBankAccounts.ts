@@ -12,7 +12,7 @@ export default function useFetchAccounts(id: string) {
   useEffect(() => {
     setIsLoading(true)
     const fetchAccounts = async () => {
-      const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/transaction/card/merchantCards?createdBy=${id}`;
+      const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/transaction/card/merchantCards?createdBy=${id}&isMerchantCard=true`;
       try {
         const response = await axios.get(url, {
           headers: {
