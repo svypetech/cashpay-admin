@@ -38,7 +38,7 @@ const handleSuspendUser = async ({
                 await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/notification/`, {
                     userId: id,
                     title: "Account Suspended",
-                    message: `Your account has been suspended for ${days} days. Please contact support for more information.`
+                    message: `Your account ${id} has been suspended for ${days} days. Please contact support for more information.`
                 }, {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem("token")}`,

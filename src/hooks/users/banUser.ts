@@ -34,7 +34,7 @@ const handleBanUser = async ({
                 await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/notification/`, {
                     userId: id,
                     title: "Account Banned",
-                    message: "Your account has been permanently banned. Please contact support if you believe this is an error."
+                    message: `Your account ${id} has been permanently banned. Please contact support if you believe this is an error.`
                 }, {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem("token")}`,
