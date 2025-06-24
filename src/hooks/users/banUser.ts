@@ -29,6 +29,23 @@ const handleBanUser = async ({
         })
         console.log("Response:", response.data)
         if (response.data.success) {
+            // Send notification after successful ban
+            try {
+                await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/notification/`, {
+                    userId: id,
+                    title: "Account Banned",
+                    message: "Your account has been permanently banned. Please contact support if you believe this is an error."
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    }
+                });
+                console.log("Ban notification sent successfully");
+            } catch (notificationError) {
+                console.error("Error sending ban notification:", notificationError);
+                // Don't fail the main operation if notification fails
+            }
+
             showSuccess && showSuccess("Success", "User banned successfully")
             setSuccess && setSuccess(true)
         } else {
