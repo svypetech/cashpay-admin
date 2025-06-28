@@ -99,7 +99,8 @@ export default function Navbar() {
                 <button
                   onClick={() => {
                     setIsMenuOpen(false);
-                    localStorage.removeItem("userInfo");
+                    localStorage.removeItem("token");
+                    localStorage.removeItem("user");
                     router.push("/signin");
                   }}
                   className="px-2 block text-sm text-[#DF1D1D] font-bold cursor-pointer"

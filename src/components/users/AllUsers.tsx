@@ -15,7 +15,6 @@ const headings = [
   "Name",
   "E-mail",
   "Joined date",
-  "Status",
   "Actions",
 ];
 

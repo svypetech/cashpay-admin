@@ -243,9 +243,6 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
               <th className="p-2 sm:p-5 text-left font-[700] w-[20%]">
                 {headings[4]}
               </th>
-              <th className="p-2 sm:p-5 text-left font-[700] w-[10%]">
-                {headings[5]}
-              </th>
             </tr>
           </thead>
           <tbody>
@@ -269,21 +266,7 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
                   <td className="p-2 sm:p-5 font-satoshi min-w-[100px] whitespace-nowrap">
                     {formatDate(user.date)}
                   </td>
-                  <td className="p-2 sm:p-5 font-satoshi min-w-[120px] py-[20px]">
-                    <ColourfulBlock
-                      text={
-                        user.verificationStatus === "Approved"
-                          ? "Approved"
-                          : "Pending"
-                      }
-                      className={`text-left rounded-xl md:text-md font-semibold whitespace-nowrap ${
-                        user.verificationStatus === "Approved"
-                          ? "bg-[#71FB5533] text-[#20C000]"
-                          : "text-[#727272] bg-[#72727233]"
-                      }`}
-                    />
-                  </td>
-                  <td className="relative p-2 sm:p-5 font-satoshi min-w-[60px] text-center">
+                  <td className="relative p-2 sm:p-5 font-satoshi min-w-[60px] text-left">
                     <div className="dropdown-container relative inline-block">
                       <button
                         className="relative cursor-pointer"

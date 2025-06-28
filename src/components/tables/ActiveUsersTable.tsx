@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import UserProfileSidebar from "../users/UserInfoSidebar";
+import UserProfileSidebar from "../users/UserProfileSidebar";
 import ExpandableId from "../ui/ExpandableId";
 import { User } from "@/src/Types/User";
 import { formatJoiningDate } from "@/src/lib/functions";
