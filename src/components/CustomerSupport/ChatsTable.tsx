@@ -11,6 +11,7 @@ import ExpandableId from "../ui/ExpandableId";
 interface Props {
   headings: string[];
   chats: SupportRequest[];
+  onChatClick?: (chatId: string) => void;
 }
 
 const getStatusConfig = (status: string) => {
@@ -32,7 +33,7 @@ const getStatusConfig = (status: string) => {
   }
 };
 
-const ChatsTable: React.FC<Props> = ({ chats, headings }) => {
+const ChatsTable: React.FC<Props> = ({ chats, headings, onChatClick }) => {
   const [showPopup, setShowPopup] = useState(false);
   const [selectedChat, setSelectedChat] = useState<SupportRequest | null>(null);
   const tableRef = useRef<HTMLDivElement>(null);
@@ -92,8 +93,13 @@ const ChatsTable: React.FC<Props> = ({ chats, headings }) => {
                   <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] whitespace-nowrap">
                     {formatJoiningDate(chat.updateDate)}
                   </td>
-                  <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] whitespace-nowrap underline text-primary cursor-pointer">
-                    {`chat.cashpay/${chat._id}`}
+                  <td className="py-3 px-2 sm:px-4 sm:py-4 min-w-[100px] text-left whitespace-nowrap">
+                    <button
+                      className="underline text-primary font-[400] cursor-pointer flex justify-start"
+                      onClick={() => onChatClick && onChatClick(chat._id)}
+                    >
+                      {`chat.cashpay/${shortenAddress(chat._id)}`}
+                    </button>
                   </td>
                 </tr>
               ))}

@@ -37,10 +37,6 @@ export default function UserProfileSidebar({
   const [actionType, setActionType] = useState("");
   const { user: kycUser, isLoading: isKycLoading, isError } = useFetchKycUser(user._id);
 
-  // Error popup state
-  const [showErrorPopup, setShowErrorPopup] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-
   // Local state to track current user status for immediate UI updates
   const [currentUserStatus, setCurrentUserStatus] = useState(user.userStatus);
 
@@ -320,7 +316,7 @@ export default function UserProfileSidebar({
                     </div>
                   </div>
                 )} 
-                {kycUser && isCompleteKycUser(kycUser) && kycUser.status === "applied" && (
+                {kycUser && isCompleteKycUser(kycUser) && kycUser.status === "requested" && (
                   <div className="w-full pb-8">
                     <VerificationAccordion kycUser={kycUser} />
                   </div>
@@ -378,15 +374,6 @@ export default function UserProfileSidebar({
           </div>
         </div>
       </div>
-
-      {/* Error Popup */}
-      <ErrorPopup
-        isOpen={showErrorPopup}
-        onClose={() => setShowErrorPopup(false)}
-        title="KYC Update Failed"
-        message={errorMessage}
-        autoClose={false}
-      />
 
       {/* Confirmation Modals */}
       <SuspendUserModal

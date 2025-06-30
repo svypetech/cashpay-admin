@@ -11,6 +11,10 @@ import Search from "../ui/Search";
 import { useDateRangeFilter } from "@/src/hooks/filter/useSetDate";
 import { useDownloadData } from "@/src/hooks/downloadData/useDownloadData";
 import DateRangePicker from "../ui/DateRangePicker";
+import { SupportRequest } from "@/src/Types/SupportRequests";
+import { ChatUser } from "@/src/Types/chat";
+import useFetchChat from "@/src/hooks/support/useFetchChat";
+import ChatSidebar from "./ChatSidebar";
 
 const headings = [
   "ChatID",
@@ -33,6 +37,8 @@ export default function Chats() {
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const { startDate, endDate, handleDateChange } = useDateRangeFilter();
+  const [chatSidebarOpen, setChatSidebarOpen] = useState(false);
+  const [currentChatId, setCurrentChatId] = useState<string>("");
   
   const {
     requests: chatsData,
@@ -40,6 +46,18 @@ export default function Chats() {
     error,
     totalPages,
   } = useFetchChats({ page:currentPage, limit:10, tab:activeTab, search:searchQuery, startDate, endDate});
+
+  const {
+    messages,
+    isLoading: isChatLoading,
+    isLoadingMore,
+    isError: isChatError,
+    currentChatUser,
+    setMessages,
+    setCurrentChatUser,
+    loadMoreMessages,
+    hasMore
+  } = useFetchChat({ chatId: currentChatId, setChatSidebarOpen });  
   
   const [data, setData] = useState(chatsData);
   const [filteredData, setFilteredData] = useState(data);
@@ -72,6 +90,18 @@ export default function Chats() {
     },
   ];
 
+  // Handle chat click from table
+  const handleChatClick = (chatId: string) => {
+    setCurrentChatId(chatId);
+  };
+  
+  const handleChatClose = () => {
+    setChatSidebarOpen(false);
+    setCurrentChatId("");
+    setMessages([]);
+    setCurrentChatUser({} as ChatUser);
+  };
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
@@ -94,21 +124,6 @@ export default function Chats() {
     setData(chatsData);
     setFilteredData(chatsData);
   }, [chatsData]);
-
-  // Filter based on active tab
-  useEffect(() => {
-    const filtered = data.filter((request) => {
-      if (activeTab === "all") {
-        return true;
-      } else if (activeTab === "pending") {
-        return request.status !== "Resolved";
-      } else if (activeTab === "resolved") {
-        return request.status === "Resolved";
-      }
-      return true;
-    });
-    setFilteredData(filtered);
-  }, [activeTab, data]);
 
   // Reset to first page when search query, date range, or tab changes
   useEffect(() => {
@@ -188,7 +203,11 @@ export default function Chats() {
         <Error text="No data found" />
       ) : (
         <div className="overflow-x-auto">
-          <ChatsTable headings={headings} chats={filteredData} />
+          <ChatsTable 
+            headings={headings} 
+            chats={filteredData} 
+            onChatClick={handleChatClick} 
+          />
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
@@ -196,6 +215,19 @@ export default function Chats() {
           />
         </div>
       )}
+
+      <ChatSidebar
+        isOpen={chatSidebarOpen}
+        onClose={handleChatClose}
+        chatId={currentChatId}
+        user={currentChatUser}
+        initialMessages={messages}
+        isLoading={isChatLoading}
+        isError={isChatError}
+        loadMoreMessages={loadMoreMessages}
+        isLoadingMore={isLoadingMore}
+        hasMore={hasMore}
+      />
     </div>
   );
 }

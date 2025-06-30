@@ -38,7 +38,7 @@ export interface CompleteKycUser {
   passportImage: string;
   passportSelfie: string;
   digitalSignature: string;
-  status: "approved" | "applied" | "new";
+  status: "approved" | "requested" | "new";
   rejectionReason: string | null;
   updateReason: string | null;
   bankAccountType: string;

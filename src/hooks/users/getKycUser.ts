@@ -23,12 +23,8 @@ export default function useFetchKycUser(id: string) {
       setIsError(false);
 
       try {
-        const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/kyc`;
 
-        const response = await 
-        
-        
-        axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/kyc`, {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/kyc`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },

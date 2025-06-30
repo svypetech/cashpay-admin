@@ -240,7 +240,7 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
               <th className="p-2 sm:p-5 text-left font-[700] w-[20%]">
                 {headings[3]}
               </th>
-              <th className="p-2 sm:p-5 text-left font-[700] w-[20%]">
+              <th className="p-2 sm:p-5 text-center font-[700] w-[10%]">
                 {headings[4]}
               </th>
             </tr>
@@ -266,26 +266,28 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
                   <td className="p-2 sm:p-5 font-satoshi min-w-[100px] whitespace-nowrap">
                     {formatDate(user.date)}
                   </td>
-                  <td className="relative p-2 sm:p-5 font-satoshi min-w-[60px] text-left">
+                  <td className="relative p-2 sm:p-5 font-satoshi min-w-[60px] text-center">
                     <div className="dropdown-container relative inline-block">
+                      
                       <button
-                        className="relative cursor-pointer"
+                        className="relative cursor-pointer p-2 rounded-full transition-colors duration-200 flex items-center justify-center"
                         onClick={() => {
                           setSelectedIndex(index);
                           toggleDropdown(index);
                         }}
+                        aria-label="Options menu"
                       >
                         <Image
                           src="/icons/options.svg"
                           alt="Options"
-                          width={24}
-                          height={24}
-                          className="w-4 h-4"
+                          width={20}
+                          height={20}
+                          className="w-5 h-5"
                         />
                       </button>
 
                       {activeDropdown === index && (
-                        <div className="absolute z-10 right-0 top-full mt-2 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-100">
+                        <div className="absolute z-10 top-full mt-2 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-100 right-0 lg:right-auto lg:left-1/2 lg:-translate-x-1/2">
                           <button
                             className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
                             onClick={() => handleViewUser(user)}

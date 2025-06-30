@@ -113,7 +113,7 @@ const CustomerSupportTable: React.FC<Props> = ({ data, headings }) => {
                                                     alt="Options"
                                                     width={24}
                                                     height={24}
-                                                    className="w-4 h-4"
+                                                    className="w-5 h-5"
                                                 />
                                             </button>
 

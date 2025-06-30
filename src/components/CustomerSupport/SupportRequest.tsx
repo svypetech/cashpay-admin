@@ -51,20 +51,6 @@ export default function SupportRequests() {
     setFilteredData(requests);
   }, [requests]);
 
-  // filter based on active tab
-  useEffect(() => {
-    const filtered = requests.filter((request) => {
-      if (activeTab === "all") {
-        return true;
-      } else if (activeTab === "unassigned") {
-        return request.status !== "assigned";
-      } else if (activeTab === "assigned") {
-        return request.status === "assigned";
-      }
-    });
-    setFilteredData(filtered);
-  }, [activeTab]);
-
   const handleSort = (option: string) => {
     setSortBy(option);
   };
