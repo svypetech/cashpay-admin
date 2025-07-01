@@ -150,3 +150,9 @@ export const getFileIcon = (fileType: string): string => {
 export const formatFileSize = (size: number): string => {
   return `${Math.round(size / 1024)} KB`;
 };
+
+
+export function isUserActive(status: string): boolean {
+  if (!status) return false; // Handle undefined or null status
+  return status.toLowerCase() !== "banned" && status.toLowerCase() !== "suspend";
+}

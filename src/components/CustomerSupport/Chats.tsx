@@ -58,6 +58,11 @@ export default function Chats() {
     loadMoreMessages,
     hasMore
   } = useFetchChat({ chatId: currentChatId, setChatSidebarOpen });  
+
+  useEffect(() => {
+    // Reset to first page when search or sort changes
+    setCurrentPage(1);
+  }, [searchQuery, activeTab, startDate, endDate]);
   
   const [data, setData] = useState(chatsData);
   const [filteredData, setFilteredData] = useState(data);

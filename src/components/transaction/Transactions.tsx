@@ -38,7 +38,7 @@ export default function Transactions() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, activeTab]);
+  }, [searchQuery, activeTab, sortBy]);
 
   const handleSort = (value: string) => {
     setSortBy(value);

@@ -19,9 +19,9 @@ const headings = [
   "Actions",
 ];
 const sortOptions = [
+  { label: "None" , value: "" }, 
   { label: "ID", value: "id" },
   { label: "Name", value: "name" },
-  { label: "None" , value: "" }, 
 ];
 
 export default function WalletComponent() {
@@ -36,6 +36,11 @@ export default function WalletComponent() {
     sortBy: sortBy,
     searchQuery,
   });
+
+  useEffect(() => {
+    // Reset to first page when search or sort changes
+    setCurrentPage(1);
+  }, [searchQuery, sortBy]);
 
   useEffect(() => {
     setFilteredData(wallets);

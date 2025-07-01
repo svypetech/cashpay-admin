@@ -41,6 +41,11 @@ export default function SupportRequests() {
     tab: activeTab,
     search: searchQuery,
   });
+
+  useEffect(() => {
+    // Reset to first page when search or sort changes
+    setCurrentPage(1);
+  }, [searchQuery, sortBy, activeTab]);
   
   const [filteredData, setFilteredData] = useState(requests);
   const handlePageChange = (page: number) => {

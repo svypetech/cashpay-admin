@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Pagination from "../pagination/pagination";
 import Tabs from "../ui/Tabs";
 import Search from "../ui/Search";
@@ -61,6 +61,11 @@ export default function MerchantsComponent() {
     getStatusFromTab(activeTab),
     searchTerm
   );
+
+  useEffect(() => {
+      // Reset to first page when search or sort changes
+      setCurrentPage(1);
+    }, [sortBy, activeTab, searchTerm]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);

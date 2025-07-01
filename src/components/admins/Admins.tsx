@@ -54,6 +54,11 @@ export default function Admins() {
   const [filteredData, setFilteredData] = useState(admins);
 
   useEffect(() => {
+    // Reset to first page when search or sort changes
+    setCurrentPage(1);
+  }, [sortBy, activeTab, searchQuery]);
+
+  useEffect(() => {
     setFilteredData(admins);
   }, [searchQuery, admins]);
 

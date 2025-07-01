@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Pagination from "../pagination/pagination";
 import Image from "next/image";
 import useFetchP2PListing from "@/src/hooks/Transactions/FetchP2PListing";
@@ -42,15 +42,15 @@ export default function P2PListings() {
     addVisibility: activeTab === "all" ? "" : activeTab,
     sortBy: sortBy,
   });
+
+  useEffect(() => {
+      // Reset to first page when search or sort changes
+      setCurrentPage(1);
+    }, [searchQuery, sortBy, activeTab]);
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
-
-  // filter based on active tab
-
-  //   if (loading) {
-  //     return <div className="flex justify-center items-center h-screen">Loading...</div>;
-  //   }
 
   return (
     <div>

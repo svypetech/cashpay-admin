@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import UserTable from "../tables/UserTable";
 import Pagination from "../pagination/pagination";
 import Tabs from "../ui/Tabs";
@@ -20,10 +20,9 @@ const headings = [
 
 // Sort options
 const sortOptions = [
-  { label: "Date", value: "date" },
-  { label: "Status", value: "userStatus" },
-  { label: "Title", value: "title" },
   { label: "None" , value: "" }, 
+  { label: "Date", value: "date" },
+  { label: "Title", value: "title" },
 ];
 
 export default function UsersComponent() {
@@ -56,6 +55,11 @@ export default function UsersComponent() {
 
   // Define tabs for the Tabs component
   const tabs = ["All", "Verified", "Pending Verifications"];
+
+  useEffect(() => {
+    // Reset to first page when search or sort changes
+    setCurrentPage(1);
+  }, [searchTerm, sortBy, activeTab]);
 
   // Handle page changes
   const handlePageChange = (page: number) => {

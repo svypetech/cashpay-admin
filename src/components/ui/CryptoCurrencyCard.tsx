@@ -13,6 +13,9 @@ interface CryptoCurrencyCardProps {
 export default function CryptoCurrencyCard({ coin }: CryptoCurrencyCardProps) {
   // Format percentage display
   const formatPercentage = (percentage: number) => {
+    if (percentage === null || percentage === undefined) {
+      return "...";
+    }
     const isPositive = percentage >= 0;
     const sign = isPositive ? "+" : "";
     return `${sign}${percentage.toFixed(2)}%`;

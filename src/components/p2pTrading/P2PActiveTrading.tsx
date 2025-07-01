@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Pagination from "@/src/components/pagination/pagination";
 import Sort from "../ui/Sort";
 import Search from "../ui/Search";
@@ -24,8 +24,6 @@ export default function P2PActiveTrading() {
   const [sortBy, setSortBy] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
-
-
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
@@ -38,6 +36,11 @@ export default function P2PActiveTrading() {
       sortBy
     }
   );
+
+  useEffect(() => {
+      // Reset to first page when search or sort changes
+      setCurrentPage(1);
+    }, [searchQuery, sortBy]);
 
   return (
     <div>

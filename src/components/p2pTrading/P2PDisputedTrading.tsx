@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Pagination from "@/src/components/pagination/pagination";
 import Search from "../ui/Search";
 import Sort from "../ui/Sort";
@@ -30,6 +30,11 @@ export default function P2PDisputedTrading() {
         sortBy,
         status: "disputed",
     });
+
+    useEffect(() => {
+        // Reset to first page when search or sort changes
+        setCurrentPage(1);
+      }, [searchQuery, sortBy]);
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);

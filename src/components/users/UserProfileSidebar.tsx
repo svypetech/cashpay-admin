@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { X } from "lucide-react";
 import { User } from "@/src/Types/User";
-import VerificationAccordion from "../cards/VerficationStatus";
+import VerificationAccordion from "../cards/VerficationAccordion";
 import ConfirmModal from "../ui/ConfirmModal";
 import ErrorPopup from "../ui/ErrorPopup";
 import handleBanUser from "@/src/hooks/users/banUser";
@@ -15,6 +15,7 @@ import SuspendUserModal from "../ui/SuspendPopup";
 import useFetchKycUser from "@/src/hooks/users/getKycUser";
 import { isCompleteKycUser, isNewKycUser } from "@/src/Types/KycUser";
 import UserSidebarSkeleton from "./SidebarSkeleton";
+import { isUserActive } from "@/src/lib/functions";
 
 interface UserProfileSidebarProps {
   showSidebar: boolean;
@@ -214,7 +215,7 @@ export default function UserProfileSidebar({
             shouldSlideIn ? "translate-x-0" : "translate-x-full"
           }`}
         >
-          <div className="flex h-full flex-col overflow-y-auto">
+          <div className={"flex h-full flex-col overflow-y-auto"}>
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 mt-5">
               <h2 className="text-2xl font-semibold">User Profile</h2>
@@ -336,7 +337,7 @@ export default function UserProfileSidebar({
               </div>
 
               {/* Action Buttons - Use currentUserStatus for immediate UI updates */}
-              {currentUserStatus === "Active" ? (
+              {isUserActive(currentUserStatus)  ? (
                 <div className="z-5 flex justify-between mt-auto w-full gap-4 px-5">
                   <button
                     className="rounded-md border px-6 py-2 border-[#DF1D1D] text-[#DF1D1D] hover:bg-red-50 cursor-pointer font-bold disabled:opacity-50"

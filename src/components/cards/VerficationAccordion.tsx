@@ -85,7 +85,7 @@ export default function VerificationAccordion({
 
   return (
     <>
-      <div className="w-full min-w-0 border border-gray-100 rounded-lg overflow-hidden">
+      <div className="w-full min-w-0 border-b border-gray-100 rounded-lg overflow-hidden">
         {/* Personal Details Section */}
         <div className="border-b border-gray-200">
           <button

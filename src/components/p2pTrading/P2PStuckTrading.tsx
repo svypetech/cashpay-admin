@@ -46,6 +46,11 @@ export default function P2PStuckTrading() {
     status: "stuck",
   });
 
+  useEffect(() => {
+    // Reset to first page when search or sort changes
+    setCurrentPage(1);
+  }, [searchQuery, sortBy,]);
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };

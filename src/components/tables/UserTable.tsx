@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 
 import UserProfileSidebar from "../users/UserProfileSidebar";
 import Image from "next/image";
-import ColourfulBlock from "../ui/ColourfulBlock";
 import ConfirmModal from "../ui/ConfirmModal";
 import { User } from "@/src/Types/User";
 import handleSuspendUser from "@/src/hooks/users/suspendUser";
@@ -14,6 +13,7 @@ import handleActivateUser from "@/src/hooks/users/activateUser";
 import ExpandableId from "../ui/ExpandableId";
 import { useToast } from "@/src/lib/ToastProvider";
 import SuspendUserModal from "../ui/SuspendPopup";
+import { isUserActive } from "@/src/lib/functions";
 
 interface Props {
   headings: string[];
@@ -127,9 +127,7 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
       // Update data state on success
       setData((prevData) =>
         prevData.map((user) =>
-          user._id === userToActivate
-            ? { ...user, userStatus: "Active" }
-            : user
+          user._id === userToActivate ? { ...user, userStatus: "Active" } : user
         )
       );
     } catch (error) {
@@ -196,9 +194,7 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
       // Update data state on success
       setData((prevData) =>
         prevData.map((user) =>
-          user._id === userToBan
-            ? { ...user, userStatus: "Banned" }
-            : user
+          user._id === userToBan ? { ...user, userStatus: "Banned" } : user
         )
       );
     } catch (error) {
@@ -268,7 +264,6 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
                   </td>
                   <td className="relative p-2 sm:p-5 font-satoshi min-w-[60px] text-center">
                     <div className="dropdown-container relative inline-block">
-                      
                       <button
                         className="relative cursor-pointer p-2 rounded-full transition-colors duration-200 flex items-center justify-center"
                         onClick={() => {
@@ -295,25 +290,24 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
                             View
                           </button>
                           <div className="border-t border-gray-100"></div>
-                          {user.userStatus === "Active" && (
-                            <button
-                              className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
-                              onClick={() =>
-                                handleSuspendConfirmation(user._id)
-                              }
-                            >
-                              Suspend User
-                            </button>
-                          )}
-                          {user.userStatus === "Active" && (
-                            <button
-                              className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
-                              onClick={() => handleBanConfirmation(user._id)}
-                            >
-                              Ban User
-                            </button>
-                          )}
-                          {user.userStatus !== "Active" && (
+                          {isUserActive(user.userStatus) ? (
+                            <>
+                              <button
+                                className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
+                                onClick={() =>
+                                  handleSuspendConfirmation(user._id)
+                                }
+                              >
+                                Suspend User
+                              </button>
+                              <button
+                                className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
+                                onClick={() => handleBanConfirmation(user._id)}
+                              >
+                                Ban User
+                              </button>
+                            </>
+                          ) : (
                             <button
                               className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
                               onClick={() =>
