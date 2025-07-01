@@ -340,18 +340,16 @@ const AdminTable: React.FC<Props> = ({ data, headings, setData }) => {
                         {activeDropdown === index && (
                           <div className="absolute z-10 right-0 top-full mt-2 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-100">
                             <button
-                              className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
+                              className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50 border-b border-gray-100"
                               onClick={() => handleViewAdmin(admin)}
                             >
                               View
                             </button>
-                            <div className="border-t border-gray-100"></div>
-
                             {/* Dynamic dropdown options based on current status */}
                             {currentStatus === "Active" && (
                               <>
                                 <button
-                                  className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
+                                  className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50 border-b border-gray-100"
                                   onClick={() =>
                                     handleSuspendConfirmation(admin._id)
                                   }
@@ -359,7 +357,7 @@ const AdminTable: React.FC<Props> = ({ data, headings, setData }) => {
                                   Suspend Admin
                                 </button>
                                 <button
-                                  className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
+                                  className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50 border-b border-gray-100"
                                   onClick={() =>
                                     handleBanConfirmation(admin._id)
                                   }

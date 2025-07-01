@@ -218,7 +218,7 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
       {/* Table - Add padding bottom for dropdown space */}
       <div
         className={`rounded-lg overflow-x-auto w-full ${
-          needsPadding ? "pb-24" : ""
+          needsPadding ? "pb-28" : ""
         } `}
       >
         <table className="w-full text-left table-auto min-w-[700px]">
@@ -284,16 +284,15 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
                       {activeDropdown === index && (
                         <div className="absolute z-10 top-full mt-2 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-100 right-0 lg:right-auto lg:left-1/2 lg:-translate-x-1/2">
                           <button
-                            className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
+                            className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50 border-b border-gray-100"
                             onClick={() => handleViewUser(user)}
                           >
                             View
                           </button>
-                          <div className="border-t border-gray-100"></div>
                           {isUserActive(user.userStatus) ? (
                             <>
                               <button
-                                className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
+                                className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50 border-b border-gray-100"
                                 onClick={() =>
                                   handleSuspendConfirmation(user._id)
                                 }

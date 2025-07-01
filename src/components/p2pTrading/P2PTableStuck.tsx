@@ -166,7 +166,7 @@ const P2PTableStuck: React.FC<Props> = ({ data, headings, setData }) => {
                       {activeDropdown === index && (
                         <div className="absolute z-10 right-0 top-full mt-2 w-56 bg-white rounded-md shadow-lg py-1 border border-gray-100">
                           <button
-                            className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
+                            className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50 border-b border-gray-100"
                             onClick={() => {
                               setSelectedTrade(trade);
                               setShowPopup(true);
@@ -175,9 +175,8 @@ const P2PTableStuck: React.FC<Props> = ({ data, headings, setData }) => {
                           >
                             {"View Details"}
                           </button>
-                          <div className="border-t border-gray-100"></div>
                           <button
-                            className={`block w-full text-left px-4 py-2 text-sm text-primary font-bold hover:bg-gray-50 ${
+                            className={`block w-full text-left px-4 py-2 text-sm text-primary font-bold hover:bg-gray-50 border-b border-gray-100 ${
                               trade.status.toLowerCase() === "resolved" ||
                               trade.status.toLowerCase() === "canceled"
                                 ? "cursor-not-allowed opacity-50"

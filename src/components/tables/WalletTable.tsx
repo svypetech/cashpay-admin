@@ -211,7 +211,7 @@ const WalletTable: React.FC<Props> = ({ data, headings, setData }) => {
       {/* Table - Add dynamic padding for dropdown space */}
       <div
         className={`rounded-lg overflow-x-auto w-full ${
-          needsPadding ? "pb-32" : ""
+          needsPadding ? "pb-28" : ""
         }`}
       >
         <table className="w-full text-left table-auto">
@@ -268,7 +268,7 @@ const WalletTable: React.FC<Props> = ({ data, headings, setData }) => {
                       {activeDropdown === index && (
                         <div className="absolute z-10 right-0 top-full mt-2 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-100">
                           <button
-                            className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
+                            className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50 border-b border-gray-100"
                             onClick={() => {
                               setSelectedWallet(wallet);
                               setShowSidebar(true);
@@ -277,11 +277,10 @@ const WalletTable: React.FC<Props> = ({ data, headings, setData }) => {
                           >
                             View Wallet
                           </button>
-                          <div className="border-t border-gray-100"></div>
                           {isUserActive(wallet.data.userStatus) ? (
                             <>
                               <button
-                                className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
+                                className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50 border-b border-gray-100"
                                 onClick={() =>
                                   handleSuspendConfirmation(wallet.data.user_id)
                                 }

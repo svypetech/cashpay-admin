@@ -324,18 +324,17 @@ export default function MerchantsTable({
                         {activeDropdown === index && (
                           <div className="absolute z-10 right-0 top-full mt-2 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-100">
                             <button
-                              className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
+                              className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50 border-b border-gray-100"
                               onClick={() => handleViewMerchant(merchant)}
                             >
                               View
                             </button>
-                            <div className="border-t border-gray-100"></div>
                             
                             {/* Dynamic dropdown options based on current merchant status */}
                             {isUserActive(currentStatus) ? (
                               <>
                                 <button
-                                  className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
+                                  className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50 border-b border-gray-100"
                                   onClick={() => handleSuspendConfirmation(merchant._id)}
                                 >
                                   Suspend User
