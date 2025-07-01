@@ -161,7 +161,7 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
       setData((prevData) =>
         prevData.map((user) =>
           user._id === userToSuspend
-            ? { ...user, userStatus: "Suspended" }
+            ? { ...user, userStatus: "suspend" }
             : user
         )
       );
@@ -194,7 +194,7 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
       // Update data state on success
       setData((prevData) =>
         prevData.map((user) =>
-          user._id === userToBan ? { ...user, userStatus: "Banned" } : user
+          user._id === userToBan ? { ...user, userStatus: "banned" } : user
         )
       );
     } catch (error) {
@@ -378,7 +378,7 @@ const UserTable: React.FC<Props> = ({ data, headings, setData }) => {
         onConfirm={executeBanUser}
         title="Ban User"
         message="Are you sure you want to ban this user? They will lose access to their account permanently."
-        warningText="This action is permanent and cannot be undone."
+        warningText="This user will not be able to access their account."
         cancelText="Cancel"
         confirmText="Ban User"
         isLoading={isSubmitting}

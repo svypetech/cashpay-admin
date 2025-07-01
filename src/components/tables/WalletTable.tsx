@@ -104,7 +104,7 @@ const WalletTable: React.FC<Props> = ({ data, headings, setData }) => {
                 ...wallet,
                 data: {
                   ...wallet.data,
-                  userStatus: "Suspended",
+                  userStatus: "suspend",
                 },
               }
             : wallet
@@ -144,7 +144,7 @@ const WalletTable: React.FC<Props> = ({ data, headings, setData }) => {
                 ...wallet,
                 data: {
                   ...wallet.data,
-                  userStatus: "Banned",
+                  userStatus: "banned",
                 },
               }
             : wallet
@@ -366,7 +366,7 @@ const WalletTable: React.FC<Props> = ({ data, headings, setData }) => {
         onConfirm={executeBanUser}
         title="Ban User"
         message="Are you sure you want to ban this user? They will lose access to their account permanently."
-        warningText="This action is permanent and cannot be undone."
+        warningText="This user will not be able to access their account."
         cancelText="Cancel"
         confirmText="Ban User"
         isLoading={isSubmitting}

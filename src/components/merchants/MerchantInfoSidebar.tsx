@@ -161,19 +161,19 @@ export default function MerchantInfoSidebar({
       });
 
       // Update both local state and parent state immediately
-      setCurrentMerchantStatus("Suspended");
+      setCurrentMerchantStatus("suspend");
       if (setMerchants) {
         setMerchants((prevMerchants) =>
           prevMerchants.map((prevMerchant) =>
             prevMerchant._id === merchant._id
-              ? { ...prevMerchant, status: "Suspended" }
+              ? { ...prevMerchant, status: "suspend" }
               : prevMerchant
           )
         );
       }
       
       // Notify table about status change
-      onStatusUpdate(merchant._id, "Suspended");
+      onStatusUpdate(merchant._id, "suspend");
     } catch (error) {
       console.error("Error suspending merchant:", error);
     } finally {
@@ -198,19 +198,19 @@ export default function MerchantInfoSidebar({
       });
 
       // Update both local state and parent state immediately
-      setCurrentMerchantStatus("Banned");
+      setCurrentMerchantStatus("banned");
       if (setMerchants) {
         setMerchants((prevMerchants) =>
           prevMerchants.map((prevMerchant) =>
             prevMerchant._id === merchant._id
-              ? { ...prevMerchant, status: "Banned" }
+              ? { ...prevMerchant, status: "banned" }
               : prevMerchant
           )
         );
       }
       
       // Notify table about status change
-      onStatusUpdate(merchant._id, "Banned");
+      onStatusUpdate(merchant._id, "banned");
     } catch (error) {
       console.error("Error banning merchant:", error);
     } finally {
@@ -517,7 +517,7 @@ export default function MerchantInfoSidebar({
         onConfirm={executeBanMerchant}
         title="Ban Merchant"
         message="Are you sure you want to ban this merchant? They will lose access to their account permanently."
-        warningText="This action is permanent and cannot be undone."
+        warningText="This user will not be able to access their account."
         cancelText="Cancel"
         confirmText="Ban Merchant"
         isLoading={isSubmitting}

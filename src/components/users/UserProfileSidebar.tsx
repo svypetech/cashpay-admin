@@ -112,11 +112,11 @@ export default function UserProfileSidebar({
       });
 
       // Update both local state and parent state immediately
-      setCurrentUserStatus("Suspended");
+      setCurrentUserStatus("suspend");
       setData((prevUsers) =>
         prevUsers.map((prevUser) =>
           prevUser._id === user._id
-            ? { ...prevUser, userStatus: "Suspended" }
+            ? { ...prevUser, userStatus: "suspend" }
             : prevUser
         )
       );
@@ -144,7 +144,7 @@ export default function UserProfileSidebar({
       });
 
       // Update both local state and parent state immediately
-      setCurrentUserStatus("Banned");
+      setCurrentUserStatus("banned");
       setData((prevUsers) =>
         prevUsers.map((prevUser) =>
           prevUser._id === user._id
@@ -408,7 +408,7 @@ export default function UserProfileSidebar({
         onConfirm={executeBanUser}
         title="Ban User"
         message="Are you sure you want to ban this user? They will lose access to their account permanently."
-        warningText="This action is permanent and cannot be undone."
+        warningText="This user will not be able to access their account."
         cancelText="Cancel"
         confirmText="Ban User"
         isLoading={isSubmitting}

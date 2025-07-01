@@ -10,7 +10,7 @@ import Merchant from "@/src/Types/Merchant";
 import handleSuspendUser from "@/src/hooks/users/suspendUser";
 import handleBanUser from "@/src/hooks/users/banUser";
 import handleActivateUser from "@/src/hooks/users/activateUser";
-import { formatNumberToTwoDecimals } from "@/src/lib/functions";
+import { formatNumberToTwoDecimals, isUserActive } from "@/src/lib/functions";
 import ExpandableId from "../ui/ExpandableId";
 import { useToast } from "@/src/lib/ToastProvider";
 
@@ -126,7 +126,7 @@ export default function MerchantsTable({
       if (setMerchants) {
         setMerchants(prevData => 
           prevData.map(merchant => 
-            merchant._id === userToSuspend ? { ...merchant, status: "Suspended" } : merchant
+            merchant._id === userToSuspend ? { ...merchant, status: "suspend" } : merchant
           )
         );
       }
@@ -134,7 +134,7 @@ export default function MerchantsTable({
       // Update local status for immediate UI response
       setMerchantStatuses(prev => ({
         ...prev,
-        [userToSuspend]: "Suspended"
+        [userToSuspend]: "suspend"
       }));
       
     } catch (error) {
@@ -167,7 +167,7 @@ export default function MerchantsTable({
       if (setMerchants) {
         setMerchants(prevData => 
           prevData.map(merchant => 
-            merchant._id === userToBan ? { ...merchant, status: "Banned" } : merchant
+            merchant._id === userToBan ? { ...merchant, status: "banned" } : merchant
           )
         );
       }
@@ -175,7 +175,7 @@ export default function MerchantsTable({
       // Update local status for immediate UI response
       setMerchantStatuses(prev => ({
         ...prev,
-        [userToBan]: "Banned"
+        [userToBan]: "banned"
       }));
       
     } catch (error) {
@@ -332,7 +332,7 @@ export default function MerchantsTable({
                             <div className="border-t border-gray-100"></div>
                             
                             {/* Dynamic dropdown options based on current merchant status */}
-                            {currentStatus === "Active" && (
+                            {isUserActive(currentStatus) ? (
                               <>
                                 <button
                                   className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
@@ -347,9 +347,7 @@ export default function MerchantsTable({
                                   Ban User
                                 </button>
                               </>
-                            )}
-                            
-                            {currentStatus !== "Active" && (
+                            ) : (
                               <button
                                 className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
                                 onClick={() => handleActivateConfirmation(merchant._id)}
@@ -419,7 +417,7 @@ export default function MerchantsTable({
         onConfirm={executeBanUser}
         title="Ban Merchant"
         message="Are you sure you want to ban this merchant? They will lose access to their account permanently."
-        warningText="This action is permanent and cannot be undone."
+        warningText="This user will not be able to access their account."
         cancelText="Cancel"
         confirmText="Ban Merchant"
         isLoading={isSubmitting}

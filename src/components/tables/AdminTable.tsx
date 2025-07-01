@@ -446,7 +446,7 @@ const AdminTable: React.FC<Props> = ({ data, headings, setData }) => {
         onConfirm={executeBanAdmin}
         title="Ban Admin"
         message="Are you sure you want to ban this admin? They will lose access to their admin account permanently."
-        warningText="This action is permanent and cannot be undone."
+        warningText="This admin will not be able to access their account."
         cancelText="Cancel"
         confirmText="Ban Admin"
         isLoading={isSubmitting}
@@ -460,7 +460,7 @@ const AdminTable: React.FC<Props> = ({ data, headings, setData }) => {
         onConfirm={executeDeleteAdmin}
         title="Delete Admin"
         message={`Are you sure you want to delete this admin. This action will permanently remove the admin from the system.`}
-        warningText="This action is permanent and cannot be undone. All admin data will be lost."
+        warningText="This action is permanent and cannot be undone."
         cancelText="Cancel"
         confirmText="Delete Admin"
         isLoading={isSubmitting}

@@ -394,7 +394,7 @@ export default function AdminSidebar({
                 onConfirm={executeBanAdmin}
                 title="Ban Admin"
                 message="Are you sure you want to ban this admin? They will lose access to their admin account permanently."
-                warningText="This action is permanent and cannot be undone."
+                warningText="This user will not be able to access their account."
                 cancelText="Cancel"
                 confirmText="Ban Admin"
                 isLoading={isSubmitting}
