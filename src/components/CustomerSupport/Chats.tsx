@@ -15,6 +15,7 @@ import { SupportRequest } from "@/src/Types/SupportRequests";
 import { ChatUser } from "@/src/Types/chat";
 import useFetchChat from "@/src/hooks/support/useFetchChat";
 import ChatSidebar from "./ChatSidebar";
+import Tabs from "../ui/Tabs";
 
 const headings = [
   "ChatID",
@@ -26,26 +27,29 @@ const headings = [
   "Chat",
 ];
 
-const navigationTabs = [
-  { id: "all", title: "All" },
-  { id: "pending", title: "Pending" },
-  { id: "resolved", title: "Resolved" },
-];
+const tabs = ["All", "Pending", "Resolved"];
 
 export default function Chats() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeTab, setActiveTab] = useState("all");
+  const [activeTab, setActiveTab] = useState(tabs[0]);
   const [searchQuery, setSearchQuery] = useState("");
   const { startDate, endDate, handleDateChange } = useDateRangeFilter();
   const [chatSidebarOpen, setChatSidebarOpen] = useState(false);
   const [currentChatId, setCurrentChatId] = useState<string>("");
-  
+
   const {
     requests: chatsData,
     isLoading,
     error,
     totalPages,
-  } = useFetchChats({ page:currentPage, limit:10, tab:activeTab, search:searchQuery, startDate, endDate});
+  } = useFetchChats({
+    page: currentPage,
+    limit: 10,
+    tab: activeTab,
+    search: searchQuery,
+    startDate,
+    endDate,
+  });
 
   const {
     messages,
@@ -56,14 +60,14 @@ export default function Chats() {
     setMessages,
     setCurrentChatUser,
     loadMoreMessages,
-    hasMore
-  } = useFetchChat({ chatId: currentChatId, setChatSidebarOpen });  
+    hasMore,
+  } = useFetchChat({ chatId: currentChatId, setChatSidebarOpen });
 
   useEffect(() => {
     // Reset to first page when search or sort changes
     setCurrentPage(1);
   }, [searchQuery, activeTab, startDate, endDate]);
-  
+
   const [data, setData] = useState(chatsData);
   const [filteredData, setFilteredData] = useState(data);
 
@@ -77,10 +81,10 @@ export default function Chats() {
   const csvFields = [
     { key: "_id", label: "Chat ID" },
     { key: "userId", label: "User ID" },
-    { 
-      key: "agentId", 
+    {
+      key: "agentId",
       label: "Agent ID",
-      transform: (value: any) => value || "Unassigned"
+      transform: (value: any) => value || "Unassigned",
     },
     { key: "issueType", label: "Issue Type" },
     { key: "status", label: "Status" },
@@ -89,7 +93,8 @@ export default function Chats() {
       label: "Chat",
       transform: (value: string) => {
         // Generate chat link using the chat ID
-        const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+        const baseUrl =
+          typeof window !== "undefined" ? window.location.origin : "";
         return `${baseUrl}/chat/${value}`;
       },
     },
@@ -99,7 +104,7 @@ export default function Chats() {
   const handleChatClick = (chatId: string) => {
     setCurrentChatId(chatId);
   };
-  
+
   const handleChatClose = () => {
     setChatSidebarOpen(false);
     setCurrentChatId("");
@@ -133,27 +138,18 @@ export default function Chats() {
   // Reset to first page when search query, date range, or tab changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, startDate, endDate, activeTab]);
+  }, [searchQuery, startDate, endDate, activeTab.toLowerCase()]);
 
   return (
     <div className="px-2">
       {/* Navigation Tabs */}
       <div className="w-full flex items-center mb-4">
-        <div className="flex w-fit">
-          {navigationTabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 text-black ${
-                activeTab === tab.id
-                  ? "border-b-2 border-primary font-semibold"
-                  : "hover:text-gray-700 cursor-pointer"
-              }`}
-            >
-              {tab.title}
-            </button>
-          ))}
-        </div>
+        <Tabs
+          activeTab={activeTab}
+          tabs={tabs}
+          setActiveTab={setActiveTab}
+          size="small"
+        />
       </div>
 
       {/* Search and Filter Section - Updated to match UserEngagement */}
@@ -179,7 +175,10 @@ export default function Chats() {
             <button
               onClick={handleDownload}
               disabled={
-                isDownloading || isLoading || !filteredData || filteredData.length === 0
+                isDownloading ||
+                isLoading ||
+                !filteredData ||
+                filteredData.length === 0
               }
               className="w-full flex justify-center items-center gap-2 px-4 py-2 font-bold border-[1px] border-primary rounded-[8px] text-primary bg-white hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -208,10 +207,10 @@ export default function Chats() {
         <Error text="No data found" />
       ) : (
         <div className="overflow-x-auto">
-          <ChatsTable 
-            headings={headings} 
-            chats={filteredData} 
-            onChatClick={handleChatClick} 
+          <ChatsTable
+            headings={headings}
+            chats={filteredData}
+            onChatClick={handleChatClick}
           />
           <Pagination
             currentPage={currentPage}

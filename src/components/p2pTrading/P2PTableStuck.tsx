@@ -149,9 +149,9 @@ const P2PTableStuck: React.FC<Props> = ({ data, headings, setData }) => {
                     />
                   </td>
                   <td className="relative px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[60px] text-center">
-                    <div className="dropdown-container relative inline-block">
+                    <div className="dropdown-container relative">
                       <button
-                        className="relative cursor-pointer"
+                        className="flex items-center justify-center w-[80%] xl:w-[70%] 2xl:w-[50%] lg:w-[100%] cursor-pointer"
                         onClick={() => toggleDropdown(index)}
                       >
                         <Image

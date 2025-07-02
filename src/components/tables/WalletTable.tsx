@@ -216,12 +216,25 @@ const WalletTable: React.FC<Props> = ({ data, headings, setData }) => {
       >
         <table className="w-full text-left table-auto">
           <thead className="bg-secondary/10">
-            <tr className="font-satoshi text-[12px] md:text-[16px] p-2 md:p-4">
-              {headings.map((heading, index) => (
-                <th key={index} className="p-2 md:p-4 text-left">
-                  {heading}
-                </th>
-              ))}
+            <tr className="font-satoshi text-[12px] sm:text-[16px] whitespace-nowrap">
+              <th className="px-2 sm:px-4 py-3 sm:py-4 text-left font-[700] w-[15%]">
+                {headings[0]}
+              </th>
+              <th className="px-2 sm:px-4 py-3 sm:py-4 text-left font-[700] w-[20%]">
+                {headings[1]}
+              </th>
+              <th className="px-2 sm:px-4 py-3 sm:py-4 text-left font-[700] w-[15%]">
+                {headings[2]}
+              </th>
+              <th className="px-2 sm:px-4 py-3 sm:py-4 text-left font-[700] w-[20%]">
+                {headings[3]}
+              </th>
+              <th className="px-2 sm:px-4 py-3 sm:py-4 text-left font-[700] w-[20%]">
+                {headings[4]}
+              </th>
+              <th className="px-2 sm:px-4 py-3 sm:py-4 text-left font-[700] w-[10%]">
+                {headings[5]}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -250,10 +263,10 @@ const WalletTable: React.FC<Props> = ({ data, headings, setData }) => {
                   <td className="p-2 md:p-4 font-satoshi min-w-[100px]">
                     {formatNumberToTwoDecimals(wallet.data.totalBalanceUSD)}
                   </td>
-                  <td className="relative p-2 md:p-4 font-satoshi min-w-[60px] text-center">
-                    <div className="dropdown-container relative inline-block">
+                  <td className="relative px-2 sm:px-4 py-3 sm:py-4 font-satoshi text-center">
+                    <div className="dropdown-container relative">
                       <button
-                        className="relative cursor-pointer"
+                        className="flex items-center justify-center w-[80%] xl:w-[70%] 2xl:w-[40%] lg:w-[100%] cursor-pointer"
                         onClick={() => toggleDropdown(index)}
                       >
                         <Image
@@ -287,7 +300,7 @@ const WalletTable: React.FC<Props> = ({ data, headings, setData }) => {
                               >
                                 Suspend User
                               </button>
-                              
+
                               <button
                                 className="block w-full text-left px-4 py-2 text-sm text-red-500 font-bold cursor-pointer hover:bg-gray-50"
                                 onClick={() =>

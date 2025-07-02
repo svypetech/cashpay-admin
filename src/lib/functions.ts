@@ -1,5 +1,5 @@
 import { formatDistanceToNow, format, parseISO, startOfDay } from "date-fns";
-import { Message } from "../Types/chat";
+import { Message, P2PMessage } from "../Types/chat";
 
 export function shortenAddress(address: string, chars = 6): string {
   if (!address) return "-";
@@ -155,4 +155,42 @@ export const formatFileSize = (size: number): string => {
 export function isUserActive(status: string): boolean {
   if (!status) return false; // Handle undefined or null status
   return status.toLowerCase() !== "banned" && status.toLowerCase() !== "suspend";
+}
+
+interface P2PMessageGroup {
+  date: string;
+  messages: P2PMessage[];
+}
+
+export function groupP2PMessagesByDate(messages: P2PMessage[]): P2PMessageGroup[] {
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return [];
+  }
+
+  // Create a map to group messages by date
+  const groups: Map<string, P2PMessage[]> = new Map();
+
+  messages.forEach((message) => {
+    try {
+      // Get the date part only, without time
+      const messageDate = new Date(message.date);
+      const dateKey = startOfDay(messageDate).toISOString();
+
+      // Store with original date for display formatting later
+      const existingMessages = groups.get(dateKey) || [];
+      groups.set(dateKey, [...existingMessages, message]);
+    } catch (error) {
+      console.error("Error parsing message date:", error, message);
+    }
+  });
+
+  // Convert map to array and sort by date
+  return Array.from(groups.entries())
+    .map(([dateKey, messages]) => ({
+      date: dateKey,
+      messages: messages.sort(
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+      ),
+    }))
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 }

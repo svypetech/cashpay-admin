@@ -3,6 +3,7 @@ import { ArrowLeftRight, ExternalLink, ChevronRight } from "lucide-react";
 import { shortenAddress, timeAgo } from "@/src/lib/functions";
 import TransactionType from "@/src/Types/TransactionManagement";
 import SkeletonTableLoader from "../skeletons/SkeletonTableLoader";
+import ColourfulBlock from "../ui/ColourfulBlock";
 const headings = ["ID", "From → To", "Status", "Block#", "Date"];
 
 export default function TransactionsTableDashboard() {
@@ -59,17 +60,18 @@ export default function TransactionsTableDashboard() {
                       {transaction.web3Data ? shortenAddress(transaction.web3Data.transaction.to): "N/A"}
                     </td>
                     <td className="p-3">
-                      {transaction.status === "completed" ||
-                      transaction.status === "Completed" ? (
-                        <span className="text-left bg-[#71FB5533] text-[#20C000] px-4 py-2 rounded-xl text-xs md:text-base font-semibold whitespace-nowrap">
-                          {transaction.status[0].toUpperCase() +
-                            transaction.status.slice(1)}
-                        </span>
-                      ) : (
-                        <span className="text-left text-[#727272] bg-[#72727233] px-4 py-2 rounded-xl text-xs md:text-base font-semibold whitespace-nowrap">
-                          {transaction.status}
-                        </span>
-                      )}
+                      <ColourfulBlock
+                        className={`${
+                          transaction.status.toLowerCase() === "completed"
+                            ? "bg-[#71FB5533]  text-[#20C000]"
+                            : "bg-[#72727233] text-[#727272]"
+                        }`}
+                        text={
+                          transaction.status[0].toUpperCase() +
+                          transaction.status.slice(1)
+                        }
+                        size="sm"
+                      ></ColourfulBlock>
                     </td>
                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] whitespace-nowrap font-medium">
                       {shortenAddress(

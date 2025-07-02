@@ -89,7 +89,7 @@ const CustomerSupportTable: React.FC<Props> = ({ data, headings }) => {
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{shortenAddress(request.userId)}</td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words"> - </td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">{formatJoiningDate(request.updateDate)}</td>
-                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[200px] break-words text-center">{request.issueType}</td>
+                                    <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[200px] break-words">{request.issueType}</td>
                                     <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[100px]">
                                         {(() => {
                                             const statusConfig = getStatusConfig(request.status);

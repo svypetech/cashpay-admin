@@ -1,10 +1,14 @@
 export default function ColourfulBlock({
   text,
+
   className,
+
   size = "lg",
 }: {
   text: string;
+
   className?: string;
+
   size?: "sm" | "md" | "lg";
 }) {
   return (

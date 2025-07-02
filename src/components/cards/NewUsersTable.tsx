@@ -1,6 +1,7 @@
 import useUser from "@/src/hooks/users/getUsers";
 import SkeletonTableLoader from "../skeletons/SkeletonTableLoader";
 import useFetchUsers from "@/src/hooks/users/getUsers";
+import ColourfulBlock from "../ui/ColourfulBlock";
 
 export default function NewUsers() {
   const { users, isLoading, isError } = useFetchUsers({currentPage: 1, limit: 3})
@@ -43,9 +44,7 @@ export default function NewUsers() {
                   </td>
                   <td className="px-4 py-3 text-gray-600">{user.email}</td>
                   <td className="px-4 py-3">
-                    <span className="inline-block bg-[#71FB5533] text-[#20C000] text-sm font-semibold px-4 py-2 rounded-xl">
-                      {user.verificationStatus}
-                    </span>
+                    <ColourfulBlock size="sm" text={user.verificationStatus} className="bg-[#71FB5533] text-[#20C000]" />
                   </td>
                 </tr>
               ))}

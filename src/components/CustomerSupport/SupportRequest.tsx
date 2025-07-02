@@ -8,6 +8,8 @@ import useFetchSupportRequests from "@/src/hooks/support/getSupportRequests";
 import SkeletonTableLoader from "../skeletons/SkeletonTableLoader";
 import Sort from "../ui/Sort";
 import Error from "../ui/Error";
+import Tabs from "../ui/Tabs";
+import Search from "../ui/Search";
 
 const headings = [
   "TicketID",
@@ -21,24 +23,20 @@ const headings = [
 const sortOptions = [
   { label: "Date", value: "date" },
   { label: "Status", value: "status" },
-  { label: "None" , value: "" }, 
+  { label: "None", value: "" },
 ];
-const navigationTabs = [
-  { id: "all", title: "All" },
-  { id: "unassigned", title: "Unassigned" },
-  { id: "assigned", title: "Assigned" },
-];
+const tabs = ["All", "Unassigned", "Assigned"];
 
 export default function SupportRequests() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeTab, setActiveTab] = useState("all");
+  const [activeTab, setActiveTab] = useState(tabs[0]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("");
   const { requests, totalPages, isLoading, error } = useFetchSupportRequests({
     page: currentPage,
     limit: 10,
     sortBy,
-    tab: activeTab,
+    tab: activeTab.toLowerCase(),
     search: searchQuery,
   });
 
@@ -46,7 +44,7 @@ export default function SupportRequests() {
     // Reset to first page when search or sort changes
     setCurrentPage(1);
   }, [searchQuery, sortBy, activeTab]);
-  
+
   const [filteredData, setFilteredData] = useState(requests);
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -64,49 +62,22 @@ export default function SupportRequests() {
     <div className="px-2">
       {/* Navigation Tabs */}
       <div className="w-full flex items-center mb-4">
-        <div className="flex w-fit">
-          {navigationTabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 text-black ${
-                activeTab === tab.id
-                  ? "border-b-2 border-primary font-semibold"
-                  : "hover:text-gray-700 cursor-pointer"
-              }`}
-            >
-              {tab.title}
-            </button>
-          ))}
-        </div>
+        <Tabs
+          tabs={tabs}
+          setActiveTab={setActiveTab}
+          activeTab={activeTab}
+          size="normal"
+        />
       </div>
 
       {/* Search and Actions */}
       <div
-        className={`flex flex-col md:grid md:grid-cols-4 justify-between items-center mb-2 gap-4`}
+        className={`flex flex-col gap-4 sm:gap-[28px] sm:flex-row`}
       >
-        <div className={`relative w-full md:w-auto md:col-span-3`}>
-          <div className="relative">
-            <input
-              onChange={(e) => setSearchQuery(e.target.value)}
-              type="text"
-              placeholder="Search..."
-              className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:gray-700 focus:border-transparent"
-            />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <Image
-                src="/icons/search.svg"
-                alt="Arrow right"
-                width={24}
-                height={24}
-              />
-            </div>
-          </div>
-        </div>
-
+        <Search className="sm:w-[80%] w-full" onSearch={setSearchQuery} />
         <Sort
-          className="w-full font-[satoshi] md:col-span-1"
-          title="Sort by"
+          className="sm:w-[20%] w-full"
+          title="Sort"
           options={sortOptions}
           onSort={handleSort}
         />

@@ -54,7 +54,7 @@ export default function Navbar() {
       </Link>
 
       <div className="flex items-center gap-2 sm:gap-6">
-        <div ref={dropdownRef} className="relative bg-gray-100 rounded-t-xl py-2 px-4 flex items-center gap-2">
+        <div ref={dropdownRef} className={`relative bg-gray-100 ${isMenuOpen ? "rounded-t-xl" : "rounded-xl"} py-2 px-4 flex items-center gap-2`}>
           <div className="flex items-center gap-2">
             <div className="relative h-8 w-8 rounded-full overflow-hidden">
               <img

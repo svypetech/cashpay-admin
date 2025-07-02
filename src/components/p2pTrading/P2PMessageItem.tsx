@@ -1,16 +1,16 @@
 import { useState } from "react";
 import ImageModal from "../ui/ImageModal";
-import { Message } from "@/src/Types/chat";
+import { P2PMessage } from "@/src/Types/chat";
 import { formatMessageTime } from "@/src/lib/functions";
 
 interface MessageItemProps {
-  message: Message;
+  message: P2PMessage;
   isFromCurrentUser: boolean;
   isTemp?: boolean;
   showStatus?: boolean;
 }
 
-export default function MessageItem({
+export default function P2PMessageItem({
   message,
   isFromCurrentUser,
   isTemp = false,

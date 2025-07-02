@@ -132,7 +132,7 @@ const P2PTableActive: React.FC<Props> = ({ data, headings, setData }) => {
                   <td className="px-2 sm:px-4 py-3 sm:py-4 font-satoshi">
                     <ColourfulBlock
                       text={trade.payment}
-                      className={`text-center rounded-xl md:text-md font-semibold bg-[#71FB5533] text-[#20C000]`}
+                      className={`text-center md:text-md font-semibold bg-[#71FB5533] text-[#20C000] sm:min-w-[150px] min-w-[105px] `}
                     />
                   </td>
                   <td className="px-2 sm:px-4 py-3 sm:py-4 font-satoshi">

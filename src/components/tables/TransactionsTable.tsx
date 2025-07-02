@@ -19,29 +19,7 @@ const TransactionTable: React.FC<Props> = ({ data, headings }) => {
   const [showPopup, setShowPopup] = useState(false);
   const [selectedTransaction, setSelectedTransaction] =
     useState<Transaction | null>(null);
-  const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
   const tableRef = useRef<HTMLDivElement>(null);
-
-  // Simple dropdown logic: close on outside click
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (activeDropdown !== null) {
-        const target = event.target as HTMLElement
-        if (!target.closest(".dropdown-container")) {
-          setActiveDropdown(null)
-        }
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [activeDropdown])
-
-  const toggleDropdown = (index: number) => {
-    setActiveDropdown(activeDropdown === index ? null : index)
-  }
 
   // Function to get status display text and styling
   const getStatusConfig = (status: string) => {
@@ -97,7 +75,11 @@ const TransactionTable: React.FC<Props> = ({ data, headings }) => {
               data.map((transaction, index) => (
                 <tr
                   key={index}
-                  className="border-b border-gray-200 text-[12px] md:text-[16px] hover:bg-gray-50 transition-colors"
+                  onClick={() => {
+                    setSelectedTransaction(transaction)
+                    setShowPopup(true)}
+                  }
+                  className="border-b border-gray-200 text-[12px] md:text-[16px] hover:bg-gray-50 transition-colors cursor-pointer"
                 >
                   <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi font-bold text-primary min-w-[100px] break-words">
                     <ExpandableId id={transaction.id || "N/A"} />
@@ -133,37 +115,6 @@ const TransactionTable: React.FC<Props> = ({ data, headings }) => {
                   </td>
                   <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[60px] whitespace-nowrap">
                     {timeAgo(transaction.date)}
-                  </td>
-                  <td className="relative p-2 md:p-4 font-satoshi min-w-[60px] text-center">
-                    <div className="dropdown-container relative inline-block">
-                      <button
-                        className="relative cursor-pointer"
-                        onClick={() => toggleDropdown(index)}
-                      >
-                        <Image
-                          src="/icons/options.svg"
-                          alt="Options"
-                          width={24}
-                          height={24}
-                          className="w-5 h-5"
-                        />
-                      </button>
-
-                      {activeDropdown === index && (
-                        <div className="absolute z-10 right-0 top-full mt-2 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-100">
-                          <button
-                            className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
-                            onClick={() => {
-                              setSelectedTransaction(transaction)
-                              setShowPopup(true)
-                              setActiveDropdown(null)
-                            }}
-                          >
-                            View Details
-                          </button>
-                        </div>
-                      )}
-                    </div>
                   </td>
                 </tr>
               ))}

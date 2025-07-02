@@ -2,17 +2,17 @@
 
 import Image from "next/image";
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import DisputeDetailsCard from "../p2pTrading/DisputeDetailsCard";
 import DisputeResolutionPopup from "../p2pTrading/ResolveDisputePopup";
-
 import ExpandableId from "../ui/ExpandableId";
 import ColourfulBlock from "../ui/ColourfulBlock";
 import axios from "axios";
-
 import DisputeSkeletonCard from "../skeletons/DisputeSkeletonCard";
 import Trade from "@/src/Types/Trades";
 import { shortenAddress } from "@/src/lib/functions";
+import useFetchP2PChat from "@/src/hooks/p2p/useFetchP2PChat";
+import P2PChatSidebar from "./P2PChatSidebar";
 import { useToast } from "@/src/lib/ToastProvider";
 
 interface Props {
@@ -43,7 +43,10 @@ const P2PTableDisputed: React.FC<Props> = ({ data, headings, setData }) => {
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState<number>(0);
+
+  // Chat sidebar states
+  const [showChatSidebar, setShowChatSidebar] = useState(false);
+  const [selectedChatId, setSelectedChatId] = useState<string>("");
 
   const [isFetchingSeller, setIsFetchingSeller] = useState(false);
   const [sellerAndBuyerDetails, setSellerAndBuyerDetails] = useState({
@@ -51,34 +54,33 @@ const P2PTableDisputed: React.FC<Props> = ({ data, headings, setData }) => {
     buyer: {} as SellerBuyer,
   });
 
-  // Simple dropdown logic: close on outside click
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (activeDropdown !== null) {
-        const target = event.target as HTMLElement;
-        if (!target.closest(".dropdown-container")) {
-          setActiveDropdown(null);
-        }
-      }
-    };
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
+  const needsPadding =
+    activeDropdown !== null &&
+    (selectedIndex >= data.length - 2 || data.length <= 2);
+  const tableRef = useRef<HTMLDivElement>(null);
+  const dropdownRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [activeDropdown]);
-
-  const toggleDropdown = (index: number) => {
-    setSelectedIndex(index); // Set selected index first
-    setActiveDropdown(activeDropdown === index ? null : index);
-  };
+  // Use the chat hook
+  const {
+    messages,
+    isLoading: isChatLoading,
+    isLoadingMore,
+    isError: chatError,
+    currentChatUser,
+    loadMoreMessages,
+    hasMore,
+  } = useFetchP2PChat({
+    chatId: selectedChatId,
+    setChatSidebarOpen: setShowChatSidebar,
+  });
 
   const getSellerAndBuyerDetails = async (trade: Trade) => {
     if (!trade) return;
     try {
       setIsFetchingSeller(true);
       let response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/transaction/order/sellerBuyerDetails/?orderId=${trade.tradeId}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}transaction/order/sellerBuyerDetails/?orderId=${trade.tradeId}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -90,12 +92,28 @@ const P2PTableDisputed: React.FC<Props> = ({ data, headings, setData }) => {
         buyer: response.data.data.buyer,
       });
     } catch (error: any) {
-      showError("Failed to fetch seller and buyer details: " + error.response.data.message);
+      showError(
+        "Failed to fetch seller and buyer details: " +
+          (error.response?.data?.message || error.message)
+      );
       console.error("Error fetching seller and buyer details:", error);
     } finally {
       setIsFetchingSeller(false);
     }
   };
+
+  // Handle chat link click
+  const handleChatClick = (trade: Trade) => {
+    setSelectedChatId(trade.tradeId); // This will trigger the useFetchChat hook
+  };
+
+  // Handle chat sidebar close
+  const handleCloseChatSidebar = () => {
+    setShowChatSidebar(false);
+    setSelectedChatId(""); // Clear the chat ID
+  };
+
+  // Create default chat user if no user data is available
 
   const handleView = (trade: Trade) => {
     if (selectedTrade) {
@@ -120,7 +138,7 @@ const P2PTableDisputed: React.FC<Props> = ({ data, headings, setData }) => {
 
     try {
       let response = await axios.put(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/transaction/order/resolveDispute`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}transaction/order/resolveDispute`,
         {
           orderId: selectedTrade ? selectedTrade.tradeId : "",
           favourOf: favor,
@@ -133,7 +151,6 @@ const P2PTableDisputed: React.FC<Props> = ({ data, headings, setData }) => {
         }
       );
       showSuccess("Dispute resolved successfully!");
-      // Update the trade status in the local state
       setData((prevTrades) =>
         prevTrades.map((trade) =>
           trade.tradeId === selectedTrade?.tradeId
@@ -142,7 +159,10 @@ const P2PTableDisputed: React.FC<Props> = ({ data, headings, setData }) => {
         )
       );
     } catch (error: any) {
-      showError("Failed to resolve dispute");
+      showError(
+        "Failed to resolve dispute: " +
+          (error.response?.data?.message || error.message)
+      );
       console.error("Error resolving dispute:", error);
     } finally {
       setShowResolvePopup(false);
@@ -150,17 +170,37 @@ const P2PTableDisputed: React.FC<Props> = ({ data, headings, setData }) => {
     }
   };
 
-  // Calculate if we need padding based on current state
-  const needsPadding = activeDropdown !== null && (
-    selectedIndex >= (data.length - 2) || // Last two rows
-    data.length <= 2 // If there are 2 or fewer rows, always add padding
-  );
+  const toggleDropdown = (index: number) => {
+    setSelectedIndex(index);
+    setActiveDropdown(activeDropdown === index ? null : index);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (activeDropdown !== null) {
+        const target = event.target as HTMLElement;
+        if (!target.closest(".dropdown-container")) {
+          setActiveDropdown(null);
+        }
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [activeDropdown]);
 
   return (
     <div className="flex-1 rounded-lg w-full py-5">
-      {/* Table - Add dynamic padding for dropdown space */}
-      <div className={`rounded-lg overflow-x-auto w-full ${needsPadding ? "pb-28" : ""}`}>
-        <table className="w-full text-left table-auto">
+      {/* Table */}
+      <div
+        className={`rounded-lg overflow-x-auto w-full pb-[30px]  ${
+          needsPadding ? "pb-[100px]" : ""
+        }`}
+        ref={tableRef}
+      >
+        <table className="w-full text-left table-auto min-w-[600px]">
           <thead className="bg-secondary/10">
             <tr className="font-satoshi text-[12px] md:text-[16px] py-3 md:py-4 px-2 md:px-4">
               {headings.map((heading, index) => (
@@ -199,14 +239,17 @@ const P2PTableDisputed: React.FC<Props> = ({ data, headings, setData }) => {
                     />
                   </td>
                   <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[100px]">
-                    <span className="text-[12px] md:text-[16px] px-4 py-2 text-primary underline decoration-primary cursor-pointer">
+                    <button
+                      onClick={() => handleChatClick(trade)}
+                      className="text-[12px] md:text-[16px] px-4 py-2 text-primary underline decoration-primary cursor-pointer hover:text-primary/80 transition-colors"
+                    >
                       {`chat.cashpay/${shortenAddress(trade.tradeId)}`}
-                    </span>
+                    </button>
                   </td>
                   <td className="relative px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[60px] text-center">
-                    <div className="dropdown-container relative inline-block">
+                    <div className="dropdown-container relative">
                       <button
-                        className="relative cursor-pointer"
+                        className="flex items-center justify-center w-[80%] lg:w-[100%] xl:w-[70%] 2xl:w-[50%]  cursor-pointer"
                         onClick={() => toggleDropdown(index)}
                       >
                         <Image
@@ -214,14 +257,19 @@ const P2PTableDisputed: React.FC<Props> = ({ data, headings, setData }) => {
                           alt="Options"
                           width={24}
                           height={24}
-                          className="w-5 h-5"
+                          className="w-4 h-4"
                         />
                       </button>
 
                       {activeDropdown === index && (
-                        <div className="absolute z-10 right-0 top-full mt-2 w-56 bg-white rounded-md shadow-lg py-1 border border-gray-100">
+                        <div
+                          className="absolute z-10 right-0 w-45 bg-white rounded-md shadow-lg py-1 border border-gray-100"
+                          ref={(el) => {
+                            dropdownRefs.current[index] = el;
+                          }}
+                        >
                           <button
-                            className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50 border-b border-gray-100"
+                            className="block w-full text-left px-3 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
                             onClick={() => handleView(trade)}
                           >
                             {showDetails &&
@@ -230,28 +278,31 @@ const P2PTableDisputed: React.FC<Props> = ({ data, headings, setData }) => {
                               ? "Back to all Trades"
                               : "View Details"}
                           </button>
-                          <button
-                            className={`block w-full text-left px-4 py-2 text-sm text-primary font-bold  hover:bg-gray-50 border-b border-gray-100 ${
-                              trade.status.toLowerCase() === "resolved"
-                                ? "opacity-50 cursor-not-allowed"
-                                : "cursor-pointer"
-                            }`}
-                            onClick={() => handleResolve("Buyer", trade)}
-                            disabled={trade.status.toLowerCase() === "resolved"}
-                          >
-                            Resolve in Favour of Buyer
-                          </button>
-                          <button
-                            className={`block w-full text-left px-4 py-2 text-sm text-primary font-bold hover:bg-gray-50 ${
-                              trade.status.toLowerCase() === "resolved"
-                                ? "opacity-50 cursor-not-allowed"
-                                : "cursor-pointer"
-                            }`}
-                            onClick={() => handleResolve("Seller", trade)}
-                            disabled={trade.status.toLowerCase() === "resolved"}
-                          >
-                            Resolve in Favour of Seller
-                          </button>
+                          {trade.status.toLowerCase() !== "resolved" && (
+                            <>
+                              <div className="border-t border-gray-100"></div>
+                              <button
+                                className={`block w-full text-left px-4 py-2 text-sm text-primary font-bold  hover:bg-gray-50 ${
+                                  trade.status.toLowerCase() === "resolved"
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : "cursor-pointer"
+                                }`}
+                                onClick={() => handleResolve("Buyer", trade)}
+                              >
+                                Resolve in Favour of Buyer
+                              </button>
+                              <button
+                                className={`block w-full text-left px-4 py-2 text-sm text-primary font-bold hover:bg-gray-50 ${
+                                  trade.status.toLowerCase() === "resolved"
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : "cursor-pointer"
+                                }`}
+                                onClick={() => handleResolve("Seller", trade)}
+                              >
+                                Resolve in Favour of Seller
+                              </button>
+                            </>
+                          )}
                         </div>
                       )}
                     </div>
@@ -304,8 +355,23 @@ const P2PTableDisputed: React.FC<Props> = ({ data, headings, setData }) => {
           isLoading={isSubmitting}
         />
       )}
+
+      {/* Chat Sidebar */}
+      <P2PChatSidebar
+        isOpen={showChatSidebar}
+        onClose={handleCloseChatSidebar}
+        chatId={selectedChatId}
+        user={currentChatUser}
+        initialMessages={messages}
+        isLoading={isChatLoading}
+        isError={chatError}
+        loadMoreMessages={loadMoreMessages}
+        isLoadingMore={isLoadingMore}
+        hasMore={hasMore}
+      />
     </div>
   );
 };
 
 export default P2PTableDisputed;
+

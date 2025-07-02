@@ -43,7 +43,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
       if (loading) { 
         return (
           <div className="flex items-center justify-center h-screen">
-            <Loader2 className="animate-spin text-blue-500" />
+            <Loader2 className="animate-spin h-8 w-8 text-primary" />
           </div>
         );
       }

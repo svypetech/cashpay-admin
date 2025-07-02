@@ -253,7 +253,7 @@ export default function DateRangePicker({
       <button 
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full cursor-pointer flex justify-between items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 ${className}`}>
+        className={`w-full cursor-pointer flex justify-between items-center gap-2 px-4 py-2 rounded-lg shadow-[0px_0px_4px_0px_rgba(0,0,0,0.2)] text-gray-700 bg-white hover:bg-gray-50 ${className}`}>
         {getDisplayText().trim() ? <span>{getDisplayText()}</span> : <span>Filter</span>}
         <Image
           src="/icons/calendar.svg"

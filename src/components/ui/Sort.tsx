@@ -6,21 +6,34 @@ interface SortOption {
 }
 
 interface SortProps {
-  className: string;
+  className?: string;
   title: string;
   options: SortOption[];
   onSort: (value: string) => void;
+  sortBy?: string;
 }
 
-export default function Sort({ className, title, options, onSort }: SortProps) {
+export default function Sort({
+  className,
+  title,
+  options,
+  onSort,
+  sortBy,
+}: SortProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedOption, setSelectedOption] = useState<SortOption | null>(null);
+  const [selectedOption, setSelectedOption] = useState<SortOption | null>(
+    sortBy ? options.find((option) => option.value === sortBy) || null : null
+  );
+  // Ref to the dropdown container to handle outside clicks
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     }
@@ -36,10 +49,10 @@ export default function Sort({ className, title, options, onSort }: SortProps) {
   };
 
   return (
-    <div className={`relative ${className}`} ref={dropdownRef}>
+    <div className={`relative ${className}} ref={dropdownRef`}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex justify-between items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50"
+        className="w-full flex justify-between items-center gap-2 px-4 py-2 rounded-lg text-gray-700 bg-white hover:bg-gray-50 shadow-[0px_0px_4px_0px_rgba(0,0,0,0.2)]"
       >
         <span>{selectedOption ? selectedOption.label : title}</span>
         <img
@@ -58,7 +71,9 @@ export default function Sort({ className, title, options, onSort }: SortProps) {
               key={option.value}
               onClick={() => handleOptionClick(option)}
               className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${
-                selectedOption?.value === option.value ? "bg-gray-50 font-medium" : ""
+                selectedOption?.value === option.value
+                  ? "bg-gray-50 font-medium"
+                  : ""
               }`}
             >
               {option.label}

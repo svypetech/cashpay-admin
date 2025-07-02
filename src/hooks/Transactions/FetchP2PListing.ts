@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { set } from "date-fns";
 export default function useFetchP2PListing({
   currentPage,
   limit,
@@ -64,5 +65,5 @@ export default function useFetchP2PListing({
     fetchListings();
   }, [currentPage, debouncedSearchQuery, addVisibility, sortBy]);
 
-  return { listings, totalPages, isLoading, isError };
+  return { listings, totalPages, isLoading, isError, setListings };
 }

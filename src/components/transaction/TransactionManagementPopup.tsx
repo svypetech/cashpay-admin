@@ -137,9 +137,7 @@ export default function TransactionManagementPopup({
               {/* Status */}
               <div className="flex flex-row sm:items-center gap-2">
                 <span className="w-28 text-sm font-bold bg-[#27AAE11A] px-4 py-1 rounded-md">Status</span>
-                <span className="text-sm text-gray-600 font-semibold">
-                  {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
-                </span>
+                <span className={`text-sm text-gray-600 font-semibold ${transaction.status.toLowerCase() === 'completed' ? 'text-green-500' : transaction.status.toLowerCase() === 'pending' ? 'text-yellow-500' : 'text-red-500'}`}></span>
               </div>
 
               {/* Block */}
