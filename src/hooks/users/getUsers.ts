@@ -55,8 +55,6 @@ export default function useFetchUsers( {currentPage, limit, sortBy, status, sear
           url += `&endDate=${formatDateForBackend(endDate)}`;
         }
 
-        console.log("Fetching users with URL:", url); // Debug log
-
         const response = await axios.get(url, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -66,7 +64,6 @@ export default function useFetchUsers( {currentPage, limit, sortBy, status, sear
         setUsers(response.data.data.users);
         setTotalPages(response.data.data.totalPages);
       } catch (error) {
-        console.error("Failed to fetch users:", error);
         setIsError(true);
         setUsers([]);
       } finally {

@@ -29,8 +29,6 @@ const handleActivateUser = async ({
             }
         })
         
-        console.log("Response:", response.data)
-        
         if (response.data.success) {
             showSuccess && showSuccess("Success", "User activated successfully")
             setSuccess && setSuccess(true)
@@ -38,7 +36,6 @@ const handleActivateUser = async ({
             showError && showError("Activation Failed", "Failed to activate user")
         }
     } catch (error) {
-        console.error("Error activating user:", error)
         showError && showError("Error", "An error occurred while activating the user")
     } finally {
         if (setIsSubmitting) {

@@ -393,7 +393,6 @@ export default function SettingsPage() {
             </div>
             <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-gray-600" />
           </button>
-          <div className="border-t border-gray-100"></div>
         </div>
       </div>
 

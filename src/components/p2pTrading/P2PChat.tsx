@@ -6,8 +6,8 @@ import ChatHeaderSkeleton from "@/src/components/skeletons/ChatHeaderSkeleton";
 import { ChatUser, P2PMessage } from "@/src/Types/chat";
 import { useP2PSocket } from "@/src/hooks/p2p/useP2PSocket";
 import ChatHeader from "../CustomerSupport/ChatHeader";
-import ChatInput from "../CustomerSupport/ChatInput";
 import P2PMessageList from "./P2PMessageList";
+import ChatInput from "../CustomerSupport/ChatInput";
 
 interface ChatProps {
   chatId: string;
@@ -36,7 +36,7 @@ export default function P2PChat({
   isLoadingMore = false,
   hasMore = false,
 }: ChatProps) {
-  const { sendMessage, onNewMessage, isConnected } = useP2PSocket();
+  const { sendMessage, sendFile, onNewMessage, isConnected } = useP2PSocket();
   
   // ✨ DUAL ARRAY SYSTEM
   const [apiMessages, setApiMessages] = useState<P2PMessage[]>(initialMessages); // From API/infinite scroll
@@ -71,8 +71,6 @@ export default function P2PChat({
   // 📨 HANDLE NEW MESSAGES FROM SOCKET
   useEffect(() => {
     const cleanupListener = onNewMessage((newMessages, isRefetch) => {
-      console.log(`📨 Socket: ${isRefetch ? 'REFETCH' : 'NEW MESSAGE'} - ${newMessages.length} messages`);
-      
       if (isRefetch) {
         // Full refetch - add to API messages
         setApiMessages(prev => {
@@ -80,7 +78,6 @@ export default function P2PChat({
           const trulyNewMessages = newMessages.filter(msg => !existingIds.has(msg._id));
           
           if (trulyNewMessages.length > 0) {
-            console.log(`📚 Adding ${trulyNewMessages.length} messages to API array`);
             return [...prev, ...trulyNewMessages];
           }
           return prev;
@@ -90,21 +87,17 @@ export default function P2PChat({
         const newMessage = newMessages[0];
         
         if (newMessage && newMessage.orderId === chatId) {
-          console.log(`🔌 Processing new message: ${newMessage._id} - "${newMessage.message}"`);
-          
           // Simple matching: find temp message with same content
           let tempIdToReplace = '';
           tempMessages.forEach((tempMsg, tempId) => {
-            if (tempMsg.message === newMessage.message) {
+            if (tempMsg.message === newMessage.message || 
+                (tempMsg.image && newMessage.image && tempMsg.image === newMessage.image)) {
               tempIdToReplace = tempId;
-              console.log(`✅ Found matching temp message: ${tempId}`);
             }
           });
           
           if (tempIdToReplace) {
             // Replace temp message
-            console.log(`🔄 Replacing temp ${tempIdToReplace} with real ${newMessage._id}`);
-            
             // Remove from temp messages
             setTempMessages(prev => {
               const updated = new Map(prev);
@@ -121,7 +114,6 @@ export default function P2PChat({
             setSocketMessages(prev => {
               const exists = prev.some(msg => msg._id === newMessage._id);
               if (!exists) {
-                console.log(`➕ Adding new message: ${newMessage._id}`);
                 return [...prev, newMessage];
               }
               return prev;
@@ -136,7 +128,7 @@ export default function P2PChat({
 
   // 📤 HANDLE SENDING MESSAGES
   const handleSendMessage = async (text: string, file?: File) => {
-    if (!text.trim()) return;
+    if (!text.trim() && !file) return;
     
     setSendingMessage(true);
     
@@ -144,12 +136,21 @@ export default function P2PChat({
       const userInfo = localStorage.getItem("user");
       const currentUserId = userInfo ? JSON.parse(userInfo)._id : null;
       
-      const { success, tempId } = await sendMessage(text, chatId);
+      let result;
       
-      if (success && tempId) {
+      if (file) {
+        // Send file with optional message
+        result = await sendFile(file, text, chatId);
+      } else {
+        // Send text message
+        result = await sendMessage(text, chatId);
+      }
+      
+      if (result.success && result.tempId) {
         const tempMessage: P2PMessage = {
-          _id: tempId,
+          _id: result.tempId,
           message: text,
+          image: file ? URL.createObjectURL(file) : undefined,
           isRead: false,
           isReplied: false,
           senderType: "support agent", 
@@ -159,32 +160,17 @@ export default function P2PChat({
           __v: 0,
         };
         
-        console.log("📝 CREATING TEMP MESSAGE:", {
-          tempId,
-          message: text,
-          orderId: chatId,
-          timestamp: tempMessage.date
-        });
-        
         // Add to temp messages (for loading state)
         setTempMessages(prev => {
-          const newMap = new Map(prev).set(tempId, tempMessage);
-          console.log(`📋 Temp messages after add:`, Array.from(newMap.entries()).map(([id, msg]) => ({ id, content: msg.message })));
+          const newMap = new Map(prev).set(result.tempId!, tempMessage);
           return newMap;
         });
         
         // Add to socket messages (for immediate display)
         setSocketMessages(prev => {
           const updated = [...prev, tempMessage];
-          console.log(`🔌 Socket messages after add:, updated.map(msg => ({ id: msg._id, content: msg.message }))`);
           return updated;
         });
-        
-        if (file) {
-          console.log("📎 File attachment handling needed:", file);
-        }
-      } else {
-        console.error("❌ Send message failed:", { success, tempId });
       }
     } catch (error) {
       console.error("❌ Error sending message:", error);
@@ -195,7 +181,6 @@ export default function P2PChat({
 
   // 🔄 RESET WHEN CHAT CHANGES
   useEffect(() => {
-    console.log("🔄 Chat changed, resetting arrays");
     setApiMessages(initialMessages);
     setSocketMessages([]);
     setTempMessages(new Map());
@@ -217,7 +202,6 @@ export default function P2PChat({
         for (const [tempId, tempMsg] of updated.entries()) {
           const age = Date.now() - new Date(tempMsg.date).getTime();
           if (age > 30000) { // Remove temp messages older than 30 seconds
-            console.log(`🕒 Removing expired temp message: ${tempId}`);
             updated.delete(tempId);
             hasChanges = true;
             
@@ -238,8 +222,6 @@ export default function P2PChat({
   // 📊 PREPARE DATA FOR DISPLAY
   const displayMessages = allMessages();
   const tempMessageIds = Array.from(tempMessages.keys());
-
-  console.log(`📊 Display: ${displayMessages.length} total (${apiMessages.length} API + ${socketMessages.length} socket, ${tempMessageIds.length} temp)`);
 
   return (
     <div className={`flex flex-col bg-white h-full font-inter`}>
@@ -279,7 +261,7 @@ export default function P2PChat({
         </div>
       )}
 
-      <ChatInput 
+      <ChatInput
         onSendMessage={handleSendMessage} 
         disabled={sendingMessage || !isConnected}
       />
@@ -294,7 +276,6 @@ function getUserIdFromLocalStorage(): string {
     const user = JSON.parse(userInfo);
     return user._id || "agent";
   } catch (error) {
-    console.error("Error parsing user from localStorage:", error);
     return "agent";
   }
 }

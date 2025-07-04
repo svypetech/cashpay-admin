@@ -112,9 +112,9 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
             >
               {isLoading ? (
                 <span className="flex items-center justify-center gap-2">
-                  
-                  <span>Please wait...</span>
-                </span>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Please wait...</span>
+                  </span>
               ) : (
                 confirmText
               )}

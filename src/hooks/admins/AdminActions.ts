@@ -37,7 +37,6 @@ export const handleActivateAdmin = async ({
             throw new Error("Failed to activate admin");
         }
     } catch (error) {
-        console.error("Error activating admin:", error);
         showError && showError("Error", "An error occurred while activating the admin");
         throw error;
     } finally {
@@ -65,7 +64,6 @@ export const handleBanAdmin = async ({
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
             }
         });
-        console.log("Response:", response.data);
         if (response.data.success) {
             showSuccess && showSuccess("Success", "Admin banned successfully");
             setSuccess && setSuccess(true);
@@ -75,7 +73,6 @@ export const handleBanAdmin = async ({
             throw new Error("Failed to ban admin");
         }
     } catch (error) {
-        console.error("Error banning admin:", error);
         showError && showError("Error", "An error occurred while banning the admin");
         throw error;
     } finally {
@@ -99,13 +96,12 @@ export const handleSuspendAdmin = async ({
         }
         const response = await axios.put(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/suspendUser`, {
             id: id,
-            days: days 
+            days: days // Include days if provided
         }, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
             }
         });
-        console.log("Response:", response.data);
         if (response.data.success) {
             showSuccess && showSuccess("Success", "Admin suspended successfully");
             setSuccess && setSuccess(true);
@@ -115,7 +111,6 @@ export const handleSuspendAdmin = async ({
             throw new Error("Failed to suspend admin");
         }
     } catch (error) {
-        console.error("Error suspending admin:", error);
         showError && showError("Error", "An error occurred while suspending the admin");
         throw error;
     } finally {
@@ -151,7 +146,6 @@ export const handleDeleteAdmin = async ({
             throw new Error("Failed to delete admin");
         }
     } catch (error) {
-        console.error("Error deleting admin:", error);
         showError && showError("Error", "An error occurred while deleting the admin");
         throw error;
     } finally {

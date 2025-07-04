@@ -1,14 +1,16 @@
 "use client";
 
+import { useToast } from '@/src/lib/ToastProvider';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_WS_URL || '';
 
-export const useSocket = () => {
+export const useSocket = (ticketId?: string) => {
     const [isConnected, setIsConnected] = useState(false);
     const socketRef = useRef<Socket | null>(null);
     const recentlySentRef = useRef<boolean>(false);
+    const { showSuccess, showError } = useToast();
     
     useEffect(() => {
         const socket = io(SOCKET_URL, {
@@ -24,29 +26,58 @@ export const useSocket = () => {
         socketRef.current = socket;
         
         socket.on('connect', () => {
-            console.log('🔌 Socket.IO Connected');
             setIsConnected(true);
+            
+            // Emit joinTicket event once connected
+            if (ticketId) {
+                // showSuccess("Connected", "Successfully connected to the support server");
+                socket.emit('joinTicket', {'ticketId':ticketId});
+                console.log(`Joined ticket: ${ticketId}`);
+            }
         });
         
         socket.on('disconnect', () => {
-            console.log('🔌 Socket.IO Disconnected');
             setIsConnected(false);
         });
         
         socket.on('connect_error', (error) => {
-            console.error('🔌 Socket.IO Connection Error:', error);
             setIsConnected(false);
+            // showError("Connection Error", `Failed to connect to server: ${error.message}`);
+        });
+
+        // Listen for general socket errors
+        socket.on('error', (error) => {
+            showError("Socket Error", error.message || "An unexpected error occurred");
+        });
+
+        // Listen for file upload errors
+        socket.on('fileUploadError', (error) => {
+            showError("File Upload Failed", error.message || "Failed to upload file");
+        });
+
+        // Listen for message send errors
+        socket.on('messageError', (error) => {
+            showError("Message Send Failed", error.message || "Failed to send message");
+        });
+
+        // Listen for authentication errors
+        socket.on('authError', (error) => {
+            showError("Authentication Error", error.message || "Authentication failed");
+        });
+
+        // Listen for general server errors
+        socket.on('serverError', (error) => {
+            showError("Server Error", error.message || "Server error occurred");
         });
         
         return () => {
             socket.disconnect();
         };
-    }, []);
+    }, [showError, ticketId]);
     
-    // 📤 SEND MESSAGE
+    // 📤 SEND MESSAGE (Text only)
     const sendMessage = useCallback((message: string, ticketId: string) => {
         if (!socketRef.current || !isConnected) {
-            console.error("❌ Socket not connected");
             return Promise.resolve({ success: false, tempId: null });
         }
         
@@ -54,9 +85,6 @@ export const useSocket = () => {
             try {
                 const tempId = `temp-${Date.now()}`;
                 
-                console.log(`📤 Sending message: "${message}" with tempId: ${tempId}`);
-                
-                // Set recently sent flag
                 recentlySentRef.current = true;
                 
                 socketRef.current!.emit('message', {
@@ -65,17 +93,93 @@ export const useSocket = () => {
                     authorization: `Bearer ${localStorage.getItem("token")}`
                 });
                 
-                // Reset flag after 10 seconds
                 setTimeout(() => {
                     recentlySentRef.current = false;
                 }, 10000);
                 
                 resolve({ success: true, tempId });
             } catch (error) {
-                console.error("❌ Error emitting message:", error);
                 resolve({ success: false, tempId: null });
             }
         });
+    }, [isConnected]);
+
+    // 📎 SEND FILE with optional message
+    const sendFile = useCallback((file: File, message: string, ticketId: string) => {
+        if (!socketRef.current || !isConnected) {
+            showError("Connection Error", "Unable to send file. Please check your connection.");
+            return Promise.resolve({ success: false, tempId: null });
+        }
+        
+        return new Promise<{ success: boolean, tempId: string | null }>((resolve) => {
+            try {
+                const tempId = `temp-${Date.now()}`;
+                
+                // Convert file to ArrayBuffer using FileReader
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const arrayBuffer = e.target?.result as ArrayBuffer;
+                    if (!arrayBuffer) {
+                        showError("Upload Error", "Failed to read file");
+                        resolve({ success: false, tempId: null });
+                        return;
+                    }
+
+                    // Convert ArrayBuffer to Buffer (Node.js style buffer that Socket.IO can handle)
+                    const buffer = Buffer.from(arrayBuffer);
+
+                    // First argument: file metadata + message + ticketId
+                    const fileMetadata = {
+                        image: {
+                            fieldname: "file",
+                            originalname: file.name,
+                            encoding: "7bit",
+                            mimetype: file.type,
+                            size: file.size
+                        },
+                        // Send message in the same format as server expects
+                        message: message.trim() ? message.trim() : file.name,
+                        ticketId: ticketId
+                    };
+
+                    recentlySentRef.current = true;
+                    
+                    // Emit with both arguments - send actual buffer
+                    socketRef.current!.emit('handleFile', fileMetadata, buffer);
+                    
+                    setTimeout(() => {
+                        recentlySentRef.current = false;
+                    }, 10000);
+                    
+                    resolve({ success: true, tempId });
+                };
+                
+                reader.onerror = () => {
+                    showError("Upload Error", "Failed to read file");
+                    resolve({ success: false, tempId: null });
+                };
+                
+                // Read file as ArrayBuffer to get binary data
+                reader.readAsArrayBuffer(file);
+            } catch (error) {
+                showError("Upload Error", "Failed to send file");
+                resolve({ success: false, tempId: null });
+            }
+        });
+    }, [isConnected, showError]);
+
+    // 📤 JOIN TICKET (Manual join if needed)
+    const joinTicket = useCallback((ticketId: string) => {
+        if (!socketRef.current || !isConnected) {
+            return false;
+        }
+        
+        try {
+            socketRef.current.emit('joinTicket', ticketId);
+            return true;
+        } catch (error) {
+            return false;
+        }
     }, [isConnected]);
     
     // 📨 LISTEN FOR NEW MESSAGES
@@ -83,42 +187,86 @@ export const useSocket = () => {
         if (!socketRef.current) return () => {};
         
         socketRef.current.on('ticketChat', (...args) => {
-            console.log(`🔌 Received ticketChat with ${args.length} arguments:`, args);
+            // Handle the server response format you provided
+            const serverResponse = args[0];
             
-            // The structure is: ['ticketChat', dataObject, latestMessageObject]
-            // We want the last argument which is the latest message
-            const latestMessage = args[args.length - 1];
-            
-            if (latestMessage && latestMessage._id && latestMessage.message) {
-                console.log(`🔌 Using latest message: ${latestMessage._id} - "${latestMessage.message}"`);
-                callback([latestMessage], false);
+            if (serverResponse && serverResponse.success && serverResponse.data && serverResponse.data.chats) {
+                // This is the server confirmation response with chats array
+                const chats = serverResponse.data.chats;
+                if (chats.length > 0) {
+                    // Check if this is a new message or a refetch
+                    // If recentlySentRef is true, this might be our own message confirmation
+                    if (recentlySentRef.current) {
+                        // This is likely our own message confirmation
+                        const latestMessage = chats[0];
+                        callback([latestMessage], false);
+                    } else {
+                        // This might be messages from others or initial load
+                        // Process all new messages that we haven't seen
+                        callback(chats, true); // Mark as refetch to handle properly in Chat component
+                    }
+                }
             } else {
-                // Fallback to the data object
-                const data = args.find(arg => arg && arg.success && arg.data);
-                if (data && data.data.chats && data.data.chats.length > 0) {
-                    const newestMessage = data.data.chats[0];
-                    console.log(`🔌 Fallback to newest from chats: ${newestMessage._id} - "${newestMessage.message}"`);
-                    callback([newestMessage], false);
+                // Handle direct message format (single message)
+                const latestMessage = args[args.length - 1];
+                
+                if (latestMessage && latestMessage._id && (latestMessage.message || latestMessage.image)) {
+                    callback([latestMessage], false);
+                } else {
+                    // Fallback: look for any valid message in args
+                    const validMessage = args.find(arg => 
+                        arg && arg._id && (arg.message || arg.image) && arg.ticketId
+                    );
+                    
+                    if (validMessage) {
+                        callback([validMessage], false);
+                    }
                 }
             }
         });
         
+        // Listen for direct message events (for real-time messages from others)
         socketRef.current.on('message', (messageData) => {
-            if (messageData) {
-                console.log('🔌 Received direct message:', messageData._id);
+            if (messageData && messageData._id) {
                 callback([messageData], false);
+            }
+        });
+
+        // Listen for file upload success responses
+        socketRef.current.on('fileUploaded', (fileData) => {
+            if (fileData && fileData._id) {
+                callback([fileData], false);
+            }
+        });
+
+        // Listen for new incoming messages from other users
+        socketRef.current.on('newMessage', (messageData) => {
+            if (messageData && messageData._id) {
+                callback([messageData], false);
+            }
+        });
+
+        // Listen for new file messages from other users
+        socketRef.current.on('newFileMessage', (fileData) => {
+            if (fileData && fileData._id) {
+                callback([fileData], false);
             }
         });
         
         return () => {
             socketRef.current?.off('ticketChat');
             socketRef.current?.off('message');
+            socketRef.current?.off('fileUploaded');
+            socketRef.current?.off('newMessage');
+            socketRef.current?.off('newFileMessage');
         };
     }, []);
     
     return { 
         socket: socketRef.current, 
         sendMessage,
+        sendFile,
+        joinTicket,
         onNewMessage,
         isConnected 
     };

@@ -10,7 +10,7 @@ export default function ChatHeaderSkeleton() {
             {/* User avatar skeleton */}
             <div className="w-10 h-10 rounded-full bg-gray-200"></div>
             {/* Status indicator skeleton */}
-            <div className="absolute top-0 left-0 w-3 h-3 rounded-full border-2 border-white bg-gray-300"></div>
+            {/* <div className="absolute top-0 left-0 w-3 h-3 rounded-full border-2 border-white bg-gray-300"></div> */}
           </div>
           <div>
             {/* Username skeleton */}

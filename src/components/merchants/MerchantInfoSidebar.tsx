@@ -137,7 +137,7 @@ export default function MerchantInfoSidebar({
       // Notify table about status change
       onStatusUpdate(merchant._id, "Active");
     } catch (error) {
-      console.error("Error activating merchant:", error);
+      showError("Error", "Failed to activate merchant");
     } finally {
       setIsSubmitting(false);
       setActionType("");
@@ -175,7 +175,7 @@ export default function MerchantInfoSidebar({
       // Notify table about status change
       onStatusUpdate(merchant._id, "suspend");
     } catch (error) {
-      console.error("Error suspending merchant:", error);
+      showError("Error", "Failed to suspend merchant");
     } finally {
       setIsSubmitting(false);
       setActionType("");
@@ -212,7 +212,7 @@ export default function MerchantInfoSidebar({
       // Notify table about status change
       onStatusUpdate(merchant._id, "banned");
     } catch (error) {
-      console.error("Error banning merchant:", error);
+      showError("Error", "Failed to ban merchant");
     } finally {
       setIsSubmitting(false);
       setActionType("");
@@ -246,7 +246,6 @@ export default function MerchantInfoSidebar({
         showError("Failed", "Could not verify account");
       }
     } catch (error) {
-      console.error("Error verifying account:", error);
       showError("Error", "An error occurred while verifying the account");
     } finally {
       setAction({ isLoading: false, type: "" });
@@ -270,7 +269,6 @@ export default function MerchantInfoSidebar({
         showError("Failed", "Could not deny account");
       }
     } catch (error) {
-      console.error("Error denying account:", error);
       showError("Error", "An error occurred while denying the account");
     } finally {
       setAction({ isLoading: false, type: "" });

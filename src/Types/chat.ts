@@ -1,15 +1,21 @@
 export interface Message {
   _id: string;
+  message: string;
   isRead: boolean;
   isReplied: boolean;
-  sender: string;
   senderType: string;
   ticketId: string;
-  message: string;
-  image?: string; // Optional image property
   date: string;
-  __v?: number;
-  showStatus?: boolean; // New property to control status display
+  sender: string;
+  __v: number;
+  image?: string;
+  showStatus?: boolean;
+  tempFileInfo?: {
+    name: string;
+    size: number;
+    type: string;
+    isUploading: boolean;
+  };
 }
 
 export interface ChatUser {
@@ -23,27 +29,34 @@ export interface ChatUser {
     email?:string
   };
 
-  export interface P2PChatUser {
-    userName: {
-      firstName: string;
-      lastName: string;
-    };
-    userImage: string;
-    avatar?: string;
-    name?:string;
-    email?:string
-  };
+  export interface ChatPreview {
+  ticketId: string; 
+  date: string; 
+  message: string; 
+  image: string | null; 
+  userName: {
+    firstName: string;
+    lastName: string;
+  } | null; 
+  userImage: string | null; 
+}
 
 export interface P2PMessage {
   _id: string;
+  message: string;
   isRead: boolean;
   isReplied: boolean;
-  sender: string;
   senderType: string;
   orderId: string;
-  message: string;
-  image?: string; // Optional image property
   date: string;
-  __v?: number;
-  showStatus?: boolean; // New property to control status display
+  sender: string;
+  __v: number;
+  image?: string;
+  showStatus?: boolean;
+  tempFileInfo?: {
+    name: string;
+    size: number;
+    type: string;
+    isUploading: boolean;
+  };
 }

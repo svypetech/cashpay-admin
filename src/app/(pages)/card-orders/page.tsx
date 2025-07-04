@@ -5,6 +5,7 @@ import Pagination from "@/src/components/pagination/pagination";
 import Image from "next/image";
 import CardOrdersTable from "@/src/components/tables/CardOrdersTable";
 import Tabs from "@/src/components/ui/Tabs";
+import { useToast } from "@/src/lib/ToastProvider";
 
 const headings = [
   "Order ID",
@@ -86,6 +87,7 @@ const cardOrdersData = [
 const tabs = ["All", "Completed", "Pending"];
 
 export default function P2PTrading() {
+  const { showSuccess, showError } = useToast();
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(15); // Example total pages
   const [activeTab, setActiveTab] = useState(tabs[0]);

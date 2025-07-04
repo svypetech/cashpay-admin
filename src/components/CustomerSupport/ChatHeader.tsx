@@ -32,11 +32,11 @@ export default function ChatHeader({
             </div>
 
             {/* Status indicator dot */}
-            <div
+            {/* <div
               className={`absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${
                 isOnline ? "bg-success" : "bg-gray-400"
               }`}
-            ></div>
+            ></div> */}
           </div>
           <div>
             <h3 className="font-semibold font-inter">

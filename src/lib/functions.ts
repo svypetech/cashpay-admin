@@ -139,11 +139,12 @@ export function groupMessagesByDate(messages: Message[]): MessageGroup[] {
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 }
 
+
 export const getFileIcon = (fileType: string): string => {
-  if (fileType.includes("pdf")) return "/icons/pdf.svg";
+  if (fileType.includes("pdf")) return "/images/pdf2.png";
   if (fileType.includes("image")) return "/icons/image.svg";
   if (fileType.includes("doc") || fileType.includes("word"))
-    return "/icons/doc.svg";
+    return "/icons/document.svg";
   return "/icons/file.svg";
 };
 

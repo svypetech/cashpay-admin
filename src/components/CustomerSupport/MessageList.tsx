@@ -4,8 +4,8 @@ import ScrollToBottom from 'react-scroll-to-bottom';
 import InfiniteScroll from "react-infinite-scroll-component";
 import MessageItem from './MessageItem';
 import { format, isToday, isYesterday, differenceInDays } from 'date-fns';
-import { groupMessagesByDate } from '@/src/lib/functions';
 import { Message } from '@/src/Types/chat';
+import { groupMessagesByDate } from '@/src/lib/functions';
 
 interface MessageListProps {
   messages: Message[];
@@ -202,17 +202,7 @@ export default function MessageList({
                       const isTemporary = tempMessageIds.includes(message._id) && 
                                          message._id.startsWith('temp-');
                       
-                      // Debug logging for temp messages
-                      if (message._id.startsWith('temp-') || tempMessageIds.length > 0) {
-                        console.log(`🔍 MESSAGE CHECK:`, {
-                          messageId: message._id,
-                          isTemporary,
-                          startsWithTemp: message._id.startsWith('temp-'),
-                          inTempIds: tempMessageIds.includes(message._id),
-                          tempMessageIds: tempMessageIds,
-                          content: message.message.substring(0, 20) + '...'
-                        });
-                      }
+                      
                       
                       return (
                         <MessageItem 

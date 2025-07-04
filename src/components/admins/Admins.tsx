@@ -50,7 +50,13 @@ export default function Admins() {
     isLoading: loadingAdmins,
     error,
     totalPages,
-  } = useGetAdmins(currentPage, 10, sortBy, getStatusFromTab(activeTab), searchQuery);
+  } = useGetAdmins(
+    currentPage,
+    10,
+    sortBy,
+    getStatusFromTab(activeTab),
+    searchQuery
+  );
   const [filteredData, setFilteredData] = useState(admins);
 
   useEffect(() => {
@@ -61,7 +67,6 @@ export default function Admins() {
   useEffect(() => {
     setFilteredData(admins);
   }, [searchQuery, admins]);
-
 
   // Handle sort
   const handleSort = (value: string) => {
@@ -122,8 +127,6 @@ export default function Admins() {
 
   return (
     <div>
-      {/* Navigation Tabs */}
-      {/* Navigation Tabs - Using Tabs component */}
       <Tabs
         tabs={tabs}
         activeTab={activeTab}
@@ -132,33 +135,21 @@ export default function Admins() {
       />
 
       {/* Search and Actions */}
-      <div
-        className={`flex flex-col md:grid md:grid-cols-8 justify-between items-center mb-2 gap-4 mt-4`}
-      >
-        <Search className="w-full md:col-span-4" onSearch={handleSearch} />
-        {/* <div className={`relative w-full md:w-auto md:col-span-3`}> */}
-          
-
+      <div className="flex flex-col gap-4 sm:gap-[28px] sm:flex-row mt-5">
+        <Search className="sm:w-[50%] w-full" onSearch={setSearchQuery} />
         <Sort
-          className="w-full md:md:col-span-2"
-          title="Sort by"
+          className="sm:w-[25%] w-full"
+          title="Sort"
           options={sortOptions}
           onSort={handleSort}
-        />
-
-        <div className="flex items-center gap-4 w-full md:col-span-2 font-[satoshi]">
+        />        
           <button
             onClick={() => setIsPopupOpen(true)}
-            className={`w-full cursor-pointer flex justify-center items-center gap-2 px-4 py-2 font-bold border border-primary rounded-lg text-primary bg-white hover:bg-blue-50 ml-auto md:ml-0`}
+            className={`w-full sm:w-[25%] cursor-pointer flex justify-center items-center gap-2 px-4 py-2 font-bold border border-primary rounded-lg text-primary bg-white hover:bg-blue-50 ml-auto md:ml-0`}
           >
             <span>Add Admin</span>
             <Plus className="h-6 w-6 text-primary" />
           </button>
-
-          {/* <button onClick={() => setIsSidebarOpen(true)} className={`w-[50%] cursor-pointer flex justify-center items-center gap-2 px-4 py-2 font-bold border bg-primary rounded-lg text-white hover:bg-blue-900 ml-auto md:ml-0`}>
-            <span>Create a new Role</span>
-          </button> */}
-        </div>
       </div>
       {loadingAdmins ? (
         <SkeletonTableLoader headings={headings} rowCount={10} />
@@ -168,7 +159,11 @@ export default function Admins() {
         <Error text="No data found" />
       ) : (
         <div>
-          <AdminTable headings={headings} data={admins} setData={setFilteredData} />
+          <AdminTable
+            headings={headings}
+            data={admins}
+            setData={setFilteredData}
+          />
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
