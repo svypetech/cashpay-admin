@@ -108,7 +108,7 @@ export default function MerchantsComponent() {
         <Search className="w-full md:col-span-3" onSearch={handleSearch} />
 
         <Sort
-          className="w-full"
+          className="w-full md:col-span-1"
           title="Sort by"
           options={sortOptions}
           onSort={handleSort}
