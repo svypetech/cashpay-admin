@@ -4,8 +4,7 @@ import { useToast } from '@/src/lib/ToastProvider';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 
-// const SOCKET_URL = process.env.NEXT_PUBLIC_WS_URL || '';
-const SOCKET_URL = 'https://34.75.109.160:3002';
+const SOCKET_URL = process.env.NEXT_PUBLIC_WS_URL || '';
 
 export const useSocket = (ticketId?: string) => {
     const [isConnected, setIsConnected] = useState(false);
@@ -25,6 +24,7 @@ export const useSocket = (ticketId?: string) => {
             reconnection: true,
             reconnectionAttempts: Infinity,
             reconnectionDelay: 1000,
+            secure: true, 
         });
         
         socketRef.current = socket;
