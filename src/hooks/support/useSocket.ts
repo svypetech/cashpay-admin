@@ -13,6 +13,9 @@ export const useSocket = (ticketId?: string) => {
     const { showSuccess, showError } = useToast();
     
     useEffect(() => {
+
+        console.log("Connecting to support socket at:", SOCKET_URL);
+
         const socket = io(SOCKET_URL, {
             auth: {
                 token: localStorage.getItem("token")

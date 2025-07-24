@@ -13,6 +13,9 @@ export const useP2PSocket = () => {
   const { showError } = useToast();
 
   useEffect(() => {
+
+    console.log("Connecting to P2P socket at:", SOCKET_URL);
+
     const socket = io(SOCKET_URL, {
       auth: {
         token: localStorage.getItem("token"),
