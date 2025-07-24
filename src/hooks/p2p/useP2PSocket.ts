@@ -4,7 +4,8 @@ import { useToast } from '@/src/lib/ToastProvider';
 import { useState, useEffect, useCallback, useRef } from "react";
 import { io, Socket } from "socket.io-client";
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_WS_URL || "";
+// const SOCKET_URL = process.env.NEXT_PUBLIC_WS_URL || "";
+const SOCKET_URL = 'http://34.75.109.160:3002';
 
 export const useP2PSocket = () => {
   const [isConnected, setIsConnected] = useState(false);
