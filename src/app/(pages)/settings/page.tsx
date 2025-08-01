@@ -8,7 +8,9 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 import TransferOwnershipDialog from "@/src/components/cards/TransferOwnershipDialog";
+import SuccessRedirectModal from "@/src/components/ui/SigninPopup";
 import { useToast } from "@/src/lib/ToastProvider";
 
 export default function SettingsPage() {
@@ -23,14 +25,17 @@ export default function SettingsPage() {
   const [user, setUser] = useState<FormValues | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showTransferDialog, setShowTransferDialog] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const [image, setImage] = useState<string>("/images/blank-profile.webp");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Use toast hook
+  // Use toast hook and router
   const { showSuccess, showError } = useToast();
+  const router = useRouter();
 
   // Initialize form with react-hook-form and zod resolver
   const {
@@ -188,7 +193,9 @@ export default function SettingsPage() {
       );
 
       if (response.data.success) {
-        showSuccess("Success", "Ownership transferred successfully");
+        // Close the transfer dialog and show success modal
+        setShowTransferDialog(false);
+        setShowSuccessModal(true);
       } else {
         showError("Transfer Failed", "Failed to transfer ownership");
       }
@@ -197,6 +204,19 @@ export default function SettingsPage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleRedirectToSignIn = () => {
+    setIsRedirecting(true);
+    
+    // Clear user data from localStorage
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    
+    // Redirect to sign in page after a short delay
+    setTimeout(() => {
+      router.push("/signin");
+    }, 1000);
   };
 
   return (
@@ -402,6 +422,17 @@ export default function SettingsPage() {
         onCancel={() => setShowTransferDialog(false)}
         onConfirm={handleTransferOwnership}
         isLoading={isSubmitting}
+      />
+
+      {/* Success Modal for Ownership Transfer */}
+      <SuccessRedirectModal
+        isOpen={showSuccessModal}
+        onRedirect={handleRedirectToSignIn}
+        title="Ownership Transferred Successfully"
+        message="Your ownership has been transferred successfully. You need to sign in again to continue."
+        infoText="*You will be redirected to the sign-in page"
+        buttonText="Sign In Again"
+        isLoading={isRedirecting}
       />
     </div>
   );

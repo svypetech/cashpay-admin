@@ -4,20 +4,18 @@ import { useToast } from '@/src/lib/ToastProvider';
 import { useState, useEffect, useCallback, useRef } from "react";
 import { io, Socket } from "socket.io-client";
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+const SOCKET_URL = "http://34.75.109.160:3002"; // Your fixed URL
 
-export const useP2PSocket = () => {
+export const useP2PSocket = (orderId?: string) => {
   const [isConnected, setIsConnected] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const recentlySentRef = useRef<boolean>(false);
   const { showError } = useToast();
 
   useEffect(() => {
-
     console.log("Connecting to P2P socket at:", SOCKET_URL);
 
     const socket = io(SOCKET_URL, {
-      path: "/help/socket.io/",
       auth: {
         token: localStorage.getItem("token"),
       },
@@ -25,26 +23,34 @@ export const useP2PSocket = () => {
       reconnection: true,
       reconnectionAttempts: Infinity,
       reconnectionDelay: 1000,
-      secure: true, 
     });
 
     socketRef.current = socket;
 
     socket.on("connect", () => {
+      console.log('✅ P2P Socket connected successfully');
       setIsConnected(true);
+      
+      // Emit joinOrder event once connected (similar to joinTicket in regular chat)
+      if (orderId) {
+        socket.emit('joinOrder', orderId);
+        console.log('📡 Joined order room:', orderId);
+      }
     });
 
-    socket.on("disconnect", () => {
+    socket.on("disconnect", (reason) => {
+      console.log('❌ P2P Socket disconnected:', reason);
       setIsConnected(false);
     });
 
     socket.on("connect_error", (error) => {
+      console.error('🔥 P2P Socket connection error:', error);
       setIsConnected(false);
-      // showError("Connection Error", `Failed to connect to server: ${error.message}`);
     });
 
     // Listen for general socket errors
     socket.on('error', (error) => {
+      console.error('🔥 P2P Socket error:', error);
       showError("Socket Error", error.message || "An unexpected error occurred");
     });
 
@@ -69,9 +75,10 @@ export const useP2PSocket = () => {
     });
 
     return () => {
+      console.log('🔌 Disconnecting P2P socket...');
       socket.disconnect();
     };
-  }, [showError]);
+  }, [showError, orderId]);
 
   // 📤 SEND MESSAGE (Text only)
   const sendMessage = useCallback(
@@ -85,7 +92,6 @@ export const useP2PSocket = () => {
           try {
             const tempId = `temp-${Date.now()}`;
 
-            // Set recently sent flag
             recentlySentRef.current = true;
 
             socketRef.current!.emit("p2pMessage", {
@@ -94,7 +100,6 @@ export const useP2PSocket = () => {
               authorization: `Bearer ${localStorage.getItem("token")}`,
             });
 
-            // Reset flag after 10 seconds
             setTimeout(() => {
               recentlySentRef.current = false;
             }, 10000);
@@ -120,7 +125,6 @@ export const useP2PSocket = () => {
       try {
         const tempId = `temp-${Date.now()}`;
         
-        // Convert file to ArrayBuffer using FileReader
         const reader = new FileReader();
         reader.onload = (e) => {
           const arrayBuffer = e.target?.result as ArrayBuffer;
@@ -130,10 +134,8 @@ export const useP2PSocket = () => {
             return;
           }
 
-          // Convert ArrayBuffer to Buffer (Node.js style buffer that Socket.IO can handle)
           const buffer = Buffer.from(arrayBuffer);
 
-          // First argument: file metadata + message + orderId
           const fileMetadata = {
             image: {
               fieldname: "file",
@@ -142,14 +144,12 @@ export const useP2PSocket = () => {
               mimetype: file.type,
               size: file.size
             },
-            // Send message in the same format as server expects
             message: message.trim() ? message.trim() : file.name,
             orderId: orderId
           };
 
           recentlySentRef.current = true;
           
-          // Use the correct event name for P2P file upload
           socketRef.current!.emit('p2pImage', fileMetadata, buffer);
           
           setTimeout(() => {
@@ -164,7 +164,6 @@ export const useP2PSocket = () => {
           resolve({ success: false, tempId: null });
         };
         
-        // Read file as ArrayBuffer to get binary data
         reader.readAsArrayBuffer(file);
       } catch (error) {
         showError("Upload Error", "Failed to send file");
@@ -173,17 +172,29 @@ export const useP2PSocket = () => {
     });
   }, [isConnected, showError]);
 
+  // 📤 JOIN ORDER (Manual join if needed)
+  const joinOrder = useCallback((orderId: string) => {
+    if (!socketRef.current || !isConnected) {
+      return false;
+    }
+    
+    try {
+      socketRef.current.emit('joinOrder', orderId);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }, [isConnected]);
+
   // 📨 LISTEN FOR NEW MESSAGES
   const onNewMessage = useCallback(
     (callback: (messages: any[], isRefetch: boolean) => void) => {
       if (!socketRef.current) return () => {};
 
       socketRef.current.on("p2pChat", (...args) => {
-        // The server response structure has: success, last10Chats, newChat
-        const response = args[0]; // First argument should be the response object
+        const response = args[0];
 
         if (response && response.success) {
-          // Use the newChat for real-time updates
           if (
             response.newChat &&
             response.newChat._id &&
@@ -192,7 +203,6 @@ export const useP2PSocket = () => {
             callback([response.newChat], false);
           }
 
-          // Also handle last10Chats if needed for refetch
           if (
             response.last10Chats &&
             response.last10Chats.chats &&
@@ -201,7 +211,6 @@ export const useP2PSocket = () => {
             callback(response.last10Chats.chats, true);
           }
         } else {
-          // Fallback to previous logic
           const latestMessage = args[args.length - 1];
           if (latestMessage && latestMessage._id && (latestMessage.message || latestMessage.image)) {
             callback([latestMessage], false);
@@ -215,21 +224,18 @@ export const useP2PSocket = () => {
         }
       });
 
-      // Listen for file upload success responses
       socketRef.current.on('fileUploaded', (fileData) => {
         if (fileData && fileData._id) {
           callback([fileData], false);
         }
       });
 
-      // Listen for new incoming messages from other users
       socketRef.current.on('newMessage', (messageData) => {
         if (messageData && messageData._id) {
           callback([messageData], false);
         }
       });
 
-      // Listen for new file messages from other users
       socketRef.current.on('newFileMessage', (fileData) => {
         if (fileData && fileData._id) {
           callback([fileData], false);
@@ -251,6 +257,7 @@ export const useP2PSocket = () => {
     socket: socketRef.current,
     sendMessage,
     sendFile,
+    joinOrder,
     onNewMessage,
     isConnected,
   };

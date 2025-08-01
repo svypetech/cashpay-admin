@@ -36,7 +36,8 @@ export default function P2PChat({
   isLoadingMore = false,
   hasMore = false,
 }: ChatProps) {
-  const { sendMessage, sendFile, onNewMessage, isConnected } = useP2PSocket();
+  // Pass chatId as orderId to useP2PSocket (similar to how Chat passes ticketId to useSocket)
+  const { sendMessage, sendFile, onNewMessage, isConnected } = useP2PSocket(chatId);
   
   // ✨ DUAL ARRAY SYSTEM
   const [apiMessages, setApiMessages] = useState<P2PMessage[]>(initialMessages); // From API/infinite scroll
@@ -107,14 +108,6 @@ export default function P2PChat({
                 const serverMessage = newMessage.message || '';
                 const serverFileName = serverMessage.split('\n')[0]; // Get filename part
                 
-                console.log('Comparing files:', {
-                  tempFileName,
-                  serverFileName,
-                  serverMessage,
-                  tempMessage: tempMsg.message,
-                  match: tempFileName === serverFileName
-                });
-                
                 // Match by exact filename
                 if (tempFileName === serverFileName) {
                   tempIdToReplace = tempId;
@@ -132,8 +125,6 @@ export default function P2PChat({
             });
             
             if (tempIdToReplace) {
-              console.log('Replacing temp message:', tempIdToReplace, 'with confirmed message:', newMessage._id);
-              
               // Remove from temp messages
               setTempMessages(prev => {
                 const updated = new Map(prev);
@@ -146,8 +137,6 @@ export default function P2PChat({
                 prev.map(msg => msg._id === tempIdToReplace ? newMessage : msg)
               );
             } else {
-              console.log('No temp message found to replace, adding as new message:', newMessage._id);
-              
               // Add as new message if no temp message to replace
               setSocketMessages(prev => {
                 const exists = prev.some(msg => msg._id === newMessage._id);

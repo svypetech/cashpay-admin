@@ -53,11 +53,9 @@ const P2PTableActive: React.FC<Props> = ({ data, headings, setData }) => {
 
     try {
       let response = await axios.put(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/transaction/order/resolveDispute`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/transaction/order/cancelOrder`,
         {
           orderId: selectedTrade ? selectedTrade.tradeId : "",
-          favourOf: "Seller",
-          comment: "Resolved in favour of seller, from active tabs",
         },
         {
           headers: {
@@ -140,7 +138,7 @@ const P2PTableActive: React.FC<Props> = ({ data, headings, setData }) => {
                       text={trade.status}
                       className={`text-center rounded-xl md:text-md font-semibold ${
                         trade.status.toLowerCase() === "canceled"
-                          ? "bg-fail/20 text-fail"
+                          ? "bg-[#DF1D1D33] text-[#DF1D1D]"
                           : "text-[#727272] bg-[#72727233]"
                       }`}
                     />
