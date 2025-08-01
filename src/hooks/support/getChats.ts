@@ -1,6 +1,7 @@
 import { SupportRequest } from "@/src/Types/SupportRequests"
 import axios from "axios"
 import { useEffect, useState } from "react"
+import { handleTokenExpiration } from "@/src/lib/functions";
 
 interface Props {
     page: number
@@ -61,7 +62,16 @@ export default function useFetchChats({ page, limit, tab, search, startDate, end
                 console.log("Requests fetched:", response.data);
                 setRequests(response.data.requests.requests);
                 setTotalPages(response.data.requests.totalPages)
-            } catch (error) {
+            } catch (error: any) {
+                // Check if the error is due to unauthorized access (401)
+                if (error.response?.status === 401 || 
+                    error.response?.data?.statusCode === 401 ||
+                    error.response?.data?.message?.includes("Invalid or expired token")) {
+                  console.log("Token expired or invalid, redirecting to sign-in");
+                  handleTokenExpiration();
+                  return; // Don't set error state, just redirect
+                }
+                
                 setError("Failed to fetch requests")
                 console.error("Error fetching requests:", error)
             } finally {

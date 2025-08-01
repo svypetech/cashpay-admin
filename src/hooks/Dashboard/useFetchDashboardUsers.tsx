@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { DashboardUser as User } from "@/src/Types/User";
+import { handleTokenExpiration } from "@/src/lib/functions";
 
 export default function useFetchDashboardUsers() {
     const [users, setUsers] = useState<User[]>([]);
@@ -21,7 +22,16 @@ export default function useFetchDashboardUsers() {
                     }
                 );
                 setUsers(response.data.users);
-            } catch (error) {
+            } catch (error: any) {
+                // Check if the error is due to unauthorized access (401)
+                if (error.response?.status === 401 || 
+                    error.response?.data?.statusCode === 401 ||
+                    error.response?.data?.message?.includes("Invalid or expired token")) {
+                  console.log("Token expired or invalid, redirecting to sign-in");
+                  handleTokenExpiration();
+                  return; // Don't set error state, just redirect
+                }
+                
                 setIsError(true);
             } finally {
                 setIsLoading(false);

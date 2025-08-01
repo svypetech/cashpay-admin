@@ -1,5 +1,6 @@
 import axios from "axios"
 import { Dispatch, SetStateAction } from "react"
+import { handleTokenExpiration } from "@/src/lib/functions";
 
 interface AdminActionProps {
     id: string;
@@ -36,7 +37,16 @@ export const handleActivateAdmin = async ({
             showError && showError("Activation Failed", "Failed to activate admin");
             throw new Error("Failed to activate admin");
         }
-    } catch (error) {
+    } catch (error: any) {
+        // Check if the error is due to unauthorized access (401)
+        if (error.response?.status === 401 || 
+            error.response?.data?.statusCode === 401 ||
+            error.response?.data?.message?.includes("Invalid or expired token")) {
+          console.log("Token expired or invalid, redirecting to sign-in");
+          handleTokenExpiration();
+          return; // Don't set error state, just redirect
+        }
+        
         showError && showError("Error", "An error occurred while activating the admin");
         throw error;
     } finally {
@@ -72,7 +82,16 @@ export const handleBanAdmin = async ({
             showError && showError("Ban Failed", "Failed to ban admin");
             throw new Error("Failed to ban admin");
         }
-    } catch (error) {
+    } catch (error: any) {
+        // Check if the error is due to unauthorized access (401)
+        if (error.response?.status === 401 || 
+            error.response?.data?.statusCode === 401 ||
+            error.response?.data?.message?.includes("Invalid or expired token")) {
+          console.log("Token expired or invalid, redirecting to sign-in");
+          handleTokenExpiration();
+          return; // Don't set error state, just redirect
+        }
+        
         showError && showError("Error", "An error occurred while banning the admin");
         throw error;
     } finally {
@@ -110,7 +129,16 @@ export const handleSuspendAdmin = async ({
             showError && showError("Suspend Failed", "Failed to suspend admin");
             throw new Error("Failed to suspend admin");
         }
-    } catch (error) {
+    } catch (error: any) {
+        // Check if the error is due to unauthorized access (401)
+        if (error.response?.status === 401 || 
+            error.response?.data?.statusCode === 401 ||
+            error.response?.data?.message?.includes("Invalid or expired token")) {
+          console.log("Token expired or invalid, redirecting to sign-in");
+          handleTokenExpiration();
+          return; // Don't set error state, just redirect
+        }
+        
         showError && showError("Error", "An error occurred while suspending the admin");
         throw error;
     } finally {
@@ -145,7 +173,16 @@ export const handleDeleteAdmin = async ({
             showError && showError("Delete Failed", "Failed to delete admin");
             throw new Error("Failed to delete admin");
         }
-    } catch (error) {
+    } catch (error: any) {
+        // Check if the error is due to unauthorized access (401)
+        if (error.response?.status === 401 || 
+            error.response?.data?.statusCode === 401 ||
+            error.response?.data?.message?.includes("Invalid or expired token")) {
+          console.log("Token expired or invalid, redirecting to sign-in");
+          handleTokenExpiration();
+          return; // Don't set error state, just redirect
+        }
+        
         showError && showError("Error", "An error occurred while deleting the admin");
         throw error;
     } finally {

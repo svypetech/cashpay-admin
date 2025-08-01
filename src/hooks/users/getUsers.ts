@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { User } from "@/src/Types/User"
+import { handleTokenExpiration } from "@/src/lib/functions"
 
 interface Props {
   currentPage: number;
@@ -63,7 +64,16 @@ export default function useFetchUsers( {currentPage, limit, sortBy, status, sear
         
         setUsers(response.data.data.users);
         setTotalPages(response.data.data.totalPages);
-      } catch (error) {
+      } catch (error: any) {
+        // Check if the error is due to unauthorized access (401)
+        if (error.response?.status === 401 || 
+            error.response?.data?.statusCode === 401 ||
+            error.response?.data?.message?.includes("Invalid or expired token")) {
+          console.log("Token expired or invalid, redirecting to sign-in");
+          handleTokenExpiration();
+          return; // Don't set error state, just redirect
+        }
+        
         setIsError(true);
         setUsers([]);
       } finally {

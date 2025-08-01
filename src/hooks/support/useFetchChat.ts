@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { ChatUser, Message } from "@/src/Types/chat";
+import { handleTokenExpiration } from "@/src/lib/functions";
 
 export default function useFetchChat({
   chatId, 
@@ -46,6 +47,15 @@ export default function useFetchChat({
         setIsError(null);
         
       } catch (error: any) {
+        // Check if the error is due to unauthorized access (401)
+        if (error.response?.status === 401 || 
+            error.response?.data?.statusCode === 401 ||
+            error.response?.data?.message?.includes("Invalid or expired token")) {
+          console.log("Token expired or invalid, redirecting to sign-in");
+          handleTokenExpiration();
+          return; // Don't set error state, just redirect
+        }
+        
         console.error("❌ API: Error fetching messages:", error);
         setIsError(error.response?.data?.error || "Failed to load messages");
       } finally {
@@ -100,6 +110,15 @@ export default function useFetchChat({
         setCurrentPage(currentPage + 1);
       }
     } catch (error: any) {
+      // Check if the error is due to unauthorized access (401)
+      if (error.response?.status === 401 || 
+          error.response?.data?.statusCode === 401 ||
+          error.response?.data?.message?.includes("Invalid or expired token")) {
+        console.log("Token expired or invalid, redirecting to sign-in");
+        handleTokenExpiration();
+        return; // Don't set error state, just redirect
+      }
+      
       console.error("❌ API: Error loading more messages:", error);
       setIsError(error.response?.data?.error || "Failed to load more messages");
     } finally {

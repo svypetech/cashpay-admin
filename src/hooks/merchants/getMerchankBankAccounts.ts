@@ -2,6 +2,7 @@
 import { MerchantBankAccount } from "@/src/Types/Merchant"
 import axios from "axios"
 import { useEffect, useState } from "react"
+import { handleTokenExpiration } from "@/src/lib/functions"
 
 export default function useFetchAccounts(id: string) {
     const [accounts, setAccounts] = useState<MerchantBankAccount []>([])
@@ -22,7 +23,16 @@ export default function useFetchAccounts(id: string) {
         console.log("accounts fetched:", response.data);
         setAccounts(response.data.cards);
 
-      } catch (error) {
+      } catch (error: any) {
+        // Check if the error is due to unauthorized access (401)
+        if (error.response?.status === 401 || 
+            error.response?.data?.statusCode === 401 ||
+            error.response?.data?.message?.includes("Invalid or expired token")) {
+          console.log("Token expired or invalid, redirecting to sign-in");
+          handleTokenExpiration();
+          return; // Don't set error state, just redirect
+        }
+        
         setError("Failed to fetch accounts")
         console.error("Error fetching accounts:", error)
       }

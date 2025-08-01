@@ -1,6 +1,7 @@
 import { Admin } from "@/src/Types/Admin"
 import axios from "axios"
 import { useEffect, useState } from "react"
+import { handleTokenExpiration } from "@/src/lib/functions"
 
 export default function useGetAdmins(page: number, limit: number, sortBy?: string, role?: string, search?: string) {
     const [admins, setAdmins] = useState<Admin []>([])
@@ -44,16 +45,26 @@ export default function useGetAdmins(page: number, limit: number, sortBy?: strin
         setAdmins(filteredAdmins)
         
         setTotalPages(Math.ceil(response.data.data.totalCount/ limit))
-      } catch (error) {
-        setError("Failed to fetch admins")
+      } catch (error: any) {
         console.error("Error fetching admins:", error)
+        
+        // Check if the error is due to unauthorized access (401)
+        if (error.response?.status === 401 || 
+            error.response?.data?.statusCode === 401 ||
+            error.response?.data?.message?.includes("Invalid or expired token")) {
+          console.log("Token expired or invalid, redirecting to sign-in");
+          handleTokenExpiration();
+          return; // Don't set error state, just redirect
+        }
+        
+        setError("Failed to fetch admins")
       }
       finally {
         setIsLoading(false)
       }
     }
     fetchAdmins() 
-  }, [page, limit, sortBy, role, search]) // Add role to dependency array
+  }, [page, limit, sortBy, role, search]) // Add router to dependency array
 
   return { admins, isLoading, error, totalPages }
 }

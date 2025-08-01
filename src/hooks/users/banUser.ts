@@ -1,5 +1,6 @@
 import axios from "axios"
 import { Dispatch, SetStateAction } from "react"
+import { handleTokenExpiration } from "@/src/lib/functions";
 
 interface HandleBanUserProps {
     id: string;
@@ -48,7 +49,16 @@ const handleBanUser = async ({
         } else {
             showError && showError("Ban Failed", "Failed to ban user")
         }
-    } catch (error) {
+    } catch (error: any) {
+        // Check if the error is due to unauthorized access (401)
+        if (error.response?.status === 401 || 
+            error.response?.data?.statusCode === 401 ||
+            error.response?.data?.message?.includes("Invalid or expired token")) {
+          console.log("Token expired or invalid, redirecting to sign-in");
+          handleTokenExpiration();
+          return; // Don't set error state, just redirect
+        }
+        
         showError && showError("Error", "An error occurred while banning the user")
     } finally {
         if (setIsSubmitting) {

@@ -1,6 +1,15 @@
 import { formatDistanceToNow, format, parseISO, startOfDay } from "date-fns";
 import { Message, P2PMessage } from "../Types/chat";
 
+export const handleTokenExpiration = () => {
+      // Clear user data from localStorage
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      
+      // Redirect to sign-in page
+      window.location.href = "/signin"; // Adjust the path as needed
+    }
+
 export function shortenAddress(address: string, chars = 6): string {
   if (!address) return "-";
 

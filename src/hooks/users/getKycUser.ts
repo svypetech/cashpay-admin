@@ -7,6 +7,7 @@ import {
   isCompleteKycUser,
   isNewKycUser,
 } from "@/src/Types/KycUser";
+import { handleTokenExpiration } from "@/src/lib/functions";
 
 export default function useFetchKycUser(id: string) {
   const [user, setUser] = useState<CompleteKycUser | NewKycUser | null>(null);
@@ -41,7 +42,16 @@ export default function useFetchKycUser(id: string) {
           // This is the complete KYC data response
           setUser(response.data.kycUser);
         }
-      } catch (error) {
+      } catch (error: any) {
+        // Check if the error is due to unauthorized access (401)
+        if (error.response?.status === 401 || 
+            error.response?.data?.statusCode === 401 ||
+            error.response?.data?.message?.includes("Invalid or expired token")) {
+          console.log("Token expired or invalid, redirecting to sign-in");
+          handleTokenExpiration();
+          return; // Don't set error state, just redirect
+        }
+        
         console.error("Failed to fetch KYC user:", error);
         setIsError(true);
       } finally {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Transaction from '@/src/Types/TransactionManagement';
+import { handleTokenExpiration } from "@/src/lib/functions";
 
 interface Props {
   page: number;
@@ -69,7 +70,16 @@ const useFetchTransactions = ({ page, limit, searchQuery, status, sortBy, startD
         setTotalPages(response.data.totalPages);
         setTransactions(response.data.transactions);
         console.log("Fetched transactions:", response.data.transactions);
-      } catch (error) {
+      } catch (error: any) {
+        // Check if the error is due to unauthorized access (401)
+        if (error.response?.status === 401 || 
+            error.response?.data?.statusCode === 401 ||
+            error.response?.data?.message?.includes("Invalid or expired token")) {
+          console.log("Token expired or invalid, redirecting to sign-in");
+          handleTokenExpiration();
+          return; // Don't set error state, just redirect
+        }
+        
         if (axios.isAxiosError(error)) {
           setError(error.response?.data?.message || "Failed to fetch transactions");
         } else {
