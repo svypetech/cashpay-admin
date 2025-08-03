@@ -53,7 +53,7 @@ const P2PTableActive: React.FC<Props> = ({ data, headings, setData }) => {
 
     try {
       let response = await axios.put(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/transaction/order/cancelOrder`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}transaction/order/cancelOrder`,
         {
           orderId: selectedTrade ? selectedTrade.tradeId : "",
         },
@@ -86,15 +86,19 @@ const P2PTableActive: React.FC<Props> = ({ data, headings, setData }) => {
   };
 
   // Calculate if we need padding based on current state
-  const needsPadding = activeDropdown !== null && (
-    selectedIndex >= (data.length - 1) || // Last two rows
-    data.length <= 1 // If there are 2 or fewer rows, always add padding
-  );
+  const needsPadding =
+    activeDropdown !== null &&
+    (selectedIndex >= data.length - 1 || // Last two rows
+      data.length <= 1); // If there are 2 or fewer rows, always add padding
 
   return (
     <div className="flex-1 rounded-lg w-full py-5">
       {/* Table - Add dynamic padding for dropdown space */}
-      <div className={`rounded-lg overflow-x-auto w-full ${needsPadding ? "pb-16" : ""}`}>
+      <div
+        className={`rounded-lg overflow-x-auto w-full ${
+          needsPadding ? "pb-16" : ""
+        }`}
+      >
         <table className="w-full text-left min-w-[900px]">
           <thead className="bg-secondary/10">
             <tr className="font-satoshi text-[12px] md:text-[16px] py-3 md:py-4 px-2 md:px-4">
@@ -173,7 +177,8 @@ const P2PTableActive: React.FC<Props> = ({ data, headings, setData }) => {
                           <div className="border-t border-gray-100"></div>
                           <button
                             className={`block w-full text-left px-4 py-2 text-sm text-red-500 font-bold hover:bg-gray-50 ${
-                              trade.status.toLowerCase() === "canceled"
+                              trade.status.toLowerCase() === "canceled" ||
+                              trade.status.toLowerCase() === "resolved"
                                 ? "opacity-50 cursor-not-allowed"
                                 : "cursor-pointer"
                             }`}
@@ -182,7 +187,10 @@ const P2PTableActive: React.FC<Props> = ({ data, headings, setData }) => {
                               setShowResolvePopup(true);
                               setActiveDropdown(null);
                             }}
-                            disabled={trade.status.toLowerCase() === "canceled"}
+                            disabled={
+                              trade.status.toLowerCase() === "canceled" ||
+                              trade.status.toLowerCase() === "resolved"
+                            }
                           >
                             Cancel trade
                           </button>
@@ -196,7 +204,6 @@ const P2PTableActive: React.FC<Props> = ({ data, headings, setData }) => {
         </table>
       </div>
 
-      {/* Trade Details Popup */}
       {selectedTrade && (
         <TradeDetailsPopup
           showPopup={showPopup}

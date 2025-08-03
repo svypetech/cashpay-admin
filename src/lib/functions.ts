@@ -2,13 +2,13 @@ import { formatDistanceToNow, format, parseISO, startOfDay } from "date-fns";
 import { Message, P2PMessage } from "../Types/chat";
 
 export const handleTokenExpiration = () => {
-      // Clear user data from localStorage
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      
-      // Redirect to sign-in page
-      window.location.href = "/signin"; // Adjust the path as needed
-    }
+  // Clear user data from localStorage
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+
+  // Redirect to sign-in page
+  window.location.href = "/signin"; // Adjust the path as needed
+};
 
 export function shortenAddress(address: string, chars = 6): string {
   if (!address) return "-";
@@ -148,7 +148,6 @@ export function groupMessagesByDate(messages: Message[]): MessageGroup[] {
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 }
 
-
 export const getFileIcon = (fileType: string): string => {
   if (fileType.includes("pdf")) return "/images/pdf2.png";
   if (fileType.includes("image")) return "/icons/image.svg";
@@ -161,10 +160,11 @@ export const formatFileSize = (size: number): string => {
   return `${Math.round(size / 1024)} KB`;
 };
 
-
 export function isUserActive(status: string): boolean {
   if (!status) return false; // Handle undefined or null status
-  return status.toLowerCase() !== "banned" && status.toLowerCase() !== "suspend";
+  return (
+    status.toLowerCase() !== "banned" && status.toLowerCase() !== "suspend"
+  );
 }
 
 interface P2PMessageGroup {
@@ -172,7 +172,9 @@ interface P2PMessageGroup {
   messages: P2PMessage[];
 }
 
-export function groupP2PMessagesByDate(messages: P2PMessage[]): P2PMessageGroup[] {
+export function groupP2PMessagesByDate(
+  messages: P2PMessage[]
+): P2PMessageGroup[] {
   if (!Array.isArray(messages) || messages.length === 0) {
     return [];
   }
