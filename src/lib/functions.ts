@@ -26,33 +26,42 @@ export function timeAgo(dateString: string) {
   return formatted.replace(/^about\s/, ""); // Remove 'about ' if it appears at the start
 }
 
-export // Format joining date using date-fns
-const formatJoiningDate = (dateString: string) => {
+export const formatJoiningDate = (dateString: string) => {
   try {
-    // Check if the date is already in a simple format
     if (dateString.includes("-") && dateString.length <= 10) {
       return dateString;
     }
-
-    // Try to parse the date
     const date = parseISO(dateString);
-    // Check if date is valid
+    
     if (isNaN(date.getTime())) {
-      return dateString; // Return original if parsing fails
+      return dateString;
     }
-
-    // Format as YYYY-MM-DD
     return format(date, "yyyy-MM-dd");
 
-    // Alternative formats:
-    // return format(date, 'MM/dd/yyyy'); // MM/DD/YYYY
-    // return format(date, 'dd/MM/yyyy'); // DD/MM/YYYY
-    // return format(date, 'MMM d, yyyy'); // Apr 1, 2025
   } catch (error) {
     console.error("Error formatting date:", error);
     return dateString; // Return original on error
   }
 };
+
+export const formatDate = (dateString: string) => {
+  try {
+    if (dateString.includes("-") && dateString.length <= 10) {
+      return dateString;
+    }
+    const date = parseISO(dateString);
+    
+    if (isNaN(date.getTime())) {
+      return dateString;
+    }
+    return format(date, "yyyy-MM-dd");
+
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return dateString; // Return original on error
+  }
+};
+
 
 export function cal_USDT_Value({
   balance,

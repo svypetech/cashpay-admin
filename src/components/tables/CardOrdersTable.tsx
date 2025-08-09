@@ -5,19 +5,7 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import OrderDetailsSidebar from "../cards/OrderDetailsSidebar";
 import ColourfulBlock from "../ui/ColourfulBlock";
-
-interface CardOrder {
-  orderID: string;
-  userID: string;
-  cardType: string;
-  date: string;
-  deliveryAddress: string;
-  orderStatus: string;
-  cardStatus: string;
-  userEmail?: string; 
-  userName?: string; 
-  userJoiningDate?: string; 
-}
+import { CardOrder } from "@/src/Types/CardOrder";
 
 interface Props {
   headings: string[];
@@ -40,11 +28,29 @@ const getOrderStatusConfig = (status: string) => {
         className:
           "text-center rounded-xl text-xs md:text-base font-semibold bg-[#71FB5533] text-[#20C000]",
       };
+    case "approved":
+      return {
+        text: "Approved",
+        className:
+          "text-center rounded-xl text-xs md:text-base font-semibold bg-[#71FB5533] text-[#20C000]",
+      };
+    case "frozen":
+      return {
+        text: "Frozen",
+        className:
+          "text-center rounded-xl text-xs md:text-base font-semibold bg-[#FF6B6B33] text-[#FF6B6B]",
+      };
+    case "pending":
+      return {
+        text: "Pending",
+        className:
+          "text-center rounded-xl text-xs md:text-base font-semibold bg-[#FFA50033] text-[#FFA500]",
+      };
     default:
       return {
         text: status,
         className:
-          "text-center rounded-xl text-xs md:text-base font-semibold bg-[#72727233] text-[#f3d5d5]",
+          "text-center rounded-xl text-xs md:text-base font-semibold bg-[#72727233] text-[#727272]",
       };
   }
 };
@@ -53,17 +59,23 @@ const getCardStatusConfig = (status: string) => {
   const normalizedStatus = status.toLowerCase();
 
   switch (normalizedStatus) {
-    case "Active":
+    case "active":
       return {
         text: "Active",
         className:
-          "text-center rounded-xl text-xs md:text-base font-semibold bg-[#71FB5533] text-[#20C000",
+          "text-center rounded-xl text-xs md:text-base font-semibold bg-[#71FB5533] text-[#20C000]",
       };
-    case "Inactive":
+    case "inactive":
       return {
         text: "Inactive",
         className:
           "text-center rounded-xl text-xs md:text-base font-semibold bg-[#72727233] text-[#727272]",
+      };
+    case "blocked":
+      return {
+        text: "Blocked",
+        className:
+          "text-center rounded-xl text-xs md:text-base font-semibold bg-[#FF6B6B33] text-[#FF6B6B]",
       };
     default:
       return {
@@ -72,6 +84,24 @@ const getCardStatusConfig = (status: string) => {
           "text-center rounded-xl text-xs md:text-base font-semibold bg-[#72727233] text-[#727272]",
       };
   }
+};
+
+const formatDate = (dateString: string) => {
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  } catch (error) {
+    return dateString; // Return original string if parsing fails
+  }
+};
+
+const truncateId = (id: string, maxLength: number = 12) => {
+  if (id.length <= maxLength) return id;
+  return `${id.substring(0, maxLength)}...`;
 };
 
 const CardOrdersTable: React.FC<Props> = ({ data, headings }) => {
@@ -128,23 +158,27 @@ const CardOrdersTable: React.FC<Props> = ({ data, headings }) => {
             {Array.isArray(filteredOrders) &&
               filteredOrders.map((order, index) => (
                 <tr
-                  key={index}
+                  key={order.orderId || index}
                   className="border-b border-gray-200 text-[12px] md:text-[16px]"
                 >
                   <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">
-                    {order.orderID}
+                    <span title={order.orderId}>
+                      {truncateId(order.orderId)}
+                    </span>
                   </td>
                   <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">
-                    {order.userID}
+                    <span title={order.userId}>
+                      {truncateId(order.userId)}
+                    </span>
                   </td>
                   <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">
                     {order.cardType}
                   </td>
                   <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px] break-words">
-                    {order.date}
+                    {formatDate(order.date)}
                   </td>
                   <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[200px] break-words text-center">
-                    {order.deliveryAddress}
+                    {order.deliveryAddress || "N/A"}
                   </td>
                   <td className="px-2 md:px-4 py-3 md:py-4 font-satoshi min-w-[120px]">
                     {(() => {
@@ -153,7 +187,7 @@ const CardOrdersTable: React.FC<Props> = ({ data, headings }) => {
                       );
                       return (
                         <ColourfulBlock
-                          text={statusConfig.text}
+                          text={statusConfig.text.charAt(0).toUpperCase() + statusConfig.text.slice(1)}
                           className={statusConfig.className}
                         />
                       );
@@ -190,14 +224,21 @@ const CardOrdersTable: React.FC<Props> = ({ data, headings }) => {
                           <button
                             className="block w-full text-left px-4 py-2 text-sm text-primary font-bold cursor-pointer hover:bg-gray-50"
                             onClick={() => {
-                              const orderWithExtraData = {
+                              // Use the actual order data with userDetails if available
+                              const orderWithDetails = {
                                 ...order,
-                                userID: "User123",
-                                userEmail: "johndoe@gmail.com",
-                                userName: "John Doe",
-                                userJoiningDate: "2023-01-01",
+                                // Map userDetails if available, otherwise use defaults
+                                userEmail: order.userDetails?.email || "N/A",
+                                userName: order.userDetails?.name 
+                                  ? `${order.userDetails.name.firstName} ${order.userDetails.name.lastName}`
+                                  : "N/A",
+                                userJoiningDate: order.userDetails?.joinDate || "N/A",
+                                userImage: order.userDetails?.image || "",
+                                // Keep the original field names for backward compatibility
+                                orderID: order.orderId,
+                                userID: order.userId,
                               };
-                              setSelectedOrder(orderWithExtraData);
+                              setSelectedOrder(orderWithDetails);
                               setShowSidebar(true);
                               setActiveDropdown(null);
                             }}
@@ -216,7 +257,8 @@ const CardOrdersTable: React.FC<Props> = ({ data, headings }) => {
 
       {/* Order Details Sidebar */}
       {showSidebar && (
-        <OrderDetailsSidebar // @ts-ignore
+        <OrderDetailsSidebar 
+          // @ts-ignore
           order={selectedOrder}
           showSidebar={showSidebar}
           onClose={() => setShowSidebar(false)}

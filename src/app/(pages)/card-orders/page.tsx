@@ -5,11 +5,15 @@ import Pagination from "@/src/components/pagination/pagination";
 import Image from "next/image";
 import CardOrdersTable from "@/src/components/tables/CardOrdersTable";
 import Tabs from "@/src/components/ui/Tabs";
-import { useToast } from "@/src/lib/ToastProvider";
+import useFetchCardOrders from "@/src/hooks/cards/getCardOrders";
+import SkeletonTableLoader from "@/src/components/skeletons/SkeletonTableLoader";
+import Sort from "@/src/components/ui/Sort";
+import Error from "@/src/components/ui/Error";
+import Search from "@/src/components/ui/Search";
 
 const headings = [
   "Order ID",
-  "User ID",
+  "User ID", 
   "Card Type",
   "Date",
   "Delivery Address",
@@ -18,106 +22,46 @@ const headings = [
   "Actions",
 ];
 
-const cardOrdersData = [
-  {
-    orderID: "CD-001",
-    userID: "CP-001",
-    cardType: "Physical",
-    date: "18-03-25",
-    deliveryAddress: "House#100, Anywhere S...",
-    orderStatus: "Dispatched",
-    cardStatus: "Inactive",
-  },
-  {
-    orderID: "CD-001",
-    userID: "CP-001",
-    cardType: "Physical",
-    date: "18-03-25",
-    deliveryAddress: "House#100, Anywhere S...",
-    orderStatus: "Dispatched",
-    cardStatus: "Inactive",
-  },
-  {
-    orderID: "CD-001",
-    userID: "CP-001",
-    cardType: "Physical",
-    date: "18-03-25",
-    deliveryAddress: "House#100, Anywhere S...",
-    orderStatus: "Dispatched",
-    cardStatus: "Inactive",
-  },
-  {
-    orderID: "CD-001",
-    userID: "CP-001",
-    cardType: "Physical",
-    date: "18-03-25",
-    deliveryAddress: "House#100, Anywhere S...",
-    orderStatus: "Dispatched",
-    cardStatus: "Inactive",
-  },
-  {
-    orderID: "CD-001",
-    userID: "CP-001",
-    cardType: "Physical",
-    date: "18-03-25",
-    deliveryAddress: "House#100, Anywhere S...",
-    orderStatus: "Dispatched",
-    cardStatus: "Inactive",
-  },
-  {
-    orderID: "CD-001",
-    userID: "CP-001",
-    cardType: "Virtual",
-    date: "18-03-25",
-    deliveryAddress: "Apartment#1200, Electra, UAE",
-    orderStatus: "Completed",
-    cardStatus: "Active",
-  },
-  {
-    orderID: "CD-001",
-    userID: "CP-001",
-    cardType: "Virtual",
-    date: "18-03-25",
-    deliveryAddress: "Apartment#1200, Electra, UAE",
-    orderStatus: "Completed",
-    cardStatus: "Active",
-  },
+const sortOptions = [
+  { label: "Date", value: "date" },
+  { label: "Freeze", value: "freeze" },
+  { label: "Type", value: "type" },
+  { label: "None", value: "" },
 ];
 
-const tabs = ["All", "Completed", "Pending"];
+const tabs = ["All", "Physical Cards", "Virtual Cards"];
 
-export default function P2PTrading() {
-  const { showSuccess, showError } = useToast();
+export default function CardOrders() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(15); // Example total pages
   const [activeTab, setActiveTab] = useState(tabs[0]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [data, setData] = useState(cardOrdersData);
-  const [filteredData, setFilteredData] = useState(data);
+  const [sortBy, setSortBy] = useState("");
+
+  // Use the hook to fetch card orders
+  const { cardOrders, totalPages, isLoading, error } = useFetchCardOrders({
+    page: currentPage,
+    limit: 10,
+    sortBy,
+    tab: activeTab,
+    search: searchQuery,
+  });
+
+  // Reset to first page when search, sort, or tab changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, sortBy, activeTab]);
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
 
-  // filter based on active tab
-  useEffect(() => {
-    const filtered = data.filter((order) => {
-      if (activeTab.toLowerCase() === "all") {
-        return true;
-      } else if (activeTab.toLowerCase() === "completed") {
-        return order.orderStatus === "Completed";
-      } else if (activeTab.toLowerCase() === "pending") {
-        return order.orderStatus === "Dispatched";
-      }
-    });
-    setFilteredData(filtered);
-  }, [activeTab]);
+  const handleSort = (option: string) => {
+    setSortBy(option);
+  };
 
-  useEffect(() => {
-    const filtered = data.filter((order) => {
-      return order.orderID.toLowerCase().includes(searchQuery.toLowerCase());
-    });
-    setFilteredData(filtered);
-  }, [searchQuery]);
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
 
   return (
     <div className="px-6 sm:px-10 py-6">
@@ -132,49 +76,36 @@ export default function P2PTrading() {
       </div>
 
       {/* Search and Actions */}
-      <div
-        className={`flex flex-col md:grid md:grid-cols-4 justify-between items-center mb-2 gap-4`}
-      >
-        <div className={`relative w-full md:w-auto md:col-span-3`}>
-          <div className="relative">
-            <input
-              onChange={(e) => setSearchQuery(e.target.value)}
-              type="text"
-              placeholder="Search..."
-              className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:gray-700 focus:border-transparent"
-            />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <Image
-                src="/icons/search.svg"
-                alt="Arrow right"
-                width={24}
-                height={24}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div
-          className={`flex items-center gap-4 w-full font-[satoshi] md:col-span-1`}
-        >
-          <button className="w-full flex justify-between items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50">
-            <span>Sort by</span>
-            <Image
-              src="/icons/dropdownIcon.svg"
-              alt="Arrow right"
-              width={24}
-              height={24}
-            />
-          </button>
-        </div>
+      <div className="flex flex-col gap-4 sm:gap-[28px] sm:flex-row mb-4">
+        <Search 
+          className="sm:w-[80%] w-full" 
+          onSearch={handleSearch}
+        />
+        <Sort
+          className="sm:w-[20%] w-full"
+          title="Sort by"
+          options={sortOptions}
+          onSort={handleSort}
+        />
       </div>
 
-      <CardOrdersTable headings={headings} data={filteredData} />
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+      {/* Content */}
+      {isLoading ? (
+        <SkeletonTableLoader rowCount={10} headings={headings} />
+      ) : error ? (
+        <Error text={error} />
+      ) : cardOrders.length === 0 ? (
+        <Error text="No card orders found" />
+      ) : (
+        <div className="overflow-x-auto">
+          <CardOrdersTable headings={headings} data={cardOrders} />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </div>
+      )}
     </div>
   );
 }

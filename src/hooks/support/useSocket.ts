@@ -25,7 +25,7 @@ export const useSocket = (ticketId?: string) => {
             reconnection: true,
             reconnectionAttempts: Infinity,
             reconnectionDelay: 1000,
-            // secure: true, 
+            secure: true, 
         });
         
         socketRef.current = socket;

@@ -35,7 +35,7 @@ export default function useFetchP2PChat({
         console.log(`📚 P2P API: Initial load for orderId: ${chatId}`);
         
         const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/help/chat/orderChat/?limit=20&page=1&orderId=${chatId}`,
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/help/chat/orderChat?limit=20&page=1&orderId=${chatId}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -89,7 +89,7 @@ export default function useFetchP2PChat({
     try {
       // Use the same endpoint as initial load but with different page
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/help/chat/orderChat/?limit=20&page=${
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/help/chat/orderChat?limit=20&page=${
           currentPage + 1
         }&orderId=${chatId}`,
         {

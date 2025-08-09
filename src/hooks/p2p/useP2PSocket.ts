@@ -4,7 +4,7 @@ import { useToast } from '@/src/lib/ToastProvider';
 import { useState, useEffect, useCallback, useRef } from "react";
 import { io, Socket } from "socket.io-client";
 
-const SOCKET_URL = "http://34.75.109.160:3002"; // Your fixed URL
+const SOCKET_URL = process.env.NEXT_PUBLIC_WS_URL || '';
 
 export const useP2PSocket = (orderId?: string) => {
   const [isConnected, setIsConnected] = useState(false);
@@ -23,6 +23,7 @@ export const useP2PSocket = (orderId?: string) => {
       reconnection: true,
       reconnectionAttempts: Infinity,
       reconnectionDelay: 1000,
+      secure: true, // means use HTTPS
     });
 
     socketRef.current = socket;
