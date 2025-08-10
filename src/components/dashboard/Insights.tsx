@@ -6,10 +6,18 @@ import Error from "../ui/Error";
 import useFetchDashboardUsers from "@/src/hooks/Dashboard/useFetchUserInsights";
 import useFetchMostTradedCoins from "@/src/hooks/Dashboard/useFetchMostTradedCoins";
 import UserInsightsSkeleton from "../skeletons/UserInsightsSkeleton";
+import useFetchTransactionFrequency from "@/src/hooks/Dashboard/useFetchTransactionFrequency";
+import TransactionFrequencySkeleton from "../skeletons/TransactionFrequencyCardSkeleton";
 
 export default function UserInsightsPage() {
   const { userInsights, isLoading, isError } = useFetchDashboardUsers();
   const {mostTradedCoins,isLoading:isLoadingCoins,isError:isCoinsError} = useFetchMostTradedCoins()
+  const {
+    transactionFrequencyData,
+    isLoading: isLoadingTxFrequency,
+    isError: isTxFrequencyError,
+  } = useFetchTransactionFrequency();
+  
   return (
     <main className="container mx-auto md:px-4 py-6">
       {/* Top Row - Cryptocurrencies and Transaction Frequency */}
@@ -18,7 +26,15 @@ export default function UserInsightsPage() {
           <MostTradedCryptocurrencies coins={mostTradedCoins} isLoading={isLoadingCoins} isError={isCoinsError} />
         </div>
         <div className="lg:col-span-2">
-          <TransactionFrequency />
+          {isLoadingTxFrequency ? (
+            <TransactionFrequencySkeleton />
+          ) : isTxFrequencyError ? (
+            <Error text="Failed to load transaction frequency data" />
+          ) : transactionFrequencyData ? (
+            <TransactionFrequency data={transactionFrequencyData} />
+          ) : (
+            <Error text="No transaction frequency data available" />
+          )}
         </div>
       </div>
 
